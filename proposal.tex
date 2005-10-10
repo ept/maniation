@@ -1,0 +1,82 @@
+\documentclass{article}
+\begin{document}
+\title{Part II Project proposal (draft)}
+\author{Martin Kleppmann (mk428)}
+\maketitle
+
+\section{Requirements}
+The aim of this project is to develop and implement a simulation of movements
+of the human body, in particular in interaction with another human. The
+simulation is presented in 3-dimensional animated graphics with the intention
+of looking fairly realistic.
+
+The project divides into three parts, which are presented in the following
+sections.
+
+\subsection{Graphics engine}
+The graphics engine should provide
+\begin{itemize}
+	\item an animatable 3D view of the scene, implemented using OpenGL.
+	\item a 3D polygon mesh representing a human body, including bones and joints
+        for the arms, hands, fingers, legs, back and neck, allowing it to be 
+        deformed in a reasonably realistic-looking way.
+  \item anatomical constraints on the possible angles of rotation at joints
+        (comfortable and stretching range) and strength of muscles.
+  \item an inverse kinematics solver to find the best bone positions for a
+  		  given requirement (e.g.\ tip of index finger at a certain position).
+  \item a collision detection algorithm for arbitrarily deformed meshes.
+  \item {\em (optionally, if there is time)\/} facilities for facial animation.
+\end{itemize}
+
+\subsection{Human action}
+The human action system includes
+\begin{itemize}
+  \item a physics simulation of gravity, collisions, inertia and friction,
+  	    acting on the human model to prevent it from moving into
+        impossible positions, and to allow actions like jumping in the air.
+  \item a graphical method of programming movements or sequences of movements,
+  		  and executing these on command, with interpolation between different
+  		  positions of the body.
+  \item a range of default movements, including a walk cycle.
+  \item possibilities to merge automated behaviour (e.g.\ walking around while
+        there is nothing else to do) with programmed behaviour.
+  \item basic collision avoidance of obstacles.
+  \item {\em (optionally)\/} an implementation of a pedestrian simulation model.
+\end{itemize}
+
+\subsection{Human interaction}
+Human interaction takes place between two instances of the human model and
+allows
+\begin{itemize}
+  \item programmed movements to touch a particular part (e.g.\ the right hand)
+        of the other model's body with a particular part of one's own body,
+        even if these parts are not at their usual positions (e.g.\ the arm is
+        lifted).
+  \item programmed reactions to particular actions of the other model (e.g.\
+        dodging a punch).
+  \item automatic, real-time matching of actions to the most appropriate
+        programmed reactions.
+  \item {\em (optionally)\/} two users to issue commands to the models and to
+        view the scene concurrently over an IP network.
+\end{itemize}
+
+
+\section{Evaluation criteria}
+Most of the features of the system can be demonstrated by sequences of
+screenshots in the dissertation. To determine whether the behaviour exhibited
+by the models can be deemed to be fairly realistic, the program will be
+demonstrated to 10 students. After the demonstration they will be asked to
+comment on the simulation in a brief questionnaire.
+
+\section{References}
+\begin{enumerate}
+  \item Marco Gillies, Neil Dodgson: Behaviourally rich actions for
+        user-controlled characters. Computers \& Graphics {\bf 28}~6,
+        p.~945--954 (2004).
+  \item Tony Polichroniadis, Neil Dodgson: Motion blending using a classifier
+        system. Proceedings of the WSCG '99, p.~225--232.
+  \item Michael Gleicher: Comparing Constraint-Based Motion Editing Methods.
+  	    Graphical Methods {\bf 63}, p. 107-134 (2001).
+\end{enumerate}
+
+\end{document}
