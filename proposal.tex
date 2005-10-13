@@ -8,8 +8,7 @@ The goal of this project is to develop a software tool for 3D character
 animation, akin to (but simpler than) the applications used in the
 production of movie special effects.
 
-
-Core requirements
+\section{Core requirements}
 
 The tool developed in this project should take as input a description
 of a deformable polygon mesh bound to a skeleton. The skeleton should
@@ -31,33 +30,35 @@ character to move `out of its own strength'. All physical effects
 should be simulated on a time-step basis.
 
 
-Optional extensions
+\section{Optional extensions}
 
 Extensions to the program aim to take it further in the direction of
 tools used by 3D animation artists to create realistic-looking
 movements of humans or creatures. Some possible extensions are:
 
-- An inverse kinematics solver, which attempts to find anatomically
+\begin{itemize}
+\item An inverse kinematics solver, which attempts to find anatomically
   valid and, if possible, `comfortable' skeleton configurations under
   given constraints (e.g. hand in a particular position).
 
-- Basic interaction with other objects: collision avoidance, throwing
+\item Basic interaction with other objects: collision avoidance, throwing
   a ball, etc.
 
-- Implementation of an algorithm to merge different concurrent
+\item Implementation of an algorithm to merge different concurrent
   animations within one character (e.g. doing something with the hands
   while walking).
 
-- A simple optimizing algorithm implementation which attempts to
+\item A simple optimizing algorithm implementation which attempts to
   refine a given animation under certain criteria, e.g. to minimize
   the energy requirements while still requiring a particular goal to
   be achieved. This may be a first step in trying to create character
   animations automatically from a given starting and finishing
   position (a far more complex ambition which is beyond the scope of
   this project).
+\end{itemize}
 
 
-Acceptance criteria
+\section{Acceptance criteria}
 
 The program must correctly handle the animation of at least one mesh
 resembling a human being. The mesh and skeleton need to include only
@@ -76,12 +77,13 @@ on the example mesh in real time with a fluent concurrent graphical
 output, an average present-day PC provided.
 
 
-Non-Goals
+\section{Non-Goals}
 
 To clarify the requirements, I would like to describe some issues
 whose solution is {\em not} an objective of this project:
 
-- To achieve realistic graphical results. It is hard to objectively
+\begin{itemize}
+\item To achieve realistic graphical results. It is hard to objectively
   measure how realistic an animation looks, and a subjective judgement
   depends on many artistic factors like the quality of the mesh,
   texturing, lighting etc. which are not part of this project. The
@@ -89,17 +91,18 @@ whose solution is {\em not} an objective of this project:
   not produce physically or anatomically impossible animations; higher
   degrees of realism are optional.
 
-- To create an interactive user interface. The tool requires no user
+\item To create an interactive user interface. The tool requires no user
   input beyond the mesh, skeleton, anatomy and animation files.
 
-- To achive scientifically accurate calculations. High-quality
+\item To achive scientifically accurate calculations. High-quality
   approximations of the differential equations describing the
   mechanics require advanced numerical methods, which are considered
   to be beyond the scope of this project. Simple approximations are
   sufficient provided they do not lead to obviously wrong results.
+\end{itemize}
 
 
-Technologies
+\section{Technologies}
 
 The main body of the program will be written in Java 1.5. This
 language is well suited for the purpose because of its widespread
@@ -120,7 +123,7 @@ tool from scratch, I view it as an external library for the purpose of
 this project.
 
 
-Starting point
+\section{Starting point}
 
 Apart from the data binding tool, which serves merely to facilitate
 the reading and writing between XML data and Java objects, and the
@@ -138,53 +141,56 @@ OpenGL libraries in the past; however, this never included deformable
 meshes. No additional programming languages will be required.
 
 
-Timetable
+\section{Timetable}
 
 The project timetable aims to complete long before the final deadline
 in order to leave additional time for exam revision. It is divided
 into 2-week blocks. The completion of the tasks by the end of each
 block constitutes a milestone.
 
-10 Oct -- 23 Oct:
-    Create 3D model. Read about collision detection algorithms.
-    Proposal submission. Revise physics.
+\begin{tabular}{|l|l|}\hline
+10 Oct -- 23 Oct: &
+    Create 3D model. Read about collision detection algorithms. \\
+&   Proposal submission. Revise physics.\\ \hline
 
-24 Oct -- 6 Nov:
-    Prepare parser and writer for mesh file format.
-    Render undeformed mesh to OpenGL.
-    Work out maths of mesh deformation and physics.
+24 Oct -- 6 Nov: &
+    Prepare parser and writer for mesh file format. \\
+&   Render undeformed mesh to OpenGL. \\
+&   Work out maths of mesh deformation and physics. \\ \hline
 
-7 Nov -- 20 Nov:
+7 Nov -- 20 Nov: &
     Implement mesh deformation.
-    Prepare sample animations.
+    Prepare sample animations. \\ \hline
 
-21 Nov -- 4 Dec:
-    Implement collision detection. Test.
+21 Nov -- 4 Dec: &
+    Implement collision detection. Test. \\ \hline
 
-5 Dec -- 18 Dec:
-    Implement physics. Test.
+5 Dec -- 18 Dec: &
+    Implement physics. Test. \\ \hline
 
-19 Dec -- 1 Jan:
-    Holiday.
+19 Dec -- 1 Jan: &
+    Holiday. \\ \hline
 
-2 Jan -- 15 Jan:
-    Complete implementation of physics.
+2 Jan -- 15 Jan: &
+    Complete implementation of physics. \\ \hline
 
-16 Jan -- 29 Jan:
-    Extension 1.
+16 Jan -- 29 Jan: &
+    Extension 1. \\ \hline
 
-30 Jan -- 12 Feb:
+30 Jan -- 12 Feb: &
     Extension 2.
     Evaluation, clean up.
-    Progress report.
+    Progress report. \\ \hline
 
-13 Feb -- 26 Feb:
-    Write dissertation.
+13 Feb -- 26 Feb: &
+    Write dissertation. \\ \hline
 
-28 Feb -- 12 Mar:
-    Write dissertation.
+28 Feb -- 12 Mar: &
+    Write dissertation. \\ \hline
 
-13 Mar -- 19 Mar: (NB. 1 week)
-    Finalize dissertation.
+13 Mar -- 19 Mar: &
+    Finalize dissertation. \\
+(NB. 1 week) & \\ \hline
+\end{tabular}
 
 \end{document}
