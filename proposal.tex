@@ -4,11 +4,13 @@
 \author{Martin Kleppmann (mk428)}
 \maketitle
 
+\section*{Project description}
+
 The goal of this project is to develop a software tool for 3D character
 animation, akin to (but simpler than) the applications used in the
-production of movie special effects.
+production of cinematic special effects.
 
-\section{Core requirements}
+\subsection*{Core requirements}
 
 The tool developed in this project should take as input a description
 of a deformable polygon mesh bound to a skeleton. The skeleton should
@@ -30,35 +32,15 @@ character to move `out of its own strength'. All physical effects
 should be simulated on a time-step basis.
 
 
-\section{Optional extensions}
+\subsection*{Optional extensions}
 
 Extensions to the program aim to take it further in the direction of
 tools used by 3D animation artists to create realistic-looking
-movements of humans or creatures. Some possible extensions are:
-
-\begin{itemize}
-\item An inverse kinematics solver, which attempts to find anatomically
-  valid and, if possible, `comfortable' skeleton configurations under
-  given constraints (e.g. hand in a particular position).
-
-\item Basic interaction with other objects: collision avoidance, throwing
-  a ball, etc.
-
-\item Implementation of an algorithm to merge different concurrent
-  animations within one character (e.g. doing something with the hands
-  while walking).
-
-\item A simple optimizing algorithm implementation which attempts to
-  refine a given animation under certain criteria, e.g. to minimize
-  the energy requirements while still requiring a particular goal to
-  be achieved. This may be a first step in trying to create character
-  animations automatically from a given starting and finishing
-  position (a far more complex ambition which is beyond the scope of
-  this project).
-\end{itemize}
+movements of humans or creatures. Possibilities include an inverse
+kinematics solver, or interaction with other objects.
 
 
-\section{Acceptance criteria}
+\subsection*{Acceptance criteria}
 
 The program must correctly handle the animation of at least one mesh
 resembling a human being. The mesh and skeleton need to include only
@@ -71,25 +53,23 @@ included in the dissertation. For further evaluation, other students
 will be shown animations and asked to answer questions on whether they
 believe the animation to be correct by the above definition.
 
-In addition to the functional acceptance, the program is expected to
-have a sufficiently high run-time performance to calculate animations
-on the example mesh in real time with a fluent concurrent graphical
-output, an average present-day PC provided.
+Run-time performance is an optional acceptance criterion of this
+project: ideally the program should run fast enough to calculate
+animations on the example mesh in real time with fluent concurrent
+graphical output, an average present-day PC provided. Such a
+performance constraint may, however, require the use of very advanced
+algorithms, and is therefore not regarded as part of the core project.
 
 
-\section{Non-Goals}
+\subsection*{Non-Goals}
 
-To clarify the requirements, I would like to describe some issues
-whose solution is {\em not} an objective of this project:
+The following issues are {\em not} objectives of this project:
 
 \begin{itemize}
 \item To achieve realistic graphical results. It is hard to objectively
   measure how realistic an animation looks, and a subjective judgement
-  depends on many artistic factors like the quality of the mesh,
-  texturing, lighting etc. which are not part of this project. The
-  project will therefore be considered a success if the program does
-  not produce physically or anatomically impossible animations; higher
-  degrees of realism are optional.
+  depends on many artistic factors. The graphics should be judged by
+  `correctness' only.
 
 \item To create an interactive user interface. The tool requires no user
   input beyond the mesh, skeleton, anatomy and animation files.
@@ -102,28 +82,27 @@ whose solution is {\em not} an objective of this project:
 \end{itemize}
 
 
-\section{Technologies}
+\section*{Resources}
 
 The main body of the program will be written in Java 1.5. This
 language is well suited for the purpose because of its widespread
 acceptance, good maintainability and the availability of extensive
-libraries. The graphical output will be rendered using the OpenGL
+libraries. The graphical output will be rendered using the Java3D
 library.
 
-The input data for the program will be encoded in an XML format based
-on the format used by the Cal3D library. This has the advantage that
-meshes can be created using standard 3D modelling software, and then
-subsequently easily converted to input data for my program using
-common tools.
-
-The parser and writer for this XML format will probably be
-automatically generated Java code, created by an XML data binding tool
-I designed during Summer 2005. Although I developed this data binding
-tool from scratch, I view it as an external library for the purpose of
-this project.
+Development will primarily be undertaken on my own PC, with a
+revision-controlled copy on at least one other computer at any time,
+and at least weekly backups on Pelican (daily when approaching a
+deadline). All required software has been tested on PWF machines; in
+the case of a problem with my own PC, project development could
+seamlessly continue on the PWF.
 
 
-\section{Starting point}
+\section*{Starting point}
+
+I have some basic prior experience in programming 3D graphics
+
+%% TODO...
 
 Apart from the data binding tool, which serves merely to facilitate
 the reading and writing between XML data and Java objects, and the
