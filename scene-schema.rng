@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<grammar xmlns="http://relaxng.org/ns/structure/1.0"
+    datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+    ns="http://kleppmann.de/maniation/scene">
+<start>
+    <element name="scene">
+        <element name="skeleton">
+            <zeroOrMore><ref name="bone"/></zeroOrMore>
+        </element>
+        <element name="mesh">
+            <zeroOrMore><ref name="vertex"/></zeroOrMore>
+            <zeroOrMore><ref name="face"/></zeroOrMore>
+        </element>
+    </element>
+</start>
+
+<define name="vertex">
+    <element name="vertex">
+        <attribute name="id"><data type="NMTOKEN"></attribute>
+        <element name="position"><ref id="vector"/></element>
+        <element name="normal"><ref id="vector"/></element>
+        <zeroOrMore>
+            <element name="deform">
+                <attribute name="bone-id"><data type="NMTOKEN"/></attribute>
+                <attribute name="weight"><data type="double"/></attribute>
+            </element>
+        </zeroOrMore>
+    </element>
+</define>
+
+<define name="face">
+    <element name="face">
+        <attribute name="vertex-ids">
+            <list><data type="NMTOKEN"/></list>
+        </attribute>
+    </element>
+</define>
+
+<define name="bone">
+    <element name="bone">
+        <attribute name="id"><data type="NMTOKEN"/></attribute>
+        <attribute name="name"><text/></attribute>
+        <optional>
+            <attribute name="parent-bone-id"><data type="NMTOKEN"/></attribute>
+        </optional>
+        <element name="base"><ref name="vector"/></element>
+        <element name="orientation"><ref name="quaternion"/></element>
+        <element name="translation-to-local"><ref name="vector"/></element>
+        <element name="rotation-to-local"><ref name="quaternion"/></element>
+    </element>
+</define>
+
+<define name="vector">
+    <attribute name="x"><data type="double"/></attribute>
+    <attribute name="y"><data type="double"/></attribute>
+    <attribute name="z"><data type="double"/></attribute>
+</define>
+
+<define name="quaternion">
+    <attribute name="x"><data type="double"/></attribute>
+    <attribute name="y"><data type="double"/></attribute>
+    <attribute name="z"><data type="double"/></attribute>
+    <attribute name="w"><data type="double"/></attribute>
+</define>
+</grammar>
