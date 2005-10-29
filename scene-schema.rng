@@ -16,9 +16,9 @@
 
 <define name="vertex">
     <element name="vertex">
-        <attribute name="id"><data type="NMTOKEN"></attribute>
-        <element name="position"><ref id="vector"/></element>
-        <element name="normal"><ref id="vector"/></element>
+        <attribute name="id"><data type="NMTOKEN"/></attribute>
+        <element name="position"><ref name="vector"/></element>
+        <element name="normal"><ref name="vector"/></element>
         <zeroOrMore>
             <element name="deform">
                 <attribute name="bone-id"><data type="NMTOKEN"/></attribute>
