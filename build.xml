@@ -1,0 +1,35 @@
+<project name="maniation" default="compile">
+
+    <property name="realityinabox" location="../../../dev/project"/>
+    <property name="jre" location="../../../jre1.5.0_05"/>
+
+    <target name="init">
+        <path id="classpath">
+            <pathelement location="${realityinabox}/build"/>
+            <pathelement location="${realityinabox}/contrib/xercesImpl.jar"/>
+            <pathelement location="${jre}/lib/ext/j3dcore.jar"/>
+            <pathelement location="${jre}/lib/ext/j3dutils.jar"/>
+            <pathelement location="${jre}/lib/ext/vecmath.jar"/>
+        </path>
+    </target>
+    
+    <target name="generate" depends="init">
+        <java classname="Parser" fork="true" dir="${realityinabox}/build">
+            <classpath refid="classpath"/>
+            <arg value="-g"/>
+            <arg path="scene-schema.rng"/>
+        </java>
+    </target>
+    
+    <target name="compile" depends="init">
+        <javac srcdir="." destdir="${realityinabox}/build" listfiles="yes" source="1.5" target="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <target name="run" depends="init,compile">
+        <java classname="de.kleppmann.maniation.java3d_test.Test" fork="true" jvm="${jre}/bin/java">
+            <classpath refid="classpath"/>
+        </java>
+    </target>
+</project>
