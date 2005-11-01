@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <grammar xmlns="http://relaxng.org/ns/structure/1.0"
+    xmlns:hint="http://realityinabox.de/databinding/hint"
     datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
     ns="http://kleppmann.de/maniation/scene">
 <start>
@@ -16,12 +17,12 @@
 
 <define name="vertex">
     <element name="vertex">
-        <attribute name="id"><data type="NMTOKEN"/></attribute>
+        <attribute name="id"><data type="NMTOKEN" hint:key="vertex"/></attribute>
         <element name="position"><ref name="vector"/></element>
         <element name="normal"><ref name="vector"/></element>
         <zeroOrMore>
             <element name="deform">
-                <attribute name="bone-id"><data type="NMTOKEN"/></attribute>
+                <attribute name="bone-id"><data type="NMTOKEN" hint:keyref="bone"/></attribute>
                 <attribute name="weight"><data type="double"/></attribute>
             </element>
         </zeroOrMore>
@@ -30,18 +31,20 @@
 
 <define name="face">
     <element name="face">
-        <attribute name="vertex-ids">
-            <list><data type="NMTOKEN"/></list>
+        <attribute name="vertex-ids" hint:name="face">
+            <list><data type="NMTOKEN" hint:keyref="vertex"/></list>
         </attribute>
     </element>
 </define>
 
 <define name="bone">
     <element name="bone">
-        <attribute name="id"><data type="NMTOKEN"/></attribute>
+        <attribute name="id"><data type="NMTOKEN" hint:key="bone"/></attribute>
         <attribute name="name"><text/></attribute>
         <optional>
-            <attribute name="parent-bone-id"><data type="NMTOKEN"/></attribute>
+            <attribute name="parent-bone-id">
+                <data type="NMTOKEN" hint:keyref="bone"/>
+            </attribute>
         </optional>
         <element name="base"><ref name="vector"/></element>
         <element name="orientation"><ref name="quaternion"/></element>
@@ -50,13 +53,13 @@
     </element>
 </define>
 
-<define name="vector">
+<define name="vector" hint:create="class">
     <attribute name="x"><data type="double"/></attribute>
     <attribute name="y"><data type="double"/></attribute>
     <attribute name="z"><data type="double"/></attribute>
 </define>
 
-<define name="quaternion">
+<define name="quaternion" hint:create="class">
     <attribute name="x"><data type="double"/></attribute>
     <attribute name="y"><data type="double"/></attribute>
     <attribute name="z"><data type="double"/></attribute>
