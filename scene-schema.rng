@@ -5,15 +5,47 @@
     ns="http://kleppmann.de/maniation/scene">
 <start>
     <element name="scene">
-        <element name="skeleton">
-            <zeroOrMore><ref name="bone"/></zeroOrMore>
-        </element>
-        <element name="mesh">
-            <zeroOrMore><ref name="vertex"/></zeroOrMore>
-            <zeroOrMore><ref name="face"/></zeroOrMore>
-        </element>
+        <zeroOrMore><ref name="material"/></zeroOrMore>
+        <zeroOrMore><ref name="skeleton"/></zeroOrMore>
+        <zeroOrMore><ref name="mesh"/></zeroOrMore>
     </element>
 </start>
+
+<define name="material">
+    <element name="material">
+        <attribute name="id"><data type="NMTOKEN" hint:key="material"/></attribute>
+        <attribute name="shininess"><data type="double"/></attribute>
+        <attribute name="density"><data type="double"/></attribute>
+        <attribute name="hollow"><data type="boolean"/></attribute>
+        <attribute name="elasticity"><data type="double"/></attribute>
+        <attribute name="static-friction"><data type="double"/></attribute>
+        <attribute name="sliding-friction"><data type="double"/></attribute>
+        <element name="ambient"><ref name="colour"/></element>
+        <element name="diffuse"><ref name="colour"/></element>
+        <element name="specular"><ref name="colour"/></element>
+        <element name="emissive"><ref name="colour"/></element>
+    </element>
+</define>
+
+<define name="skeleton">
+    <element name="skeleton">
+        <attribute name="id"><data type="NMTOKEN" hint:key="skeleton"/></attribute>
+        <zeroOrMore><ref name="bone"/></zeroOrMore>
+    </element>
+</define>
+
+<define name="mesh">
+    <element name="mesh">
+        <optional><attribute name="skeleton-id">
+            <data type="NMTOKEN" hint:keyref="skeleton"/>
+        </attribute></optional>
+        <optional><attribute name="material-id">
+            <data type="NMTOKEN" hint:keyref="material"/>
+        </attribute></optional>
+        <zeroOrMore><ref name="vertex"/></zeroOrMore>
+        <zeroOrMore><ref name="face"/></zeroOrMore>
+    </element>
+</define>
 
 <define name="vertex">
     <element name="vertex">
@@ -50,7 +82,17 @@
         <element name="orientation"><ref name="quaternion"/></element>
         <element name="translation-to-local"><ref name="vector"/></element>
         <element name="rotation-to-local"><ref name="quaternion"/></element>
+        <optional><element name="x-axis"><ref name="axis-constraint"/></element></optional>
+        <optional><element name="y-axis"><ref name="axis-constraint"/></element></optional>
+        <optional><element name="z-axis"><ref name="axis-constraint"/></element></optional>
     </element>
+</define>
+
+<define name="axis-constraint" hint:create="class">
+    <attribute name="max-comfortable"><data type="double"/></attribute>
+    <attribute name="min-comfortable"><data type="double"/></attribute>
+    <attribute name="max-extreme"><data type="double"/></attribute>
+    <attribute name="min-extreme"><data type="double"/></attribute>
 </define>
 
 <define name="vector" hint:create="class">
@@ -64,5 +106,12 @@
     <attribute name="y"><data type="double"/></attribute>
     <attribute name="z"><data type="double"/></attribute>
     <attribute name="w"><data type="double"/></attribute>
+</define>
+
+<define name="colour" hint:create="class">
+    <attribute name="red"><data type="double"/></attribute>
+    <attribute name="green"><data type="double"/></attribute>
+    <attribute name="blue"><data type="double"/></attribute>
+    <attribute name="alpha"><data type="double"/></attribute>
 </define>
 </grammar>
