@@ -36,6 +36,7 @@
 
 <define name="mesh">
     <element name="mesh">
+        <attribute name="id"><data type="NMTOKEN" hint:key="vertex"/></attribute>
         <optional><attribute name="skeleton-id">
             <data type="NMTOKEN" hint:keyref="skeleton"/>
         </attribute></optional>
