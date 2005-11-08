@@ -9,4 +9,5 @@ public interface Mesh {
     de.kleppmann.maniation.scene.Material getMaterial();
     java.util.List<de.kleppmann.maniation.scene.Vertex> getVertices();
     java.util.List<de.kleppmann.maniation.scene.Face> getFaces();
+    javax.media.j3d.Node getJava3D();
 }

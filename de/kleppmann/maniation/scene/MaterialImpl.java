@@ -2,6 +2,17 @@ package de.kleppmann.maniation.scene;
 
 class MaterialImpl implements de.kleppmann.maniation.scene.Material, de.kleppmann.maniation.scene.XMLElement {
     
+    public javax.media.j3d.Material getJava3D() {
+        javax.media.j3d.Material mat = new javax.media.j3d.Material(
+                new javax.vecmath.Color3f((float) getAmbient ().getRed(), (float) getAmbient ().getGreen(), (float) getAmbient ().getBlue()),
+                new javax.vecmath.Color3f((float) getEmissive().getRed(), (float) getEmissive().getGreen(), (float) getEmissive().getBlue()),
+                new javax.vecmath.Color3f((float) getDiffuse ().getRed(), (float) getDiffuse ().getGreen(), (float) getDiffuse ().getBlue()),
+                new javax.vecmath.Color3f((float) getSpecular().getRed(), (float) getSpecular().getGreen(), (float) getSpecular().getBlue()),
+                (float) getShininess());
+        //mat.setColorTarget(javax.media.j3d.Material.AMBIENT);
+        return mat;
+    }
+    
     private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "material");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.MaterialImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;

@@ -23,4 +23,5 @@ public interface Material {
     void setSpecular(de.kleppmann.maniation.scene.Colour specular);
     de.kleppmann.maniation.scene.Colour getEmissive();
     void setEmissive(de.kleppmann.maniation.scene.Colour emissive);
+    javax.media.j3d.Material getJava3D();
 }

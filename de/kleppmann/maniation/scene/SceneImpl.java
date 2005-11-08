@@ -2,6 +2,12 @@ package de.kleppmann.maniation.scene;
 
 class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.maniation.scene.XMLElement {
     
+    public javax.media.j3d.Node getJava3D() {
+        javax.media.j3d.Group group = new javax.media.j3d.Group();
+        for (Mesh m : getMeshes()) group.addChild(m.getJava3D());
+        return group;
+    }
+    
     private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "scene");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.SceneImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;

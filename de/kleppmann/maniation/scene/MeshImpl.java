@@ -2,6 +2,29 @@ package de.kleppmann.maniation.scene;
 
 class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniation.scene.XMLElement {
     
+    public javax.media.j3d.Node getJava3D() {
+        javax.media.j3d.TriangleArray geometry = new javax.media.j3d.TriangleArray(3*faces.size(),
+                javax.media.j3d.TriangleArray.COORDINATES |
+                javax.media.j3d.TriangleArray.NORMALS);
+        float[] val = new float[3];
+        for (int i=0; i<faces.size(); i++) {
+            for (int j=0; j<3; j++) {
+                de.kleppmann.maniation.scene.Vertex v = faces.get(i).getVertices().get(j);
+                val[0] = (float) v.getPosition().getX();
+                val[1] = (float) v.getPosition().getY();
+                val[2] = (float) v.getPosition().getZ();
+                geometry.setCoordinate(3*i+j, val);
+                val[0] = (float) v.getNormal().getX();
+                val[1] = (float) v.getNormal().getY();
+                val[2] = (float) v.getNormal().getZ();
+                geometry.setNormal(3*i+j, val);
+            }
+        }
+        javax.media.j3d.Appearance appearance = new javax.media.j3d.Appearance();
+        appearance.setMaterial(getMaterial().getJava3D());
+        return new javax.media.j3d.Shape3D(geometry, appearance);
+    }
+    
     private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "mesh");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.MeshImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;
