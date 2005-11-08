@@ -2,7 +2,7 @@ package de.kleppmann.maniation.scene;
 
 class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniation.scene.XMLElement {
     
-    private javax.xml.namespace.QName _tagName;
+    private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "mesh");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.MeshImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;
     private de.kleppmann.maniation.scene.XMLDocument _document;
@@ -13,6 +13,7 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
         this._document = document;
         this._parent = parent;
     }
+    private java.lang.String id;
     private de.kleppmann.maniation.scene.Skeleton skeleton;
     private java.lang.String skeletonKeyRef;
     private boolean skeletonUpToDate = false;
@@ -21,6 +22,15 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
     private boolean materialUpToDate = false;
     private java.util.List<de.kleppmann.maniation.scene.Vertex> vertices = new java.util.ArrayList<de.kleppmann.maniation.scene.Vertex>();
     private java.util.List<de.kleppmann.maniation.scene.Face> faces = new java.util.ArrayList<de.kleppmann.maniation.scene.Face>();
+    
+    public java.lang.String getId() {
+        return id;
+    }
+    
+    public void setId(java.lang.String id) {
+        _document.mapMeshKeys.remove(this.id); _document.mapMeshKeys.put(id, this);
+        this.id = id;
+    }
     
     public void setSkeleton(de.kleppmann.maniation.scene.Skeleton skeleton) {
         skeletonUpToDate = true;
@@ -84,6 +94,7 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
     private class MyAttributes extends de.realityinabox.databinding.libs.AttributeSet {
         
         javax.xml.namespace.QName _materialAttribute = new javax.xml.namespace.QName("", "material-id");
+        javax.xml.namespace.QName _idAttribute = new javax.xml.namespace.QName("", "id");
         javax.xml.namespace.QName _skeletonAttribute = new javax.xml.namespace.QName("", "skeleton-id");
         
         MyAttributes() {
@@ -91,11 +102,15 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
         }
         
         public int size() {
-            return 2;
+            return 3;
         }
         
         public java.lang.String add(javax.xml.namespace.QName key, java.lang.String value) {
             java.lang.String _result = null;
+            if (key.equals(_idAttribute)) {
+                _result = getId();
+                setId(value);
+            } else
             if (key.equals(_skeletonAttribute)) {
                 _result = (getSkeleton() == null ? "" : getSkeleton().getId());
                 skeletonKeyRef = value; skeletonUpToDate = false;
@@ -109,19 +124,21 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
         }
         
         public javax.xml.namespace.QName getKey(int index) {
-            if (index == 0) return _skeletonAttribute;
-            if (index == 1) return _materialAttribute;
+            if (index == 0) return _idAttribute;
+            if (index == 1) return _skeletonAttribute;
+            if (index == 2) return _materialAttribute;
             throw new IllegalArgumentException();
         }
         
         public java.lang.String getValue(int index) {
-            if (index == 0) return (getSkeleton() == null ? "" : getSkeleton().getId());
-            if (index == 1) return (getMaterial() == null ? "" : getMaterial().getId());
+            if (index == 0) return getId();
+            if (index == 1) return (getSkeleton() == null ? "" : getSkeleton().getId());
+            if (index == 2) return (getMaterial() == null ? "" : getMaterial().getId());
             throw new IllegalArgumentException();
         }
         
         public void remove(int index) {
-            if ((index >= 0) && (index < 2)) return;
+            if ((index >= 0) && (index < 3)) return;
             throw new IllegalArgumentException();
         }
     }
@@ -132,10 +149,20 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
         
         private int ownSize() {
             int _i = 0;
+            _i += vertices.size();
+            _i += faces.size();
             return _i;
         }
         
-        public de.kleppmann.maniation.scene.XMLChild get(int index) {
+        public de.realityinabox.databinding.libs.XMLChild get(int index) {
+            try {
+                if ((index >= 0) && (index < vertices.size())) return (XMLChild) vertices.get(index);
+                index -= vertices.size();
+                if ((index >= 0) && (index < faces.size())) return (XMLChild) faces.get(index);
+                index -= faces.size();
+            } catch (ClassCastException e) {
+                assert(false);
+            }
             throw new IllegalArgumentException();
         }
         
@@ -143,22 +170,54 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
             return ownSize();
         }
         
-        public de.kleppmann.maniation.scene.XMLChild set(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public de.realityinabox.databinding.libs.XMLChild set(int index, de.realityinabox.databinding.libs.XMLChild element) {
             de.kleppmann.maniation.scene.XMLChild _result;
             try {
+                if ((index >= 0) && (index < vertices.size())) {
+                    _result = (de.kleppmann.maniation.scene.XMLChild) vertices.get(index);
+                    vertices.set(index, (de.kleppmann.maniation.scene.VertexImpl) element);
+                    return _result;
+                }
+                index -= vertices.size();
+                if ((index >= 0) && (index < faces.size())) {
+                    _result = (de.kleppmann.maniation.scene.XMLChild) faces.get(index);
+                    faces.set(index, (de.kleppmann.maniation.scene.FaceImpl) element);
+                    return _result;
+                }
+                index -= faces.size();
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
             }
         }
         
-        public void add(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public void add(int index, de.realityinabox.databinding.libs.XMLChild element) {
+            if (element instanceof de.kleppmann.maniation.scene.VertexImpl) {
+                if (((de.kleppmann.maniation.scene.VertexImpl) element).getTagName().equals(_handler._vertexChild)) {
+                    vertices.add((de.kleppmann.maniation.scene.VertexImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.FaceImpl) {
+                if (((de.kleppmann.maniation.scene.FaceImpl) element).getTagName().equals(_handler._faceChild)) {
+                    faces.add((de.kleppmann.maniation.scene.FaceImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
         }
         
-        public de.kleppmann.maniation.scene.XMLChild remove(int index) {
+        public de.realityinabox.databinding.libs.XMLChild remove(int index) {
+            try {
+                if ((index >= 0) && (index < vertices.size())) return (XMLChild) vertices.remove(index);
+                index -= vertices.size();
+                if ((index >= 0) && (index < faces.size())) return (XMLChild) faces.remove(index);
+                index -= faces.size();
+            } catch (ClassCastException e) {
+                assert(false);
+            }
             throw new java.lang.IllegalArgumentException();
         }
     }
@@ -166,9 +225,15 @@ class MeshImpl implements de.kleppmann.maniation.scene.Mesh, de.kleppmann.maniat
     
     private class MyHandler extends org.xml.sax.helpers.DefaultHandler {
         
+        javax.xml.namespace.QName _vertexChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "vertex");
+        javax.xml.namespace.QName _faceChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "face");
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
             de.kleppmann.maniation.scene.XMLElement _el = null;
+            if (namespaceURI.equals(_vertexChild.getNamespaceURI()) && localName.equals(_vertexChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.VertexImpl(_document, MeshImpl.this);
+            if (namespaceURI.equals(_faceChild.getNamespaceURI()) && localName.equals(_faceChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.FaceImpl(_document, MeshImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));

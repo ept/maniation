@@ -147,7 +147,7 @@ class ColourImpl implements de.kleppmann.maniation.scene.Colour, de.kleppmann.ma
             return _i;
         }
         
-        public de.kleppmann.maniation.scene.XMLChild get(int index) {
+        public de.realityinabox.databinding.libs.XMLChild get(int index) {
             throw new IllegalArgumentException();
         }
         
@@ -155,8 +155,7 @@ class ColourImpl implements de.kleppmann.maniation.scene.Colour, de.kleppmann.ma
             return ownSize();
         }
         
-        public de.kleppmann.maniation.scene.XMLChild set(int index, de.kleppmann.maniation.scene.XMLChild element) {
-            de.kleppmann.maniation.scene.XMLChild _result;
+        public de.realityinabox.databinding.libs.XMLChild set(int index, de.realityinabox.databinding.libs.XMLChild element) {
             try {
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
@@ -164,13 +163,13 @@ class ColourImpl implements de.kleppmann.maniation.scene.Colour, de.kleppmann.ma
             }
         }
         
-        public void add(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public void add(int index, de.realityinabox.databinding.libs.XMLChild element) {
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
         }
         
-        public de.kleppmann.maniation.scene.XMLChild remove(int index) {
+        public de.realityinabox.databinding.libs.XMLChild remove(int index) {
             throw new java.lang.IllegalArgumentException();
         }
     }

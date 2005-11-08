@@ -2,7 +2,7 @@ package de.kleppmann.maniation.scene;
 
 class MaterialImpl implements de.kleppmann.maniation.scene.Material, de.kleppmann.maniation.scene.XMLElement {
     
-    private javax.xml.namespace.QName _tagName;
+    private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "material");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.MaterialImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;
     private de.kleppmann.maniation.scene.XMLDocument _document;
@@ -229,10 +229,34 @@ class MaterialImpl implements de.kleppmann.maniation.scene.Material, de.kleppman
         
         private int ownSize() {
             int _i = 0;
+            if (getAmbient() != null) _i++;
+            if (getDiffuse() != null) _i++;
+            if (getSpecular() != null) _i++;
+            if (getEmissive() != null) _i++;
             return _i;
         }
         
-        public de.kleppmann.maniation.scene.XMLChild get(int index) {
+        public de.realityinabox.databinding.libs.XMLChild get(int index) {
+            try {
+                if (getAmbient() != null) {
+                    if (index == 0) return (XMLChild) getAmbient();
+                    index--;
+                }
+                if (getDiffuse() != null) {
+                    if (index == 0) return (XMLChild) getDiffuse();
+                    index--;
+                }
+                if (getSpecular() != null) {
+                    if (index == 0) return (XMLChild) getSpecular();
+                    index--;
+                }
+                if (getEmissive() != null) {
+                    if (index == 0) return (XMLChild) getEmissive();
+                    index--;
+                }
+            } catch (ClassCastException e) {
+                assert(false);
+            }
             throw new IllegalArgumentException();
         }
         
@@ -240,22 +264,78 @@ class MaterialImpl implements de.kleppmann.maniation.scene.Material, de.kleppman
             return ownSize();
         }
         
-        public de.kleppmann.maniation.scene.XMLChild set(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public de.realityinabox.databinding.libs.XMLChild set(int index, de.realityinabox.databinding.libs.XMLChild element) {
             de.kleppmann.maniation.scene.XMLChild _result;
             try {
+                if (getAmbient() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getAmbient();
+                        setAmbient((de.kleppmann.maniation.scene.ColourImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getDiffuse() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getDiffuse();
+                        setDiffuse((de.kleppmann.maniation.scene.ColourImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getSpecular() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getSpecular();
+                        setSpecular((de.kleppmann.maniation.scene.ColourImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getEmissive() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getEmissive();
+                        setEmissive((de.kleppmann.maniation.scene.ColourImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
             }
         }
         
-        public void add(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public void add(int index, de.realityinabox.databinding.libs.XMLChild element) {
+            if (element instanceof de.kleppmann.maniation.scene.ColourImpl) {
+                if (((de.kleppmann.maniation.scene.ColourImpl) element).getTagName().equals(_handler._ambientChild)) {
+                    setAmbient((de.kleppmann.maniation.scene.ColourImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.ColourImpl) {
+                if (((de.kleppmann.maniation.scene.ColourImpl) element).getTagName().equals(_handler._diffuseChild)) {
+                    setDiffuse((de.kleppmann.maniation.scene.ColourImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.ColourImpl) {
+                if (((de.kleppmann.maniation.scene.ColourImpl) element).getTagName().equals(_handler._specularChild)) {
+                    setSpecular((de.kleppmann.maniation.scene.ColourImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.ColourImpl) {
+                if (((de.kleppmann.maniation.scene.ColourImpl) element).getTagName().equals(_handler._emissiveChild)) {
+                    setEmissive((de.kleppmann.maniation.scene.ColourImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
         }
         
-        public de.kleppmann.maniation.scene.XMLChild remove(int index) {
+        public de.realityinabox.databinding.libs.XMLChild remove(int index) {
             throw new java.lang.IllegalArgumentException();
         }
     }
@@ -263,9 +343,21 @@ class MaterialImpl implements de.kleppmann.maniation.scene.Material, de.kleppman
     
     private class MyHandler extends org.xml.sax.helpers.DefaultHandler {
         
+        javax.xml.namespace.QName _ambientChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "ambient");
+        javax.xml.namespace.QName _diffuseChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "diffuse");
+        javax.xml.namespace.QName _specularChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "specular");
+        javax.xml.namespace.QName _emissiveChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "emissive");
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
             de.kleppmann.maniation.scene.XMLElement _el = null;
+            if (namespaceURI.equals(_ambientChild.getNamespaceURI()) && localName.equals(_ambientChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.ColourImpl(_document, MaterialImpl.this);
+            if (namespaceURI.equals(_diffuseChild.getNamespaceURI()) && localName.equals(_diffuseChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.ColourImpl(_document, MaterialImpl.this);
+            if (namespaceURI.equals(_specularChild.getNamespaceURI()) && localName.equals(_specularChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.ColourImpl(_document, MaterialImpl.this);
+            if (namespaceURI.equals(_emissiveChild.getNamespaceURI()) && localName.equals(_emissiveChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.ColourImpl(_document, MaterialImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));

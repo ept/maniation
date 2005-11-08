@@ -2,7 +2,7 @@ package de.kleppmann.maniation.scene;
 
 class SkeletonImpl implements de.kleppmann.maniation.scene.Skeleton, de.kleppmann.maniation.scene.XMLElement {
     
-    private javax.xml.namespace.QName _tagName;
+    private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "skeleton");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.SkeletonImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;
     private de.kleppmann.maniation.scene.XMLDocument _document;
@@ -102,10 +102,17 @@ class SkeletonImpl implements de.kleppmann.maniation.scene.Skeleton, de.kleppman
         
         private int ownSize() {
             int _i = 0;
+            _i += bones.size();
             return _i;
         }
         
-        public de.kleppmann.maniation.scene.XMLChild get(int index) {
+        public de.realityinabox.databinding.libs.XMLChild get(int index) {
+            try {
+                if ((index >= 0) && (index < bones.size())) return (XMLChild) bones.get(index);
+                index -= bones.size();
+            } catch (ClassCastException e) {
+                assert(false);
+            }
             throw new IllegalArgumentException();
         }
         
@@ -113,22 +120,40 @@ class SkeletonImpl implements de.kleppmann.maniation.scene.Skeleton, de.kleppman
             return ownSize();
         }
         
-        public de.kleppmann.maniation.scene.XMLChild set(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public de.realityinabox.databinding.libs.XMLChild set(int index, de.realityinabox.databinding.libs.XMLChild element) {
             de.kleppmann.maniation.scene.XMLChild _result;
             try {
+                if ((index >= 0) && (index < bones.size())) {
+                    _result = (de.kleppmann.maniation.scene.XMLChild) bones.get(index);
+                    bones.set(index, (de.kleppmann.maniation.scene.BoneImpl) element);
+                    return _result;
+                }
+                index -= bones.size();
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
             }
         }
         
-        public void add(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public void add(int index, de.realityinabox.databinding.libs.XMLChild element) {
+            if (element instanceof de.kleppmann.maniation.scene.BoneImpl) {
+                if (((de.kleppmann.maniation.scene.BoneImpl) element).getTagName().equals(_handler._boneChild)) {
+                    bones.add((de.kleppmann.maniation.scene.BoneImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
         }
         
-        public de.kleppmann.maniation.scene.XMLChild remove(int index) {
+        public de.realityinabox.databinding.libs.XMLChild remove(int index) {
+            try {
+                if ((index >= 0) && (index < bones.size())) return (XMLChild) bones.remove(index);
+                index -= bones.size();
+            } catch (ClassCastException e) {
+                assert(false);
+            }
             throw new java.lang.IllegalArgumentException();
         }
     }
@@ -136,9 +161,12 @@ class SkeletonImpl implements de.kleppmann.maniation.scene.Skeleton, de.kleppman
     
     private class MyHandler extends org.xml.sax.helpers.DefaultHandler {
         
+        javax.xml.namespace.QName _boneChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "bone");
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
             de.kleppmann.maniation.scene.XMLElement _el = null;
+            if (namespaceURI.equals(_boneChild.getNamespaceURI()) && localName.equals(_boneChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.BoneImpl(_document, SkeletonImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));

@@ -1,6 +1,8 @@
 package de.kleppmann.maniation.scene;
 
 public interface Mesh {
+    java.lang.String getId();
+    void setId(java.lang.String id);
     void setSkeleton(de.kleppmann.maniation.scene.Skeleton skeleton);
     de.kleppmann.maniation.scene.Skeleton getSkeleton();
     void setMaterial(de.kleppmann.maniation.scene.Material material);

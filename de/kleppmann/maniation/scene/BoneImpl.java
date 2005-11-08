@@ -2,7 +2,7 @@ package de.kleppmann.maniation.scene;
 
 class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniation.scene.XMLElement {
     
-    private javax.xml.namespace.QName _tagName;
+    private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "bone");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.BoneImpl.MyAttributes());
     private de.kleppmann.maniation.scene.XMLElement _parent;
     private de.kleppmann.maniation.scene.XMLDocument _document;
@@ -197,10 +197,49 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
         
         private int ownSize() {
             int _i = 0;
+            if (getBase() != null) _i++;
+            if (getOrientation() != null) _i++;
+            if (getTranslationToLocal() != null) _i++;
+            if (getRotationToLocal() != null) _i++;
+            if (getXAxis() != null) _i++;
+            if (getYAxis() != null) _i++;
+            if (getZAxis() != null) _i++;
             return _i;
         }
         
-        public de.kleppmann.maniation.scene.XMLChild get(int index) {
+        public de.realityinabox.databinding.libs.XMLChild get(int index) {
+            try {
+                if (getBase() != null) {
+                    if (index == 0) return (XMLChild) getBase();
+                    index--;
+                }
+                if (getOrientation() != null) {
+                    if (index == 0) return (XMLChild) getOrientation();
+                    index--;
+                }
+                if (getTranslationToLocal() != null) {
+                    if (index == 0) return (XMLChild) getTranslationToLocal();
+                    index--;
+                }
+                if (getRotationToLocal() != null) {
+                    if (index == 0) return (XMLChild) getRotationToLocal();
+                    index--;
+                }
+                if (getXAxis() != null) {
+                    if (index == 0) return (XMLChild) getXAxis();
+                    index--;
+                }
+                if (getYAxis() != null) {
+                    if (index == 0) return (XMLChild) getYAxis();
+                    index--;
+                }
+                if (getZAxis() != null) {
+                    if (index == 0) return (XMLChild) getZAxis();
+                    index--;
+                }
+            } catch (ClassCastException e) {
+                assert(false);
+            }
             throw new IllegalArgumentException();
         }
         
@@ -208,22 +247,120 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
             return ownSize();
         }
         
-        public de.kleppmann.maniation.scene.XMLChild set(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public de.realityinabox.databinding.libs.XMLChild set(int index, de.realityinabox.databinding.libs.XMLChild element) {
             de.kleppmann.maniation.scene.XMLChild _result;
             try {
+                if (getBase() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getBase();
+                        setBase((de.kleppmann.maniation.scene.VectorImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getOrientation() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getOrientation();
+                        setOrientation((de.kleppmann.maniation.scene.QuaternionImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getTranslationToLocal() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getTranslationToLocal();
+                        setTranslationToLocal((de.kleppmann.maniation.scene.VectorImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getRotationToLocal() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getRotationToLocal();
+                        setRotationToLocal((de.kleppmann.maniation.scene.QuaternionImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getXAxis() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getXAxis();
+                        setXAxis((de.kleppmann.maniation.scene.AxisConstraintImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getYAxis() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getYAxis();
+                        setYAxis((de.kleppmann.maniation.scene.AxisConstraintImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getZAxis() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getZAxis();
+                        setZAxis((de.kleppmann.maniation.scene.AxisConstraintImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
             }
         }
         
-        public void add(int index, de.kleppmann.maniation.scene.XMLChild element) {
+        public void add(int index, de.realityinabox.databinding.libs.XMLChild element) {
+            if (element instanceof de.kleppmann.maniation.scene.VectorImpl) {
+                if (((de.kleppmann.maniation.scene.VectorImpl) element).getTagName().equals(_handler._baseChild)) {
+                    setBase((de.kleppmann.maniation.scene.VectorImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.QuaternionImpl) {
+                if (((de.kleppmann.maniation.scene.QuaternionImpl) element).getTagName().equals(_handler._orientationChild)) {
+                    setOrientation((de.kleppmann.maniation.scene.QuaternionImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.VectorImpl) {
+                if (((de.kleppmann.maniation.scene.VectorImpl) element).getTagName().equals(_handler._translationToLocalChild)) {
+                    setTranslationToLocal((de.kleppmann.maniation.scene.VectorImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.QuaternionImpl) {
+                if (((de.kleppmann.maniation.scene.QuaternionImpl) element).getTagName().equals(_handler._rotationToLocalChild)) {
+                    setRotationToLocal((de.kleppmann.maniation.scene.QuaternionImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.AxisConstraintImpl) {
+                if (((de.kleppmann.maniation.scene.AxisConstraintImpl) element).getTagName().equals(_handler._xAxisChild)) {
+                    setXAxis((de.kleppmann.maniation.scene.AxisConstraintImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.AxisConstraintImpl) {
+                if (((de.kleppmann.maniation.scene.AxisConstraintImpl) element).getTagName().equals(_handler._yAxisChild)) {
+                    setYAxis((de.kleppmann.maniation.scene.AxisConstraintImpl) element);
+                    return;
+                }
+            }
+            if (element instanceof de.kleppmann.maniation.scene.AxisConstraintImpl) {
+                if (((de.kleppmann.maniation.scene.AxisConstraintImpl) element).getTagName().equals(_handler._zAxisChild)) {
+                    setZAxis((de.kleppmann.maniation.scene.AxisConstraintImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
         }
         
-        public de.kleppmann.maniation.scene.XMLChild remove(int index) {
+        public de.realityinabox.databinding.libs.XMLChild remove(int index) {
             throw new java.lang.IllegalArgumentException();
         }
     }
@@ -231,9 +368,31 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
     
     private class MyHandler extends org.xml.sax.helpers.DefaultHandler {
         
+        javax.xml.namespace.QName _baseChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "base");
+        javax.xml.namespace.QName _orientationChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "orientation");
+        javax.xml.namespace.QName _translationToLocalChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "translation-to-local");
+        javax.xml.namespace.QName _rotationToLocalChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "rotation-to-local");
+        javax.xml.namespace.QName _xAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "x-axis");
+        javax.xml.namespace.QName _yAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "y-axis");
+        javax.xml.namespace.QName _zAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "z-axis");
+
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
             de.kleppmann.maniation.scene.XMLElement _el = null;
+            if (namespaceURI.equals(_baseChild.getNamespaceURI()) && localName.equals(_baseChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.VectorImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_orientationChild.getNamespaceURI()) && localName.equals(_orientationChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.QuaternionImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_translationToLocalChild.getNamespaceURI()) && localName.equals(_translationToLocalChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.VectorImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_rotationToLocalChild.getNamespaceURI()) && localName.equals(_rotationToLocalChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.QuaternionImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_xAxisChild.getNamespaceURI()) && localName.equals(_xAxisChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.AxisConstraintImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_yAxisChild.getNamespaceURI()) && localName.equals(_yAxisChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.AxisConstraintImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_zAxisChild.getNamespaceURI()) && localName.equals(_zAxisChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.AxisConstraintImpl(_document, BoneImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));
