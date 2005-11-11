@@ -5,8 +5,6 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.Shape3D;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TriangleArray;
 import javax.swing.JFrame;
 import com.sun.j3d.utils.universe.SimpleUniverse;
