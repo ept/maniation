@@ -5,12 +5,16 @@ import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.Shape3D;
+
+import de.kleppmann.maniation.maths.Quaternion;
+import de.kleppmann.maniation.maths.Vector;
+import de.kleppmann.maniation.scene.Bone;
+import de.kleppmann.maniation.scene.Deform;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Vertex;
 
 public class MeshDeformation implements GeometryUpdater {
     
-    private long frame = 0;
     private Mesh mesh;
     private double[] coordinates;
     private float[] normals;
@@ -73,11 +77,50 @@ public class MeshDeformation implements GeometryUpdater {
     public Mesh getMesh() {
         return mesh;
     }
+    
+    private Vector worldToBone(Vector x, Bone bone) {
+        Vector boneBase = new Vector(
+                bone.getBase().getX(),
+                bone.getBase().getY(),
+                bone.getBase().getZ());
+        Quaternion boneOrient = new Quaternion(
+                bone.getOrientation().getW(),
+                bone.getOrientation().getX(),
+                bone.getOrientation().getY(),
+                bone.getOrientation().getZ());
+        return boneOrient.getInverse().transform(x.subtract(boneBase));        
+    }
+
+    private Vector boneToWorld(Vector x, Bone bone) {
+        Vector boneBase = new Vector(
+                bone.getBase().getX(),
+                bone.getBase().getY(),
+                bone.getBase().getZ());
+        Quaternion boneOrient = new Quaternion(
+                bone.getOrientation().getW(),
+                bone.getOrientation().getX(),
+                bone.getOrientation().getY(),
+                bone.getOrientation().getZ());
+        return boneOrient.transform(x).add(boneBase);        
+    }
 
     public void updateData(Geometry arg0) {
-        frame++;
-        for (int i=0; i<coordinates.length; i++) {
-            coordinates[i] += Math.exp(frame/80.0 - 8.0)*(Math.random() - 0.5);
-        }
+        //int coordIndex = 0;
+        //for (Vertex vert : mesh.getVertices()) {
+            /*Vector pos = new Vector(
+                    vert.getPosition().getX(),
+                    vert.getPosition().getY(),
+                    vert.getPosition().getZ());*/
+            /*Vector deformed = new Vector(0.0, 0.0, 0.0);
+            for (Deform deform : vert.getDeforms()) {
+                deformed.add(
+                        boneToWorld(
+                                worldToBone(pos, deform.getBone()),
+                                deform.getBone()
+                        ).mult(deform.getWeight()));
+            }
+            deformed*///pos.toDoubleArray(coordinates, 3*coordIndex);
+            //coordIndex++;
+        //}
     }
 }
