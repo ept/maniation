@@ -21,4 +21,6 @@ public interface Bone {
     void setYAxis(de.kleppmann.maniation.scene.AxisConstraint yAxis);
     de.kleppmann.maniation.scene.AxisConstraint getZAxis();
     void setZAxis(de.kleppmann.maniation.scene.AxisConstraint zAxis);
+    de.kleppmann.maniation.scene.Animation getAnimation();
+    void setAnimation(de.kleppmann.maniation.scene.Animation animation);
 }

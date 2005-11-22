@@ -25,6 +25,7 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
     private de.kleppmann.maniation.scene.AxisConstraint xAxis;
     private de.kleppmann.maniation.scene.AxisConstraint yAxis;
     private de.kleppmann.maniation.scene.AxisConstraint zAxis;
+    private de.kleppmann.maniation.scene.Animation animation;
     
     public java.lang.String getId() {
         return id;
@@ -109,7 +110,15 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
     public void setZAxis(de.kleppmann.maniation.scene.AxisConstraint zAxis) {
         this.zAxis = zAxis;
     }
+
+    public de.kleppmann.maniation.scene.Animation getAnimation() {
+        return animation;
+    }
     
+    public void setAnimation(de.kleppmann.maniation.scene.Animation animation) {
+        this.animation = animation;
+    }
+
     public de.realityinabox.databinding.libs.Document getDocument() {
         return this._document;
     }
@@ -204,6 +213,7 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
             if (getXAxis() != null) _i++;
             if (getYAxis() != null) _i++;
             if (getZAxis() != null) _i++;
+            if (getAnimation() != null) _i++;
             return _i;
         }
         
@@ -235,6 +245,10 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                 }
                 if (getZAxis() != null) {
                     if (index == 0) return (XMLChild) getZAxis();
+                    index--;
+                }
+                if (getAnimation() != null) {
+                    if (index == 0) return (XMLChild) getAnimation();
                     index--;
                 }
             } catch (ClassCastException e) {
@@ -306,6 +320,14 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                     }
                     index--;
                 }
+                if (getAnimation() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getAnimation();
+                        setAnimation((de.kleppmann.maniation.scene.AnimationImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
@@ -355,6 +377,12 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                     return;
                 }
             }
+            if (element instanceof de.kleppmann.maniation.scene.AnimationImpl) {
+                if (((de.kleppmann.maniation.scene.AnimationImpl) element).getTagName().equals(_handler._animationChild)) {
+                    setAnimation((de.kleppmann.maniation.scene.AnimationImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
@@ -375,6 +403,7 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
         javax.xml.namespace.QName _xAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "x-axis");
         javax.xml.namespace.QName _yAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "y-axis");
         javax.xml.namespace.QName _zAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "z-axis");
+        javax.xml.namespace.QName _animationChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "animation");
 
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
@@ -393,6 +422,8 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                 _el = new de.kleppmann.maniation.scene.AxisConstraintImpl(_document, BoneImpl.this);
             if (namespaceURI.equals(_zAxisChild.getNamespaceURI()) && localName.equals(_zAxisChild.getLocalPart()))
                 _el = new de.kleppmann.maniation.scene.AxisConstraintImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_animationChild.getNamespaceURI()) && localName.equals(_animationChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.AnimationImpl(_document, BoneImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));

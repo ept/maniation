@@ -86,6 +86,21 @@
         <optional><element name="x-axis"><ref name="axis-constraint"/></element></optional>
         <optional><element name="y-axis"><ref name="axis-constraint"/></element></optional>
         <optional><element name="z-axis"><ref name="axis-constraint"/></element></optional>
+        <optional><ref name="animation"/></optional>
+    </element>
+</define>
+
+<define name="animation">
+    <element name="animation">
+        <attribute name="start"><data type="double"/></attribute>
+        <attribute name="finish"><data type="double"/></attribute>
+        <attribute name="loop"><data type="boolean"/></attribute>
+        <zeroOrMore>
+            <element name="keyframe">
+                <attribute name="time"><data type="double"/></attribute>
+                <element name="rotation"><ref name="quaternion"/></element>
+            </element>
+        </zeroOrMore>
     </element>
 </define>
 

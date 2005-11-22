@@ -101,26 +101,27 @@ public class MeshDeformation implements GeometryUpdater {
                 bone.getOrientation().getX(),
                 bone.getOrientation().getY(),
                 bone.getOrientation().getZ());
-        return boneOrient.transform(x).add(boneBase);        
+        return boneOrient.transform(x).add(boneBase);
+        return x;
     }
 
     public void updateData(Geometry arg0) {
-        //int coordIndex = 0;
-        //for (Vertex vert : mesh.getVertices()) {
-            /*Vector pos = new Vector(
+        int coordIndex = 0;
+        for (Vertex vert : mesh.getVertices()) {
+            Vector pos = new Vector(
                     vert.getPosition().getX(),
                     vert.getPosition().getY(),
-                    vert.getPosition().getZ());*/
-            /*Vector deformed = new Vector(0.0, 0.0, 0.0);
+                    vert.getPosition().getZ());
+            Vector deformed = new Vector(0.0, 0.0, 0.0);
             for (Deform deform : vert.getDeforms()) {
-                deformed.add(
+                deformed = deformed.add(
                         boneToWorld(
                                 worldToBone(pos, deform.getBone()),
                                 deform.getBone()
                         ).mult(deform.getWeight()));
             }
-            deformed*///pos.toDoubleArray(coordinates, 3*coordIndex);
-            //coordIndex++;
-        //}
+            deformed.toDoubleArray(coordinates, 3*coordIndex);
+            coordIndex++;
+        }
     }
 }
