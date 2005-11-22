@@ -102,7 +102,6 @@ public class MeshDeformation implements GeometryUpdater {
                 bone.getOrientation().getY(),
                 bone.getOrientation().getZ());
         return boneOrient.transform(x).add(boneBase);
-        return x;
     }
 
     public void updateData(Geometry arg0) {

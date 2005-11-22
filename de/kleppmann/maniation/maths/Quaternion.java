@@ -41,6 +41,18 @@ public class Quaternion {
         Quaternion t = inverse.mult(vq).mult(this);
         return new Vector(t.x, t.y, t.z);
     }
+
+    public Quaternion interpolateTo(Quaternion dest, double amount) {
+        double theta = Math.acos(this.x*dest.x + this.y*dest.y + this.z*dest.z);
+        double sinTheta = Math.sin(theta);
+        double v1 = Math.sin((1.0 - amount)*theta) / sinTheta;
+        double v2 = Math.sin(amount*theta) / sinTheta;
+        return new Quaternion(
+                v1*this.w + v2*dest.w,
+                v1*this.x + v2*dest.x,
+                v1*this.y + v2*dest.y,
+                v1*this.z + v2*dest.z);
+    }
     
     public static Quaternion getXRotation(double angle) {
         return new Quaternion(Math.cos(angle/2.0), Math.sin(angle/2.0), 0.0, 0.0);

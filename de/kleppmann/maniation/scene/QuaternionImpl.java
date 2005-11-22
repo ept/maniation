@@ -1,6 +1,10 @@
 package de.kleppmann.maniation.scene;
 
 class QuaternionImpl implements de.kleppmann.maniation.scene.Quaternion, de.kleppmann.maniation.scene.XMLElement {
+ 
+    public de.kleppmann.maniation.maths.Quaternion getValue() {
+        return new de.kleppmann.maniation.maths.Quaternion(getW(), getX(), getY(), getZ());
+    }
     
     private javax.xml.namespace.QName _tagName;
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.QuaternionImpl.MyAttributes());

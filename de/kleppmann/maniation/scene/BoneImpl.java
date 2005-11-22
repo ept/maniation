@@ -1,6 +1,40 @@
 package de.kleppmann.maniation.scene;
 
 class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniation.scene.XMLElement {
+
+    public de.kleppmann.maniation.maths.Quaternion getRotationAt(double time) {
+        double prevTime = -1e100, nextTime = +1e100;
+        double length = getAnimation().getFinish() - getAnimation().getStart();
+        de.kleppmann.maniation.scene.Quaternion prevQuat = null, nextQuat = null;
+        int prevIndex = -1, nextIndex = -1;
+        de.kleppmann.maniation.maths.Quaternion result =
+            new de.kleppmann.maniation.maths.Quaternion(1, 0, 0, 0);
+        time -= getAnimation().getStart();
+        if (!getAnimation().isLoop() && ((time < 0.0) || (time > length))) return result;
+        if (getAnimation().isLoop()) {
+            while (time < 0.0) time += length;
+            while (time >= length) time -= length;
+        }
+        for (Keyframe kf : getAnimation().getKeyframes()) {
+            if ((kf.getTime() < time) && (kf.getTime() > prevTime)) {
+                prevTime = kf.getTime(); prevQuat = kf.getRotation();
+            }
+            if ((kf.getTime() > time) && (kf.getTime() < nextTime)) {
+                nextTime = kf.getTime(); nextQuat = kf.getRotation();
+            }
+        }
+        if ((prevQuat == null) && (nextQuat == null)) return result;
+        de.kleppmann.maniation.maths.Quaternion prev = null;
+        de.kleppmann.maniation.maths.Quaternion next = null;
+        if (prevQuat != null) prev = new de.kleppmann.maniation.maths.Quaternion(
+                prevQuat.getW(), prevQuat.getX(), prevQuat.getY(), prevQuat.getZ());
+        if (nextQuat != null) next = new de.kleppmann.maniation.maths.Quaternion(
+                nextQuat.getW(), nextQuat.getX(), nextQuat.getY(), nextQuat.getZ());
+        if (prevQuat == null) return next;
+        if (nextQuat == null) return prev;
+        return prevQuat.getValue().interpolateTo(nextQuat.getValue(),
+                (time - prevTime) / (nextTime - prevTime));
+    }
     
     private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "bone");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.BoneImpl.MyAttributes());
