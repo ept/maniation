@@ -1,9 +1,12 @@
 package de.kleppmann.maniation.geometry;
 
 import javax.media.j3d.Appearance;
+import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Geometry;
+import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.IndexedTriangleArray;
+import javax.media.j3d.LineArray;
 import javax.media.j3d.Shape3D;
 
 import de.kleppmann.maniation.maths.Quaternion;
@@ -12,19 +15,28 @@ import de.kleppmann.maniation.scene.Bone;
 import de.kleppmann.maniation.scene.Deform;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Vertex;
+import de.realityinabox.util.Pair;
 
 public class MeshDeformation implements GeometryUpdater {
     
+    public static final boolean DRAW_SKELETON = true;
+    
+    private int frame = 0;
     private Mesh mesh;
     private double[] coordinates;
     private float[] normals;
-    private IndexedTriangleArray geometry;
+    private GeometryArray geometry;
     private Shape3D shape;
+    java.util.Map<Bone,Pair<Vector,Quaternion>> skeletonRest, skeletonCurrent;
 
     public MeshDeformation(Mesh mesh) {
         this.mesh = mesh;
-        buildArrays();
-        buildJava3D();
+        if (DRAW_SKELETON) {
+            buildSkeleton();
+        } else {
+            buildArrays();
+            buildJava3D();
+        }
     }
     
     private void buildArrays() {
@@ -43,34 +55,69 @@ public class MeshDeformation implements GeometryUpdater {
     }
     
     private void buildJava3D() {
-        geometry = new IndexedTriangleArray(mesh.getVertices().size(),
+        IndexedTriangleArray triangles = new IndexedTriangleArray(mesh.getVertices().size(),
                 IndexedTriangleArray.COORDINATES |
                 IndexedTriangleArray.NORMALS |
                 IndexedTriangleArray.BY_REFERENCE |
                 IndexedTriangleArray.USE_COORD_INDEX_ONLY,
                 3*mesh.getFaces().size());
-        geometry.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
-        geometry.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_WRITE);
-        geometry.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
-        geometry.setCoordRefDouble(coordinates);
-        geometry.setNormalRefFloat(normals);
+        triangles.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
+        triangles.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_WRITE);
+        triangles.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
+        triangles.setCoordRefDouble(coordinates);
+        triangles.setNormalRefFloat(normals);
         for (int i=0; i<mesh.getFaces().size(); i++) {
             for (int j=0; j<3; j++) {
                 int index = mesh.getVertices().indexOf(
                         mesh.getFaces().get(i).getVertices().get(j));
-                geometry.setCoordinateIndex(3*i+j, index);
+                triangles.setCoordinateIndex(3*i+j, index);
             }
         }
+        geometry = triangles;
         Appearance appearance = new Appearance();
         appearance.setMaterial(mesh.getMaterial().getJava3D());
         shape = new Shape3D(geometry, appearance);
+    }
+
+    private void buildSkeleton() {
+        coordinates = new double[6*mesh.getSkeleton().getBones().size()];
+        updateSkeleton();
+        LineArray lines = new LineArray(2*mesh.getSkeleton().getBones().size(),
+                LineArray.COORDINATES | LineArray.BY_REFERENCE);
+        lines.setCapability(LineArray.ALLOW_REF_DATA_READ);
+        lines.setCapability(LineArray.ALLOW_REF_DATA_WRITE);
+        lines.setCapability(LineArray.ALLOW_COUNT_READ);
+        lines.setCoordRefDouble(coordinates);
+        geometry = lines;
+        Appearance appearance = new Appearance();
+        appearance.setColoringAttributes(new ColoringAttributes(1.0f, 1.0f, 1.0f, ColoringAttributes.NICEST));
+        appearance.setMaterial(mesh.getMaterial().getJava3D());
+        shape = new Shape3D(geometry, appearance);
+    }
+
+    private void updateSkeleton() {
+        updateBones();
+        for (int i=0; i<mesh.getSkeleton().getBones().size(); i++) {
+            Bone b = mesh.getSkeleton().getBones().get(i);
+            Pair<Vector,Quaternion> transform = skeletonCurrent.get(b);
+            Vector base = transform.getLeft();
+            Quaternion orient = transform.getRight();
+            Vector end = new Vector(0, 0.1, 0);
+            end = orient.transform(end).add(base);
+            coordinates[6*i+0] = base.getElement(0);
+            coordinates[6*i+1] = base.getElement(1);
+            coordinates[6*i+2] = base.getElement(2);
+            coordinates[6*i+3] = end.getElement(0);
+            coordinates[6*i+4] = end.getElement(1);
+            coordinates[6*i+5] = end.getElement(2);
+        }
     }
     
     public Shape3D getShape3D() {
         return shape;
     }
     
-    public IndexedTriangleArray getGeometry() {
+    public GeometryArray getGeometry() {
         return geometry;
     }
     
@@ -79,33 +126,27 @@ public class MeshDeformation implements GeometryUpdater {
     }
     
     private Vector worldToBone(Vector x, Bone bone) {
-        Vector boneBase = new Vector(
-                bone.getBase().getX(),
-                bone.getBase().getY(),
-                bone.getBase().getZ());
-        Quaternion boneOrient = new Quaternion(
-                bone.getOrientation().getW(),
-                bone.getOrientation().getX(),
-                bone.getOrientation().getY(),
-                bone.getOrientation().getZ());
+        Pair<Vector,Quaternion> transform = skeletonRest.get(bone);
+        Vector boneBase = transform.getLeft();
+        Quaternion boneOrient = transform.getRight();
         return boneOrient.getInverse().transform(x.subtract(boneBase));        
     }
 
     private Vector boneToWorld(Vector x, Bone bone) {
-        Vector boneBase = new Vector(
-                bone.getBase().getX(),
-                bone.getBase().getY(),
-                bone.getBase().getZ());
-        Quaternion boneOrient = new Quaternion(
-                bone.getOrientation().getW(),
-                bone.getOrientation().getX(),
-                bone.getOrientation().getY(),
-                bone.getOrientation().getZ());
+        Pair<Vector,Quaternion> transform = skeletonCurrent.get(bone);
+        Vector boneBase = transform.getLeft();
+        Quaternion boneOrient = transform.getRight();
         return boneOrient.transform(x).add(boneBase);
     }
 
     public void updateData(Geometry arg0) {
+        frame++;
+        if (DRAW_SKELETON) {
+            updateSkeleton();
+            return;
+        }
         int coordIndex = 0;
+        updateBones();
         for (Vertex vert : mesh.getVertices()) {
             Vector pos = new Vector(
                     vert.getPosition().getX(),
@@ -122,5 +163,34 @@ public class MeshDeformation implements GeometryUpdater {
             deformed.toDoubleArray(coordinates, 3*coordIndex);
             coordIndex++;
         }
+    }
+
+    private void updateBones() {
+        skeletonRest = new java.util.HashMap<Bone,Pair<Vector,Quaternion>>();
+        skeletonCurrent = new java.util.HashMap<Bone,Pair<Vector,Quaternion>>();
+        for (Bone b : mesh.getSkeleton().getBones()) updateBone(b);
+    }
+
+    private void updateBone(Bone b) {
+        if (skeletonRest.get(b) != null) return;
+        Vector baseRest = new Vector(0, 0, 0);
+        Quaternion orientRest = new Quaternion(1, 0, 0, 0);
+        Vector baseCurrent = new Vector(0, 0, 0);
+        Quaternion orientCurrent = new Quaternion(1, 0, 0, 0);
+        if (b.getParentBone() != null) {
+            updateBone(b.getParentBone());
+            Pair<Vector,Quaternion> parentRest = skeletonRest.get(b.getParentBone());
+            Pair<Vector,Quaternion> parentCurrent = skeletonCurrent.get(b.getParentBone());
+            baseRest = parentRest.getLeft(); orientRest = parentRest.getRight();
+            baseCurrent = parentCurrent.getLeft(); orientCurrent = parentCurrent.getRight();
+        }
+        Vector local = new Vector(b.getBase().getX(), b.getBase().getY(), b.getBase().getZ());
+        baseRest = baseRest.add(orientRest.transform(local));
+        baseCurrent = baseCurrent.add(orientCurrent.transform(local));
+        orientRest = orientRest.mult(b.getOrientation().getValue());
+        orientCurrent = orientCurrent.mult(b.getOrientation().getValue());
+        orientCurrent = orientCurrent.mult(b.getRotationAt(frame/30.0));
+        skeletonRest.put(b, new Pair(baseRest, orientRest));
+        skeletonCurrent.put(b, new Pair(baseCurrent, orientCurrent));
     }
 }

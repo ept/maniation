@@ -3,27 +3,30 @@ package de.kleppmann.maniation.scene;
 class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniation.scene.XMLElement {
 
     public de.kleppmann.maniation.maths.Quaternion getRotationAt(double time) {
-        double prevTime = -1e100, nextTime = +1e100;
-        double length = getAnimation().getFinish() - getAnimation().getStart();
-        de.kleppmann.maniation.scene.Quaternion prevQuat = null, nextQuat = null;
-        int prevIndex = -1, nextIndex = -1;
-        de.kleppmann.maniation.maths.Quaternion result =
+        de.kleppmann.maniation.maths.Quaternion nothing =
             new de.kleppmann.maniation.maths.Quaternion(1, 0, 0, 0);
+        if (getAnimation() == null) return nothing;
+        // Adjust for looping animations
         time -= getAnimation().getStart();
-        if (!getAnimation().isLoop() && ((time < 0.0) || (time > length))) return result;
+        double length = getAnimation().getFinish() - getAnimation().getStart();
+        if (!getAnimation().isLoop() && ((time < 0.0) || (time > length))) return nothing;
         if (getAnimation().isLoop()) {
             while (time < 0.0) time += length;
             while (time >= length) time -= length;
         }
+        // Find nearest keyframe before and after current time
+        double prevTime = -1e100, nextTime = +1e100;
+        de.kleppmann.maniation.scene.Quaternion prevQuat = null, nextQuat = null;
         for (Keyframe kf : getAnimation().getKeyframes()) {
             if ((kf.getTime() < time) && (kf.getTime() > prevTime)) {
                 prevTime = kf.getTime(); prevQuat = kf.getRotation();
             }
-            if ((kf.getTime() > time) && (kf.getTime() < nextTime)) {
+            if ((kf.getTime() >= time) && (kf.getTime() < nextTime)) {
                 nextTime = kf.getTime(); nextQuat = kf.getRotation();
             }
         }
-        if ((prevQuat == null) && (nextQuat == null)) return result;
+        if ((prevQuat == null) && (nextQuat == null)) return nothing;
+        // Interpolate between quaternions if two are available, otherwise just return one of them
         de.kleppmann.maniation.maths.Quaternion prev = null;
         de.kleppmann.maniation.maths.Quaternion next = null;
         if (prevQuat != null) prev = new de.kleppmann.maniation.maths.Quaternion(
