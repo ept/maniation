@@ -1,5 +1,5 @@
 function retval = qtomatrix(q)
-    # Quaternion to rotation matrix
+    % Quaternion to rotation matrix
     if (!isquaternion(q))
         usage ("qtomatrix (quaternion)");
     endif

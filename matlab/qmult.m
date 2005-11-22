@@ -1,5 +1,5 @@
 function prod = qmult(q1, q2)
-    # Multiply two quaternions
+    % Multiply two quaternions
 
     if ((nargin != 2) || (rows(q1) != 4) || (rows(q2) != 4))
         usage ("qmult (quaternion1, quaternion2)");

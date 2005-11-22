@@ -1,5 +1,5 @@
 function retval = qinv(q)
-    # Quaternion inverse
+    % Quaternion inverse
     if (!isquaternion(q))
         usage ("qinv (quaternion)");
     endif

@@ -1,8 +1,8 @@
 function retval = qinterpol(q1, q2, t)
-    # Smoothly interpolate between two quaternions
-    # (on the unit sphere in quaternion space)
-    # t can be a row vector, in which case an interpolation is
-    # generated in each column of the result matrix.
+    % Smoothly interpolate between two quaternions
+    % (on the unit sphere in quaternion space)
+    % t can be a row vector, in which case an interpolation is
+    % generated in each column of the result matrix.
 
     if ((nargin != 3) || !isquaternion(q1) || !isquaternion(q2))
         usage("qinterpol (quaternion1, quaternion2, value)");
