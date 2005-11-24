@@ -10,7 +10,7 @@ function quat = vectortoq(original, transformed, roll)
 
     rollq = qrot(original, roll);
     
-    rot = [0, 0, 0, 1];
+    rot = [0; 0; 0; 1];
     if (abs(angle) > 0.000001)
         rot = qrot(cross(original, transformed), angle);
     endif
