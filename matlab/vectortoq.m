@@ -8,13 +8,12 @@ function quat = vectortoq(original, transformed, roll)
     transformed = normalize(transformed);
     angle = acos(original'*transformed);
 
-    roll = qrot(original, angle);
+    rollq = qrot(original, roll);
     
-    if (abs(angle) < 0.000001)
-        rot = [0, 0, 0, 1];
-    else
+    rot = [0, 0, 0, 1];
+    if (abs(angle) > 0.000001)
         rot = qrot(cross(original, transformed), angle);
     endif
 
-    quat = qmult(roll, rot);
+    quat = qmult(rollq, rot);
 endfunction
