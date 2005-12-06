@@ -8,7 +8,8 @@ function retval = qinterpol(q1, q2, t)
         usage("qinterpol (quaternion1, quaternion2, value)");
     endif
     
-    theta = acos(q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3));
+    % Not sure if theta is defined this way -- Shoemake is not clear about it
+    theta = acos(q1(1)*q2(1) + q1(2)*q2(2) + q1(3)*q2(3) + q1(4)*q2(4));
     retval = zeros(4, columns(t));
 
     for i = 1:columns(t)
