@@ -28,6 +28,7 @@ public class MeshDeformation implements GeometryUpdater {
     private GeometryArray geometry;
     private Shape3D shape;
     java.util.Map<Bone,Pair<Vector,Quaternion>> skeletonRest, skeletonCurrent;
+    private boolean firstUpdate = true;
 
     public MeshDeformation(Mesh mesh) {
         this.mesh = mesh;
@@ -169,6 +170,7 @@ public class MeshDeformation implements GeometryUpdater {
         skeletonRest = new java.util.HashMap<Bone,Pair<Vector,Quaternion>>();
         skeletonCurrent = new java.util.HashMap<Bone,Pair<Vector,Quaternion>>();
         for (Bone b : mesh.getSkeleton().getBones()) updateBone(b);
+        firstUpdate = false;
     }
 
     private void updateBone(Bone b) {
@@ -192,5 +194,10 @@ public class MeshDeformation implements GeometryUpdater {
         orientCurrent = orientCurrent.mult(b.getRotationAt(frame/30.0));
         skeletonRest.put(b, new Pair(baseRest, orientRest));
         skeletonCurrent.put(b, new Pair(baseCurrent, orientCurrent));
+        if (firstUpdate) {
+            System.out.println("Bone " + b.getName() + ":");
+            System.out.println("        Base " + baseRest + " at rest");
+            System.out.println("        Orientation " + orientRest + " at rest");
+        }
     }
 }

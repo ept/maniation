@@ -22,6 +22,26 @@ public class Quaternion {
         this.inverse.inverse = this;
     }
 
+    public double getW() {
+        return w;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
+    public String toString() {
+        return "Quaternion(w: " + w + ", x: " + x + ", y: " + y + ", z: " + z + ")";
+    }
+
     public Quaternion mult(Quaternion other) {
         return new Quaternion(
                 this.w*other.w - this.x*other.x - this.y*other.y - this.z*other.z,

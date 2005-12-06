@@ -14,6 +14,15 @@ public class Vector {
         values[2] = z;
     }
 
+    public String toString() {
+        String result = "";
+        for (int i=0; i<values.length; i++) {
+            if (!result.equals("")) result += ", ";
+            result += values[i];
+        }
+        return "Vector(" + result + ")";
+    }
+
     public int getDimension() {
         return values.length;
     }
