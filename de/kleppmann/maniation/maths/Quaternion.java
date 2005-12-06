@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.maths;
 
+import java.text.DecimalFormat;
+
 
 public class Quaternion {
     
@@ -39,7 +41,11 @@ public class Quaternion {
     }
 
     public String toString() {
-        return "Quaternion(w: " + w + ", x: " + x + ", y: " + y + ", z: " + z + ")";
+        DecimalFormat format = new DecimalFormat("######0.00000");
+        return "Quaternion(w: " + format.format(w) +
+            ", x: " + format.format(x) + 
+            ", y: " + format.format(y) +
+            ", z: " + format.format(z) + ")";
     }
 
     public Quaternion mult(Quaternion other) {
@@ -63,7 +69,7 @@ public class Quaternion {
     }
 
     public Quaternion interpolateTo(Quaternion dest, double amount) {
-        double theta = Math.acos(this.x*dest.x + this.y*dest.y + this.z*dest.z);
+        double theta = Math.acos(this.x*dest.x + this.y*dest.y + this.z*dest.z + this.w*dest.w);
         double sinTheta = Math.sin(theta);
         double v1 = Math.sin((1.0 - amount)*theta) / sinTheta;
         double v2 = Math.sin(amount*theta) / sinTheta;

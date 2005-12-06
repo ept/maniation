@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.maths;
 
+import java.text.DecimalFormat;
+
 
 public class Vector {
     
@@ -15,10 +17,11 @@ public class Vector {
     }
 
     public String toString() {
+        DecimalFormat format = new DecimalFormat("######0.00000");
         String result = "";
         for (int i=0; i<values.length; i++) {
             if (!result.equals("")) result += ", ";
-            result += values[i];
+            result += format.format(values[i]);
         }
         return "Vector(" + result + ")";
     }

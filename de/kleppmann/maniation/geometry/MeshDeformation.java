@@ -192,8 +192,8 @@ public class MeshDeformation implements GeometryUpdater {
         orientRest = orientRest.mult(b.getOrientation().getValue());
         orientCurrent = orientCurrent.mult(b.getOrientation().getValue());
         orientCurrent = orientCurrent.mult(b.getRotationAt(frame/30.0));
-        skeletonRest.put(b, new Pair(baseRest, orientRest));
-        skeletonCurrent.put(b, new Pair(baseCurrent, orientCurrent));
+        skeletonRest.put(b, new Pair<Vector,Quaternion>(baseRest, orientRest));
+        skeletonCurrent.put(b, new Pair<Vector,Quaternion>(baseCurrent, orientCurrent));
         if (firstUpdate) {
             System.out.println("Bone " + b.getName() + ":");
             System.out.println("        Base " + baseRest + " at rest");
