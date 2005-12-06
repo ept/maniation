@@ -4,5 +4,6 @@ function retval = qinv(q)
         usage ("qinv (quaternion)");
     endif
 
-    retval = [ -q(1); -q(2); -q(3); q(4) ] / qmag(q);
+    mag = qmag(q);
+    retval = [ -q(1); -q(2); -q(3); q(4) ] / (mag*mag);
 endfunction
