@@ -11,8 +11,15 @@ function quat = vectortoq(original, transformed, roll)
     rollq = qrot(original, roll);
     
     rot = [0; 0; 0; 1];
-    if (abs(angle) > 0.000001)
-        rot = qrot(cross(original, transformed), -angle);
+    axis = cross(original, transformed);
+    
+    if (sumsq(axis) > 0.0000000000001)
+        rot = qrot(axis, -angle);
+    else
+        if (original'*transformed < 0)
+            % need to reverse direction
+            rot = qrot(anyortho(original), pi);
+        endif
     endif
 
     quat = qmult(rollq, rot);
