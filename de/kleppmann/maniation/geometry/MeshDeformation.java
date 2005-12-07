@@ -1,7 +1,6 @@
 package de.kleppmann.maniation.geometry;
 
 import javax.media.j3d.Appearance;
-import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
@@ -27,8 +26,8 @@ public class MeshDeformation implements GeometryUpdater {
     private float[] normals;
     private GeometryArray geometry;
     private Shape3D shape;
-    java.util.Map<Bone,Pair<Vector,Quaternion>> skeletonRest, skeletonCurrent;
-    private boolean firstUpdate = true;
+    private java.util.Map<Bone,Pair<Vector,Quaternion>> skeletonRest, skeletonCurrent;
+    private java.util.Map<Bone,Vector> boneEnds;
 
     public MeshDeformation(Mesh mesh) {
         this.mesh = mesh;
@@ -81,17 +80,24 @@ public class MeshDeformation implements GeometryUpdater {
     }
 
     private void buildSkeleton() {
-        coordinates = new double[6*mesh.getSkeleton().getBones().size()];
+        coordinates = new double[12*mesh.getSkeleton().getBones().size()];
         updateSkeleton();
-        LineArray lines = new LineArray(2*mesh.getSkeleton().getBones().size(),
-                LineArray.COORDINATES | LineArray.BY_REFERENCE);
+        LineArray lines = new LineArray(4*mesh.getSkeleton().getBones().size(),
+                LineArray.COORDINATES | LineArray.COLOR_3 | LineArray.BY_REFERENCE);
         lines.setCapability(LineArray.ALLOW_REF_DATA_READ);
         lines.setCapability(LineArray.ALLOW_REF_DATA_WRITE);
         lines.setCapability(LineArray.ALLOW_COUNT_READ);
         lines.setCoordRefDouble(coordinates);
+        float[] colours = new float[12*mesh.getSkeleton().getBones().size()];
+        lines.setColorRefFloat(colours);
+        for (int i=0; i<mesh.getSkeleton().getBones().size(); i++) {
+            colours[12*i +  0] = 1.0f; colours[12*i +  1] = 1.0f; colours[12*i +  2] = 1.0f;
+            colours[12*i +  3] = 1.0f; colours[12*i +  4] = 1.0f; colours[12*i +  5] = 1.0f;
+            colours[12*i +  6] = 1.0f; colours[12*i +  7] = 0.0f; colours[12*i +  8] = 0.0f;
+            colours[12*i +  9] = 1.0f; colours[12*i + 10] = 0.0f; colours[12*i + 11] = 0.0f;
+        }
         geometry = lines;
         Appearance appearance = new Appearance();
-        appearance.setColoringAttributes(new ColoringAttributes(1.0f, 1.0f, 1.0f, ColoringAttributes.NICEST));
         appearance.setMaterial(mesh.getMaterial().getJava3D());
         shape = new Shape3D(geometry, appearance);
     }
@@ -103,14 +109,20 @@ public class MeshDeformation implements GeometryUpdater {
             Pair<Vector,Quaternion> transform = skeletonCurrent.get(b);
             Vector base = transform.getLeft();
             Quaternion orient = transform.getRight();
-            Vector end = new Vector(0, 0.1, 0);
-            end = orient.transform(end).add(base);
-            coordinates[6*i+0] = base.getElement(0);
-            coordinates[6*i+1] = base.getElement(1);
-            coordinates[6*i+2] = base.getElement(2);
-            coordinates[6*i+3] = end.getElement(0);
-            coordinates[6*i+4] = end.getElement(1);
-            coordinates[6*i+5] = end.getElement(2);
+            Vector end = orient.transform(boneEnds.get(b)).add(base);
+            Vector xaxis = orient.transform(new Vector(0.1, 0, 0)).add(base);
+            coordinates[12*i +  0] = base.getElement(0);
+            coordinates[12*i +  1] = base.getElement(1);
+            coordinates[12*i +  2] = base.getElement(2);
+            coordinates[12*i +  3] = end.getElement(0);
+            coordinates[12*i +  4] = end.getElement(1);
+            coordinates[12*i +  5] = end.getElement(2);
+            coordinates[12*i +  6] = base.getElement(0);
+            coordinates[12*i +  7] = base.getElement(1);
+            coordinates[12*i +  8] = base.getElement(2);
+            coordinates[12*i +  9] = xaxis.getElement(0);
+            coordinates[12*i + 10] = xaxis.getElement(1);
+            coordinates[12*i + 11] = xaxis.getElement(2);
         }
     }
     
@@ -169,8 +181,8 @@ public class MeshDeformation implements GeometryUpdater {
     private void updateBones() {
         skeletonRest = new java.util.HashMap<Bone,Pair<Vector,Quaternion>>();
         skeletonCurrent = new java.util.HashMap<Bone,Pair<Vector,Quaternion>>();
+        boneEnds = new java.util.HashMap<Bone,Vector>();
         for (Bone b : mesh.getSkeleton().getBones()) updateBone(b);
-        firstUpdate = false;
     }
 
     private void updateBone(Bone b) {
@@ -189,15 +201,11 @@ public class MeshDeformation implements GeometryUpdater {
         Vector local = new Vector(b.getBase().getX(), b.getBase().getY(), b.getBase().getZ());
         baseRest = baseRest.add(orientRest.transform(local));
         baseCurrent = baseCurrent.add(orientCurrent.transform(local));
-        orientRest = orientRest.mult(b.getOrientation().getValue());
-        orientCurrent = orientCurrent.mult(b.getOrientation().getValue());
-        orientCurrent = orientCurrent.mult(b.getRotationAt(frame/30.0));
+        orientRest = b.getOrientation().getValue().mult(orientRest);
+        orientCurrent = b.getRotationAt(frame/30.0).mult(b.getOrientation().getValue().mult(orientCurrent));
         skeletonRest.put(b, new Pair<Vector,Quaternion>(baseRest, orientRest));
         skeletonCurrent.put(b, new Pair<Vector,Quaternion>(baseCurrent, orientCurrent));
-        if (firstUpdate) {
-            System.out.println("Bone " + b.getName() + ":");
-            System.out.println("        Base " + baseRest + " at rest");
-            System.out.println("        Orientation " + orientRest + " at rest");
-        }
+        boneEnds.put(b.getParentBone(), local);
+        boneEnds.put(b, new Vector(0, 0.1, 0));
     }
 }
