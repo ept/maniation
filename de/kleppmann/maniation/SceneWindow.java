@@ -3,9 +3,7 @@ package de.kleppmann.maniation;
 import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Enumeration;
 import javax.media.j3d.AmbientLight;
-import javax.media.j3d.Behavior;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
@@ -13,13 +11,16 @@ import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.RotationInterpolator;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
-import javax.media.j3d.WakeupOnElapsedFrames;
 import javax.swing.JFrame;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 import com.sun.j3d.utils.universe.SimpleUniverse;
+
+import de.kleppmann.maniation.geometry.AnimateObject;
+import de.kleppmann.maniation.geometry.AnimateSkeleton;
+import de.kleppmann.maniation.geometry.GeometryBehaviour;
 import de.kleppmann.maniation.geometry.MeshDeformation;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Scene;
@@ -66,10 +67,14 @@ public class SceneWindow extends JFrame {
         TransformGroup tg = new TransformGroup(getSceneTransform());
         tg.addChild(sceneAsJava3D);
         bg.addChild(tg);
+        GeometryBehaviour behaviour = new GeometryBehaviour();
+        bg.addChild(behaviour);
         for (Mesh m : scene.getMeshes()) {
-            MeshDeformation md = new MeshDeformation(m);
-            sceneAsJava3D.addChild(md.getShape3D());
-            bg.addChild(new DeformationBehaviour(md));
+            AnimateObject obj;
+            if (AnimateSkeleton.DRAW_SKELETON) obj = new AnimateSkeleton(m.getSkeleton());
+            else obj = new MeshDeformation(m);
+            sceneAsJava3D.addChild(obj.getShape3D());
+            behaviour.addObject(obj);
         }
     }
     
@@ -116,27 +121,5 @@ public class SceneWindow extends JFrame {
         backgnd.setApplicationBounds(new javax.media.j3d.BoundingSphere(
                 new javax.vecmath.Point3d(0.0f, 0.0f, 0.0f), 10));
         bg.addChild(backgnd);
-    }
-    
-    
-    private static class DeformationBehaviour extends Behavior {
-        private MeshDeformation md;
-        private WakeupOnElapsedFrames w;
-        
-        public DeformationBehaviour(MeshDeformation md) {
-            this.md = md;
-            w = new WakeupOnElapsedFrames(0);
-            setSchedulingBounds(new javax.media.j3d.BoundingSphere(
-                    new javax.vecmath.Point3d(0.0f, 0.0f, 0.0f), 10));
-        }
-        
-        public void initialize() {
-            wakeupOn(w);
-        }
-
-        public void processStimulus(Enumeration criteria) {
-            md.getGeometry().updateData(md);
-            wakeupOn(w);
-        }
     }
 }
