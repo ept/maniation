@@ -18,7 +18,7 @@ import de.realityinabox.util.Pair;
 
 public class MeshDeformation implements GeometryUpdater {
     
-    public static final boolean DRAW_SKELETON = true;
+    public static final boolean DRAW_SKELETON = false;
     
     private int frame = 0;
     private Mesh mesh;
@@ -202,7 +202,7 @@ public class MeshDeformation implements GeometryUpdater {
         baseRest = baseRest.add(orientRest.transform(local));
         baseCurrent = baseCurrent.add(orientCurrent.transform(local));
         orientRest = b.getOrientation().getValue().mult(orientRest);
-        orientCurrent = b.getRotationAt(frame/30.0).mult(b.getOrientation().getValue().mult(orientCurrent));
+        orientCurrent = b.getRotationAt(frame/30.0).getInverse().mult(b.getOrientation().getValue().mult(orientCurrent));
         skeletonRest.put(b, new Pair<Vector,Quaternion>(baseRest, orientRest));
         skeletonCurrent.put(b, new Pair<Vector,Quaternion>(baseCurrent, orientCurrent));
         boneEnds.put(b.getParentBone(), local);
