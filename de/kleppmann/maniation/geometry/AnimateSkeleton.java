@@ -2,7 +2,6 @@ package de.kleppmann.maniation.geometry;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
-import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.Shape3D;
@@ -22,7 +21,7 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     private int frame = 0;
     private Skeleton skeleton;
     private double[] coordinates;
-    private GeometryArray geometry;
+    private LineArray lines;
     private Shape3D shape;
     private java.util.Map<Bone,Pair<Vector,Quaternion>> skeletonRest, skeletonCurrent;
     private java.util.Map<Bone,Vector> boneEnds;
@@ -39,7 +38,7 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     private void buildJava3D() {
         coordinates = new double[12*skeleton.getBones().size()];
         updateSkeleton();
-        LineArray lines = new LineArray(4*skeleton.getBones().size(),
+        lines = new LineArray(4*skeleton.getBones().size(),
                 LineArray.COORDINATES | LineArray.COLOR_3 | LineArray.BY_REFERENCE);
         lines.setCapability(LineArray.ALLOW_REF_DATA_READ);
         lines.setCapability(LineArray.ALLOW_REF_DATA_WRITE);
@@ -53,10 +52,7 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
             colours[12*i +  6] = 1.0f; colours[12*i +  7] = 0.0f; colours[12*i +  8] = 0.0f;
             colours[12*i +  9] = 1.0f; colours[12*i + 10] = 0.0f; colours[12*i + 11] = 0.0f;
         }
-        geometry = lines;
-        Appearance appearance = new Appearance();
-        //appearance.setMaterial(mesh.getMaterial().getJava3D());
-        shape = new Shape3D(geometry, appearance);
+        shape = new Shape3D(lines, new Appearance());
     }
 
     private void updateSkeleton() {
@@ -143,7 +139,7 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     }
     
     public void processStimulus() {
-        geometry.updateData(this);
+        lines.updateData(this);
     }
 
     public void updateData(Geometry geometry) {
