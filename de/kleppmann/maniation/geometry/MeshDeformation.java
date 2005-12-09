@@ -2,6 +2,7 @@ package de.kleppmann.maniation.geometry;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
@@ -24,6 +25,7 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
     private MeshTriangle[] triangles;
     private Map<Vertex, MeshVertex> vertexMap;
     private Map<Bone, CollisionVolume> boneVolumesMap;
+    private Map<Bone, Set<Bone>> collisionTestBones;
     private IndexedTriangleArray geometry;
     private Shape3D shape;
     private AnimateSkeleton skeleton;
@@ -78,6 +80,19 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
             triArray = boneTriangles.toArray(triArray);
             boneVolumesMap.put(bone, new CollisionVolume(triArray));
         }
+        collisionTestBones = new java.util.HashMap<Bone, Set<Bone>>();
+        for (i=0; i<mesh.getSkeleton().getBones().size(); i++) {
+            Bone bone = mesh.getSkeleton().getBones().get(i);
+            Set<Bone> boneList = new java.util.HashSet<Bone>();
+            for (int j=0; j<i; j++)
+                boneList.add(mesh.getSkeleton().getBones().get(j));
+            collisionTestBones.put(bone, boneList);
+        }
+        for (Bone bone : mesh.getSkeleton().getBones()) {
+            collisionTestBones.get(bone).remove(bone.getParentBone());
+            Set<Bone> parentList = collisionTestBones.get(bone.getParentBone());
+            if (parentList != null) parentList.remove(bone);
+        }
     }
     
     private void buildJava3D() {
@@ -117,6 +132,19 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
             Vector deformed = skeleton.currentVertexPosition(vert);
             deformed.toDoubleArray(coordinates, 3*coordIndex);
             coordIndex++;
+        }
+        for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet())
+            entry.getValue().updateBBox();
+        for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet()) {
+            CollisionVolume vol1 = entry.getValue();
+            for (Bone target : collisionTestBones.get(entry.getKey())) {
+                Collision c = new Collision();
+                boneVolumesMap.get(target).intersect(vol1, c);
+                if (c.isColliding()) {
+                    System.out.println("Collision between " + entry.getKey().getName() + " and " +
+                            target.getName());
+                }
+            }
         }
     }
 }
