@@ -1,13 +1,18 @@
 package de.kleppmann.maniation.geometry;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
-import javax.media.j3d.GeometryArray;
 import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.Shape3D;
 
 import de.kleppmann.maniation.maths.Vector;
+import de.kleppmann.maniation.scene.Bone;
+import de.kleppmann.maniation.scene.Deform;
+import de.kleppmann.maniation.scene.Face;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Vertex;
 
@@ -16,7 +21,10 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
     private Mesh mesh;
     private double[] coordinates;
     private float[] normals;
-    private GeometryArray geometry;
+    private MeshTriangle[] triangles;
+    private Map<Vertex, MeshVertex> vertexMap;
+    private Map<Bone, CollisionVolume> boneVolumesMap;
+    private IndexedTriangleArray geometry;
     private Shape3D shape;
     private AnimateSkeleton skeleton;
 
@@ -30,6 +38,7 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
     private void buildArrays() {
         coordinates = new double[3*mesh.getVertices().size()];
         normals = new float[3*mesh.getVertices().size()];
+        vertexMap = new java.util.HashMap<Vertex, MeshVertex>();
         int i = 0;
         for (Vertex v : mesh.getVertices()) {
             coordinates[3*i+0] = v.getPosition().getX();
@@ -38,30 +47,56 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
             normals[3*i+0] = (float) v.getNormal().getX();
             normals[3*i+1] = (float) v.getNormal().getY();
             normals[3*i+2] = (float) v.getNormal().getZ();
+            vertexMap.put(v, new MeshVertex(coordinates, i));
             i++;
+        }
+        triangles = new MeshTriangle[mesh.getFaces().size()];
+        i = 0;
+        for (Face face : mesh.getFaces()) {
+            triangles[i] = new MeshTriangle(
+                    vertexMap.get(face.getVertices().get(0)),
+                    vertexMap.get(face.getVertices().get(1)),
+                    vertexMap.get(face.getVertices().get(2)));
+            i++;
+        }
+        boneVolumesMap = new java.util.HashMap<Bone, CollisionVolume>();
+        for (Bone bone : mesh.getSkeleton().getBones()) {
+            List<MeshTriangle> boneTriangles = new java.util.ArrayList<MeshTriangle>();
+            int triangleIndex = 0;
+            for (Face face : mesh.getFaces()) {
+                boolean faceDeformed = true;
+                for (Vertex vert : face.getVertices()) {
+                    boolean vertexDeformed = false;
+                    for (Deform deform : vert.getDeforms())
+                        if (deform.getBone() == bone) vertexDeformed = true;
+                    if (!vertexDeformed) faceDeformed = false;
+                }
+                if (faceDeformed) boneTriangles.add(triangles[triangleIndex]);
+                triangleIndex++;
+            }
+            MeshTriangle[] triArray = new MeshTriangle[boneTriangles.size()];
+            triArray = boneTriangles.toArray(triArray);
+            boneVolumesMap.put(bone, new CollisionVolume(triArray));
         }
     }
     
     private void buildJava3D() {
-        IndexedTriangleArray triangles = new IndexedTriangleArray(mesh.getVertices().size(),
+        geometry = new IndexedTriangleArray(mesh.getVertices().size(),
                 IndexedTriangleArray.COORDINATES |
                 IndexedTriangleArray.NORMALS |
                 IndexedTriangleArray.BY_REFERENCE |
                 IndexedTriangleArray.USE_COORD_INDEX_ONLY,
                 3*mesh.getFaces().size());
-        triangles.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
-        triangles.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_WRITE);
-        triangles.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
-        triangles.setCoordRefDouble(coordinates);
-        triangles.setNormalRefFloat(normals);
-        for (int i=0; i<mesh.getFaces().size(); i++) {
-            for (int j=0; j<3; j++) {
-                int index = mesh.getVertices().indexOf(
-                        mesh.getFaces().get(i).getVertices().get(j));
-                triangles.setCoordinateIndex(3*i+j, index);
-            }
+        geometry.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
+        geometry.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_WRITE);
+        geometry.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
+        geometry.setCoordRefDouble(coordinates);
+        geometry.setNormalRefFloat(normals);
+        for (int i=0; i<triangles.length; i++) {
+            MeshTriangle tri = triangles[i];
+            for (int j=0; j<3; j++)
+                geometry.setCoordinateIndex(3*i+j, tri.vertices[j].index);
         }
-        geometry = triangles;
         Appearance appearance = new Appearance();
         appearance.setMaterial(mesh.getMaterial().getJava3D());
         shape = new Shape3D(geometry, appearance);
