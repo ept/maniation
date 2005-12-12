@@ -7,8 +7,11 @@ package de.kleppmann.maniation.geometry;
 public class CollisionVolume {
     
     private Tree tree;
+    //private int triangleCount;
+    private int tests;
 
     public CollisionVolume(MeshTriangle[] triangles) {
+        //triangleCount = triangles.length;
         tree = newTree(triangles);
     }
     
@@ -17,7 +20,9 @@ public class CollisionVolume {
     }
     
     public void intersect(CollisionVolume other, Collision result) {
+        tests = 0;
         tree.intersect(other.tree, result);
+        //System.out.println(tests + " primitive tests out of " + triangleCount*other.triangleCount);
     }
     
     private Tree newTree(MeshTriangle[] triangles) {
@@ -58,9 +63,10 @@ public class CollisionVolume {
         }
         
         public void intersect(Tree other, Collision result) {
-            if (other instanceof TreeLeaf)
-                triangle.intersect(((TreeLeaf) other).triangle, result); else
-                other.intersect(this, result);
+            if (other instanceof TreeLeaf) {
+                triangle.intersect(((TreeLeaf) other).triangle, result);
+                tests++;
+            } else other.intersect(this, result);
         }
     }
     

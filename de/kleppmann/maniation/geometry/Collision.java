@@ -7,9 +7,11 @@ public class Collision {
 
     List<CollisionPoint> intersections = new java.util.ArrayList<CollisionPoint>();
     boolean colliding = false;
+    int collisions = 0;
     
     public void addIntersection() {
         colliding = true;
+        collisions++;
     }
     
     public void addIntersection(double x, double y, double z,

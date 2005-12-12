@@ -44,6 +44,7 @@ public class MeshTriangle {
 
     public void intersect(MeshTriangle other, Collision result) {
         updateNumbers(other);
+        other.updateNumbers(this);
         // Do all points of the other triangle lie on the same side of the
         // plane of this triangle?
         int i = 0;
@@ -118,7 +119,7 @@ public class MeshTriangle {
             double q1, double q2, double q3) {
         // Intersect line with plane
         double t = (q1 - p1)*n1 + (q2 - p2)*n2 + (q3 - p3)*n3;
-        if ((t > 1e-10) || (t < -1e-10)) return false;
+        if ((t < 1e-10) && (t > -1e-10)) return false;
         t = ((a1 - p1)*n1 + (a2 - p2)*n2 + (a3 - p3)*n3) / t;
         if ((t > 1.0) || (t < 0.0)) return false;
         // We now know that the intersection lies between p and q.

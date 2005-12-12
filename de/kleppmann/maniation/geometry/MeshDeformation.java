@@ -62,18 +62,25 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
             i++;
         }
         boneVolumesMap = new java.util.HashMap<Bone, CollisionVolume>();
+        Map<Vertex, Bone> vertexBonesMap = new java.util.HashMap<Vertex, Bone>();
         for (Bone bone : mesh.getSkeleton().getBones()) {
             List<MeshTriangle> boneTriangles = new java.util.ArrayList<MeshTriangle>();
             int triangleIndex = 0;
             for (Face face : mesh.getFaces()) {
                 boolean faceDeformed = true;
                 for (Vertex vert : face.getVertices()) {
+                    if (vertexBonesMap.get(vert) != null) {
+                        faceDeformed = false; continue;
+                    }
                     boolean vertexDeformed = false;
                     for (Deform deform : vert.getDeforms())
                         if (deform.getBone() == bone) vertexDeformed = true;
                     if (!vertexDeformed) faceDeformed = false;
                 }
-                if (faceDeformed) boneTriangles.add(triangles[triangleIndex]);
+                if (faceDeformed) {
+                    boneTriangles.add(triangles[triangleIndex]);
+                    for (Vertex vert : face.getVertices()) vertexBonesMap.put(vert, bone);
+                }
                 triangleIndex++;
             }
             MeshTriangle[] triArray = new MeshTriangle[boneTriangles.size()];
@@ -139,10 +146,11 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
             CollisionVolume vol1 = entry.getValue();
             for (Bone target : collisionTestBones.get(entry.getKey())) {
                 Collision c = new Collision();
+                //System.out.print(entry.getKey().getName() + " vs. " + target.getName() + ": ");
                 boneVolumesMap.get(target).intersect(vol1, c);
                 if (c.isColliding()) {
-                    System.out.println("Collision between " + entry.getKey().getName() + " and " +
-                            target.getName());
+                    System.out.println(c.collisions + " collisions between " + 
+                            entry.getKey().getName() + " and " + target.getName());
                 }
             }
         }
