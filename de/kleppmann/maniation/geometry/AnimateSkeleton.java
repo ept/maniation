@@ -130,8 +130,8 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
         Vector local = new Vector(b.getBase().getX(), b.getBase().getY(), b.getBase().getZ());
         baseRest = baseRest.add(orientRest.transform(local));
         baseCurrent = baseCurrent.add(orientCurrent.transform(local));
-        orientRest = b.getOrientation().getValue().mult(orientRest);
-        orientCurrent = b.getRotationAt(frame/30.0).getInverse().mult(b.getOrientation().getValue().mult(orientCurrent));
+        orientRest = orientRest.mult(b.getOrientation().getValue());
+        orientCurrent = orientCurrent.mult(b.getOrientation().getValue().mult(b.getRotationAt(frame/30.0)));
         skeletonRest.put(b, new Pair<Vector,Quaternion>(baseRest, orientRest));
         skeletonCurrent.put(b, new Pair<Vector,Quaternion>(baseCurrent, orientCurrent));
         boneEnds.put(b.getParentBone(), local);

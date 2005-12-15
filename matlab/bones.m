@@ -10,7 +10,7 @@ function retval = bones(b)
         a = -b(i, 4);
         if (i > 1)
             q1 = vectortoq(boneaxis, v, a);
-            q = qmult(q1, qinv(q0));
+            q = qmult(qinv(q0), q1);
             q0 = q1;
             orientation = q'
         endif

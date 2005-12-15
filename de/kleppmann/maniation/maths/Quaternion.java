@@ -64,7 +64,7 @@ public class Quaternion {
     public Vector transform(Vector v) {
         if (v.getDimension() != 3) throw new IllegalArgumentException();
         Quaternion vq = new Quaternion(0.0, v.getElement(0), v.getElement(1), v.getElement(2));
-        Quaternion t = inverse.mult(vq).mult(this);
+        Quaternion t = mult(vq).mult(inverse);
         return new Vector(t.x, t.y, t.z);
     }
 

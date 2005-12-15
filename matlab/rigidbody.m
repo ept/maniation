@@ -24,7 +24,7 @@ function newstatus = rigidbody(status, time, mass, invinert, forces)
 
     pos1 = mom0/mass;
     angvel0 = worldinertia*angmom0;
-    orient1 = qmult([-0.5*angvel0; 0.0], orient0);
+    orient1 = qmult([0.5*angvel0; 0.0], orient0);
     mom1 = sum(forces(1:3,:),2);
     angmom1 = [0;0;0];
 

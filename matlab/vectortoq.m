@@ -14,7 +14,7 @@ function quat = vectortoq(original, transformed, roll)
     axis = cross(original, transformed);
     
     if (sumsq(axis) > 0.0000000000001)
-        rot = qrot(axis, -angle);
+        rot = qrot(axis, angle);
     else
         if (original'*transformed < 0)
             % need to reverse direction
@@ -22,5 +22,5 @@ function quat = vectortoq(original, transformed, roll)
         endif
     endif
 
-    quat = qmult(rollq, rot);
+    quat = qmult(rot, rollq);
 endfunction
