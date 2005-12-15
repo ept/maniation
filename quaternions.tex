@@ -1,0 +1,91 @@
+Besides its position, every rigid body in 3D space may have an orientation. This introduces an
+additional three degrees of freedom for each stationary body (six degrees of freedom if
+angular velocity is included). Unfortunately, there is no similarly neat representation of
+orientation as cartesian coordinates are for the position. The most common schemes describe
+orientation in terms of a rotation operation which transforms a vector in the body's local
+coordinates into world coordinates (or vice-versa). There is, however, no obvious best
+answer to the question how to represent this rotation: the three most common representations,
+described here, all have their advantages and disadvantages.
+
+{\em Euler angles} are probably the most intuitive representation of a 3D rotation, describing
+it as a series of three rotations about different axes. These axes are fixed by convention, so it
+suffices to specify the three angles of rotation. However, this scheme has a number of drawbacks
+which are extensively discussed in the literature: amongst other things, it is possible that
+rotation about an axis freezes during an animation (``Gimbal lock'') unless all special cases
+are handled very carefully.
+
+{\em Rotation matrices} are commonly used because they are well understood, easily generalize
+to other dimensions and allow efficient combination with other linear transformations (scaling
+and shearing~-- translation may also be included if homogeneous coordinates are employed).
+Unfortunately, many operations required for animation of rotations are awkward to implement
+since this representation uses nine numbers (a $3\times3$ matrix) to represent three degrees
+of freedom, thus introducing six additional side-conditions.
+
+{\em Quaternions} are a popular alternative to the two previous schemes, and they are also
+used extensively in this project. Mathematically, they can be regarded as numbers with one real
+part and three distinct imaginary parts:
+\begin{equation}
+\mathbf{q} = w + x\mathbf{i} + y\mathbf{j} + z\mathbf{k}
+\end{equation}
+where $w$, $x$, $y$ and $z$ are real and $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ satisfy
+\begin{equation}
+\mathbf{i}^2 = \mathbf{j}^2 = \mathbf{k}^2 = \mathbf{i}\mathbf{j}\mathbf{k} = -1.
+\end{equation}
+From this follows that
+$\mathbf{i}\mathbf{j} = -\mathbf{j}\mathbf{i} = \mathbf{k}$ and
+$\mathbf{j}\mathbf{k} = -\mathbf{k}\mathbf{j} = \mathbf{i}$ and
+$\mathbf{k}\mathbf{i} = -\mathbf{i}\mathbf{k} = \mathbf{j}$.
+Note that multiplication is not commutative.
+
+We will also need the conjugate and the inverse of a quaternion. In analogy to
+complex numbers, these are given respectively by
+\begin{eqnarray}
+\mathbf{q}^\ast & = & w - x\mathbf{i} - y\mathbf{j} - z\mathbf{k}\\
+\mathbf{q}^{-1} & = & \frac{\mathbf{q}^\ast}{||\mathbf{q}||}
+\end{eqnarray}
+
+The complex constants $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ are required for the algebra
+only, therefore we can represent a quaternion as four numbers $(w,x,y,z)$. It turns out that
+quaternions neatly represent a rotation in 3D space (similarly to the way that ordinary complex
+numbers represent a rotation in the 2D Argand diagram) if we require their magnitude to be
+equal to one:
+\begin{equation}
+||\mathbf{q}||^2 = w^2 + x^2 + y^2 + z^2 = 1.
+\end{equation}
+This condition reduces the number of degrees of freedom to three, as required.
+
+Every unit quaternion now represents a rotation of angle $\theta$ about an arbitrary axis.
+If the axis passes through the origin and has a direction given by the vector
+$\mathbf{a} = (a_1, a_2, a_3)$ with $||\mathbf{a}|| = 1$, the quaternion describing this rotation is
+\begin{equation}
+\mathbf{q} = \cos\left(\frac{\theta}{2}\right) + (a_1\mathbf{i} + a_2\mathbf{j} +
+    a_3\mathbf{k}) \sin\left(\frac{\theta}{2}\right).
+\end{equation}
+It can easily be verified that this quaternion always has unit magnitude.
+We shall assume throughout this project that the rotation thus described is clockwise (as seen
+when looking in the direction of the vector $\mathbf{a}$), i.e. that it is given by the
+``right-hand rule''.
+
+To rotate a vector $\mathbf{v} = (v_1, v_2, v_3)$ by a quaternion $\mathbf{q}$, we first
+convert it into a quaternion $\tilde{\mathbf{v}} = v_1\mathbf{i} + v_2\mathbf{j} + v_3\mathbf{k}$
+and then calculate the quaternion product
+\begin{equation}
+\label{quatTransform}
+\tilde{\mathbf{v}}^\prime = \mathbf{q}\tilde{\mathbf{v}}\mathbf{q}^{-1}
+\end{equation}
+
+By multiplying out this formula, we find that the real part of the result is always zero, and
+that the rotated vector $\mathbf{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime)$ is contained
+in the three complex parts of the quaternion product $\tilde{\mathbf{v}}^\prime$.
+
+Some authors, notably Shoemake, choose to define the product in equation~\ref{quatTransform} in
+the reverse order. The choice is a matter of convention, since it merely changes the effect
+of this operation from being a clockwise to a counter-clockwise rotation. We chose the clockwise
+convention because it is consistent with the usual definition of the angular velocity vector
+in physics.
+
+Observe that under this convention, if $\mathbf{q}$ is itself a product of quaternions, the
+result of this transformation is the same as if the rotations corresponding to the factors
+of $\mathbf{q}$ had been applied starting with the rightmost factor, and continuing from
+right to left. To verify that this is the case, the identity
+$(q_1 q_2)^{-1} = q_2^{-1} q_1^{-1}$ is useful.
