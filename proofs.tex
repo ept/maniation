@@ -1,0 +1,112 @@
+\chapter{Proofs and derivations\label{proofs}}
+\section{Quaternion integration\label{quatProofs}}
+\subsection{Instantaneous rate of change\label{quatRateOfChangeOrthogonal}}
+The instantaneous rate of change is given to be
+\begin{eqnarray*}
+\dot{\mathbf{q}} & = & \frac{1}{2}\mathbf{\omega q} =
+    \frac{1}{2}(\omega_1\mathbf{i} + \omega_2\mathbf{j} + \omega_3\mathbf{k})
+    (q_w + q_x\mathbf{i} + q_y\mathbf{j} + q_z\mathbf{k}) \\
+& = & \frac{1}{2} ( - \omega_1 q_x - \omega_2 q_y - \omega_3 q_z ) +
+    \frac{\mathbf{i}}{2} ( \omega_1 q_w + \omega_2 q_z - \omega_3 q_y ) + \\
+&&  \frac{\mathbf{j}}{2} (-\omega_1 q_z + \omega_2 q_w + \omega_3 q_x ) +
+    \frac{\mathbf{k}}{2} ( \omega_1 q_y - \omega_2 q_x + \omega_3 q_w )
+\end{eqnarray*}
+
+We now treat $\mathbf{q}$ and $\dot{\mathbf{q}}$ as 4D vectors and calculate
+their dot product:
+\begin{eqnarray*}
+\mathbf{q}\cdot\dot{\mathbf{q}} & = & \frac{1}{2} (
+    - q_w \omega_1 q_x - q_w \omega_2 q_y - q_w \omega_3 q_z
+    + q_x \omega_1 q_w + q_x \omega_2 q_z - q_x \omega_3 q_y \\
+&&  - q_y \omega_1 q_z + q_y \omega_2 q_w + q_y \omega_3 q_x
+    + q_z \omega_1 q_y - q_z \omega_2 q_x + q_z \omega_3 q_w ) \\
+& = & 0.
+\end{eqnarray*}
+The rate of change is orthogonal to $\mathbf{q}$, and therefore it is always
+a tangent to the sphere, touching it at the point corresponding to $\mathbf{q}$.
+
+\subsection{Corrected quaternion integration\label{quatIntegrationDerivation}}
+
+Assume that the body we are simulating is rotating at a constant angular velocity.
+(This assumption is later weakened by the use of a more sophisticated ODE solver,
+but for now we will stick with Euler's method.) Furthermore assume without loss of
+generality that the body is rotating clockwise about its $x$ axis, which corresponds
+to the world's $x$ axis. Then the orientation of the body (the quaternion describing
+the linear transformation to get from the body's frame of reference into the world
+frame) is given as a function of time by
+\begin{equation}
+\label{quatDerivationExact}
+\mathbf{q}(t) = \cos\left(\frac{||\mathbf{\omega}||t}{2}\right) +
+    \sin\left(\frac{||\mathbf{\omega}||t}{2}\right)\mathbf{i}
+\end{equation}
+(cf. equation~\ref{quatRotation}) and its angular velocity is
+\begin{equation}
+\mathbf{\omega} = (\omega_1, \omega_2, \omega_3) = (||\mathbf{\omega}||, 0, 0)
+\end{equation}
+for some arbitrary $||\mathbf{\omega}||$, measured in radians per unit time.
+
+Now assume w.l.o.g. that we take a time step from $t = 0$ to $t = \Delta t$.
+Then we require that the result returned by Euler's method for $\mathbf{q}(\Delta t)$
+after re-normalization be equal to its exact value in equation~\ref{quatDerivationExact}:
+\begin{equation}
+\label{quatDerivationSetup}
+\cos\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) +
+    \sin\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)\mathbf{i} =
+    \frac{\mathbf{q}(0) + \Delta t \dot{\mathbf{q}}(0)}
+        {||\mathbf{q}(0) + \Delta t \dot{\mathbf{q}}(0)||}
+\end{equation}
+
+We know from examining the 4D geometry that the value assigned to $\dot{\mathbf{q}}$
+in equation~\ref{quatRateOfChange} has the correct direction and merely needs to be
+corrected in magnitude. In other words, we are searching for a scalar function
+$f(\Delta t, ||\mathbf{\omega}||)$ which will allow $\dot{\mathbf{q}}$ to satisfy
+equation~\ref{quatDerivationSetup}:
+\begin{equation}
+\dot{\mathbf{q}}_{\Delta t}(t) = f\tilde{\mathbf{\omega}}(t)\mathbf{q}(t)
+\end{equation}
+
+Observe that under the above assumptions $\mathbf{q}(0) = 1$, and thus
+$\dot{\mathbf{q}}_{\Delta t}(0) = f ||\mathbf{\omega}|| \mathbf{i}$. Substituting this
+into equation~\ref{quatDerivationSetup} and considering only the real part:
+\begin{eqnarray*}
+&& \cos\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) =
+    \left[1 + \left( f ||\mathbf{\omega}||\Delta t \right)^2 \right]^{-\frac{1}{2}} \\
+&\Leftrightarrow&
+    \left( f ||\mathbf{\omega}||\Delta t \right)^2 =
+    \frac{1}{\cos^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)} - 1 \\
+&\Leftrightarrow&
+    f(\Delta t, ||\mathbf{\omega}||) =
+    \frac{1}{||\mathbf{\omega}||\Delta t} \sqrt{\frac{
+        1 - \cos^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)}{
+        \cos^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)}} =
+    \frac{1}{||\mathbf{\omega}||\Delta t}
+        \tan\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+\end{eqnarray*}
+
+To check, we substitute this result into the $\mathbf{i}$-imaginary part of
+equation~\ref{quatDerivationSetup}:
+\begin{eqnarray*}
+\sin\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) & = &
+    \tan\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+    \left[ 1 + \tan^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+    \right]^{-\frac{1}{2}} \\
+&=& \tan\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+    \left[ \frac{\cos^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) +
+    \sin^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) }{
+    \cos^2\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) }
+    \right]^{-\frac{1}{2}} \\
+&=& \tan\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+    \cos\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) \\
+&=& \sin\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+\end{eqnarray*}
+
+Thus we establish the validity of this expression for $f$ and obtain
+equation~\ref{quatRateOfChangeCorrected}. Finally observe that by using L'Hospital's rule,
+we can find value of $f$ for an infinitessimally small time step:
+$$
+\lim_{\Delta t \to 0} f = \lim_{\Delta t \to 0} \frac{ \frac{||\mathbf{\omega}||}{2}
+    \cos^{-2}\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right) }{ ||\mathbf{\omega}|| } =
+    \frac{1}{2}
+$$
+i.e. we obtain the original equation~\ref{quatRateOfChange} for the
+instantaneous rate of change.

@@ -1,3 +1,5 @@
+\section{Quaternions}
+\subsection{The need for Quaternions}
 Besides its position, every rigid body in 3D space may have an orientation. This introduces an
 additional three degrees of freedom for each stationary body (six degrees of freedom if
 angular velocity is included). Unfortunately, there is no similarly neat representation of
@@ -22,8 +24,11 @@ since this representation uses nine numbers (a $3\times3$ matrix) to represent t
 of freedom, thus introducing six additional side-conditions.
 
 {\em Quaternions} are a popular alternative to the two previous schemes, and they are also
-used extensively in this project. Mathematically, they can be regarded as numbers with one real
-part and three distinct imaginary parts:
+used extensively in this project.
+
+\subsection{Definition and properties}
+Mathematically, quaternions can be regarded as numbers with one real part and three
+distinct imaginary parts:
 \begin{equation}
 \mathbf{q} = w + x\mathbf{i} + y\mathbf{j} + z\mathbf{k}
 \end{equation}
@@ -41,8 +46,26 @@ We will also need the conjugate and the inverse of a quaternion. In analogy to
 complex numbers, these are given respectively by
 \begin{eqnarray}
 \mathbf{q}^\ast & = & w - x\mathbf{i} - y\mathbf{j} - z\mathbf{k}\\
-\mathbf{q}^{-1} & = & \frac{\mathbf{q}^\ast}{||\mathbf{q}||}
+\mathbf{q}^{-1} & = & \frac{\mathbf{q}^\ast}{||\mathbf{q}||^2}
 \end{eqnarray}
+
+On the other hand, as there is a similarity to 4D vectors, we also define a
+quaternion dot product as
+\begin{equation}
+\mathbf{q}_1\cdot\mathbf{q}_2 =
+    (w_1 + x_1\mathbf{i} + y_1\mathbf{j} + z_1\mathbf{k})\cdot
+    (w_2 + x_2\mathbf{i} + y_2\mathbf{j} + z_2\mathbf{k}) =
+    w_1 w_2 + x_1 x_2 + y_1 y_2 + z_1 z_2
+\end{equation}
+The dot product is commutative, contrary to the `normal' quaternion product.
+
+Sometimes we will need to relate a 3D vector to a quaternion with zero real part.
+For a given vector $\mathbf{u} = (u_1, u_2, u_3)$ we define the corresponding
+quaternion to be
+\begin{equation}
+\label{vectorToQuat}
+\tilde{\mathbf{u}} = u_1\mathbf{i} + u_2\mathbf{j} + u_3\mathbf{k}.
+\end{equation}
 
 The complex constants $\mathbf{i}$, $\mathbf{j}$ and $\mathbf{k}$ are required for the algebra
 only, therefore we can represent a quaternion as four numbers $(w,x,y,z)$. It turns out that
@@ -50,14 +73,16 @@ quaternions neatly represent a rotation in 3D space (similarly to the way that o
 numbers represent a rotation in the 2D Argand diagram) if we require their magnitude to be
 equal to one:
 \begin{equation}
+\label{unitQuat}
 ||\mathbf{q}||^2 = w^2 + x^2 + y^2 + z^2 = 1.
 \end{equation}
 This condition reduces the number of degrees of freedom to three, as required.
 
-Every unit quaternion now represents a rotation of angle $\theta$ about an arbitrary axis.
+Every unit quaternion represents a rotation of angle $\theta$ about an arbitrary axis.
 If the axis passes through the origin and has a direction given by the vector
 $\mathbf{a} = (a_1, a_2, a_3)$ with $||\mathbf{a}|| = 1$, the quaternion describing this rotation is
 \begin{equation}
+\label{quatRotation}
 \mathbf{q} = \cos\left(\frac{\theta}{2}\right) + (a_1\mathbf{i} + a_2\mathbf{j} +
     a_3\mathbf{k}) \sin\left(\frac{\theta}{2}\right).
 \end{equation}
@@ -67,16 +92,17 @@ when looking in the direction of the vector $\mathbf{a}$), i.e. that it is given
 ``right-hand rule''.
 
 To rotate a vector $\mathbf{v} = (v_1, v_2, v_3)$ by a quaternion $\mathbf{q}$, we first
-convert it into a quaternion $\tilde{\mathbf{v}} = v_1\mathbf{i} + v_2\mathbf{j} + v_3\mathbf{k}$
-and then calculate the quaternion product
+convert it into its corresponding quaternion $\tilde{\mathbf{v}}$ as defined in
+equation~\ref{vectorToQuat} and then calculate the quaternion product
 \begin{equation}
 \label{quatTransform}
 \tilde{\mathbf{v}}^\prime = \mathbf{q}\tilde{\mathbf{v}}\mathbf{q}^{-1}
 \end{equation}
 
-By multiplying out this formula, we find that the real part of the result is always zero, and
-that the rotated vector $\mathbf{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime)$ is contained
-in the three complex parts of the quaternion product $\tilde{\mathbf{v}}^\prime$.
+If we expand this formula, we find that the real part of the result is always zero, and
+that the rotated vector $\mathbf{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime)$ is
+the vector corresponding to $\tilde{\mathbf{v}}^\prime$ (i.e. $\mathbf{v}^\prime$ is
+contained in the three complex parts of the quaternion product).
 
 Some authors, notably Shoemake, choose to define the product in equation~\ref{quatTransform} in
 the reverse order. The choice is a matter of convention, since it merely changes the effect
@@ -89,3 +115,68 @@ result of this transformation is the same as if the rotations corresponding to t
 of $\mathbf{q}$ had been applied starting with the rightmost factor, and continuing from
 right to left. To verify that this is the case, the identity
 $(q_1 q_2)^{-1} = q_2^{-1} q_1^{-1}$ is useful.
+
+\subsection{Quaternion integration}
+In a dynamics simulation, the angular momentum of a body is determined by solving the
+differential equation of motion, given the torques acting on the body. Similarly, the
+orientation of the body should be found by numerical integration, given the angular
+velocity. Angular velocity or momentum can be represented easily using a 3D vector whose
+direction is the axis of rotation and whose magnitude is the scalar quantity (e.g. in
+radians per second). As we have seen, such a concise representation is not possible for
+orientation, which leads to some complications.
+
+At this point it might be helpful to consider a different view on quaternions. The set of
+unit quaternions, defined by equation~\ref{unitQuat}, can be understood as the surface of
+a unit sphere in a four-dimensional vector space. Each point on this hypersphere corresponds
+to a particular quaternion. It also turns out that each pair of opposite points on this
+sphere represent exactly the same rotation; thus all possible rotations are contained in
+one hemisphere, no matter where the sphere is cut in half.
+
+The instantaneous rate of change of a quaternion $\mathbf{q}$ over time is usually given
+in the literature as
+\begin{equation}
+\label{quatRateOfChange}
+\dot{\mathbf{q}}(t) = \frac{1}{2}\tilde{\mathbf{\omega}}(t)\mathbf{q}(t)
+\end{equation}
+where $\tilde{\mathbf{\omega}}$ is the quaternion corresponding to the angular velocity
+vector $\mathbf{\omega}$. The space of all possible values of $\dot{\mathbf{q}}$ is
+conceptually a three-dimensional subspace tangential to the sphere at the point $\mathbf{q}$
+in 4D space (proof in appendix~\ref{quatRateOfChangeOrthogonal}). Therefore adding an
+infinitessimal amount of $\dot{\mathbf{q}}$ to $\mathbf{q}$ will preserve the property of
+unit magnitude; this is exactly what we should expect of the derivative.
+
+Unfortunately this formula fails in practice since simulations use finite time steps. This
+shall be demonstrated using Euler's method; it should, however, be pointed out that more
+sophisticated methods like RK4 are equally affected. Consider the value of $\mathbf{q}$ at
+the next time step, $\mathbf{q}(t + \Delta t) = \mathbf{q}(t) + \Delta t \dot{\mathbf{q}}(t)$.
+For any non-zero $\Delta t$ this point will always lie outside the unit sphere
+($||\mathbf{q}(t + \Delta t)|| > 1$). This is usually compensated by re-normalizing the
+quaternion after the ODE solving step. Geometrically, this re-normalization can be understood as
+drawing a line through the origin and the point $\mathbf{q}(t) + \Delta t \dot{\mathbf{q}}(t)$,
+intersecting this line with the unit sphere and replacing $\mathbf{q}(t + \Delta t)$ by this
+point of intersection.
+
+Following the tangent to the sphere is a reasonable approximation to following its curve if the
+magnitude of $\Delta t \dot{\mathbf{q}}(t)$ is small compared to the curvature of the sphere.
+For large time steps or large magnitudes of $\mathbf{\omega}$, however, this gets increasingly
+erroneous. Consider the limiting case, a body rotating infinitely fast
+($||\omega|| \rightarrow \infty$): after re-normalisation, $\mathbf{q}$ will have moved merely
+a quarter of the way around the unit sphere, while it would have been correct to perform an
+infinite number of revolutions around the quaternion sphere.
+
+We can solve this problem by introducing an additional factor into the definition of
+$\dot{\mathbf{q}}$, replacing equation~\ref{quatRateOfChange}:
+\begin{equation}
+\label{quatRateOfChangeCorrected}
+\dot{\mathbf{q}}_{\Delta t}(t) = \frac{1}{||\mathbf{\omega}||\Delta t}
+    \tan\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
+    \tilde{\mathbf{\omega}}(t)\mathbf{q}(t)
+\end{equation}
+This formula is derived in appendix~\ref{quatIntegrationDerivation}. Given the simulation time
+step as an additional parameter, it ensures that the tangent is always scaled appropriately so
+that the correct result is obtained after renormalization. This assumes a constant angular
+velocity, which is appropriate since the solver for the equations of linear motion makes an
+analoguous assumption. When implementing this formula, care must be taken around the
+discontinuities of the $\tan$ function, where numerical instability may occur. These
+discontinuities are reached whenever a body performs an odd multiple of half
+revolutions during a single time step.
