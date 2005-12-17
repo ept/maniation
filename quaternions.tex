@@ -136,10 +136,10 @@ The instantaneous rate of change of a quaternion $\mathbf{q}$ over time is usual
 in the literature as
 \begin{equation}
 \label{quatRateOfChange}
-\dot{\mathbf{q}}(t) = \frac{1}{2}\tilde{\mathbf{\omega}}(t)\mathbf{q}(t)
+\dot{\mathbf{q}}(t) = \frac{1}{2}\tilde{\bm{\omega}}(t)\mathbf{q}(t)
 \end{equation}
-where $\tilde{\mathbf{\omega}}$ is the quaternion corresponding to the angular velocity
-vector $\mathbf{\omega}$. The space of all possible values of $\dot{\mathbf{q}}$ is
+where $\tilde{\bm{\omega}}$ is the quaternion corresponding to the angular velocity
+vector $\bm{\omega}$. The space of all possible values of $\dot{\mathbf{q}}$ is
 conceptually a three-dimensional subspace tangential to the sphere at the point $\mathbf{q}$
 in 4D space (proof in appendix~\ref{quatRateOfChangeOrthogonal}). Therefore adding an
 infinitessimal amount of $\dot{\mathbf{q}}$ to $\mathbf{q}$ will preserve the property of
@@ -158,9 +158,9 @@ point of intersection.
 
 Following the tangent to the sphere is a reasonable approximation to following its curve if the
 magnitude of $\Delta t \dot{\mathbf{q}}(t)$ is small compared to the curvature of the sphere.
-For large time steps or large magnitudes of $\mathbf{\omega}$, however, this gets increasingly
+For large time steps or large magnitudes of $\bm{\omega}$, however, this gets increasingly
 erroneous. Consider the limiting case, a body rotating infinitely fast
-($||\omega|| \rightarrow \infty$): after re-normalisation, $\mathbf{q}$ will have moved merely
+($||\bm{\omega}|| \rightarrow \infty$): after re-normalisation, $\mathbf{q}$ will have moved merely
 a quarter of the way around the unit sphere, while it would have been correct to perform an
 infinite number of revolutions around the quaternion sphere.
 
@@ -168,9 +168,9 @@ We can solve this problem by introducing an additional factor into the definitio
 $\dot{\mathbf{q}}$, replacing equation~\ref{quatRateOfChange}:
 \begin{equation}
 \label{quatRateOfChangeCorrected}
-\dot{\mathbf{q}}_{\Delta t}(t) = \frac{1}{||\mathbf{\omega}||\Delta t}
-    \tan\left(\frac{||\mathbf{\omega}||\Delta t}{2}\right)
-    \tilde{\mathbf{\omega}}(t)\mathbf{q}(t)
+\dot{\mathbf{q}}_{\Delta t}(t) = \frac{1}{||\bm{\omega}||\Delta t}
+    \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
+    \tilde{\bm{\omega}}(t)\mathbf{q}(t)
 \end{equation}
 This formula is derived in appendix~\ref{quatIntegrationDerivation}. Given the simulation time
 step as an additional parameter, it ensures that the tangent is always scaled appropriately so
