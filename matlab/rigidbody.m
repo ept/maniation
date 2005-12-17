@@ -29,9 +29,12 @@ function newstatus = rigidbody(status, time, mass, invinert, forces)
     angmom1 = [0;0;0];
 
     for i=1:columns(forces)
-        force = qtransform(qinv(orient0), forces(1:3, i));
-        pos = qtransform(qinv(orient0), forces(4:6, i) - pos0);
-        angmom1 = angmom1 + qtransform(orient0, cross(pos, force));
+        %force = qtransform(qinv(orient0), forces(1:3, i));
+        %pos = qtransform(qinv(orient0), forces(4:6, i) - pos0);
+        %angmom1 = angmom1 + qtransform(orient0, cross(pos, force));
+        force = forces(1:3, i);
+        pos = forces(4:6, i) - pos0;
+        angmom1 = angmom1 + cross(pos, force);
     endfor
     
     newstatus = zeros(13,1);
