@@ -3,7 +3,7 @@
 \subsection{Instantaneous rate of change\label{quatRateOfChangeOrthogonal}}
 The instantaneous rate of change is given to be
 \begin{eqnarray*}
-\dot{\mathbf{q}} & = & \frac{1}{2}\bm{\omega q} =
+\dot{\mathbf{q}} & = & \frac{1}{2}\bm{\omega}\mathbf{q} =
     \frac{1}{2}(\omega_1\mathbf{i} + \omega_2\mathbf{j} + \omega_3\mathbf{k})
     (q_w + q_x\mathbf{i} + q_y\mathbf{j} + q_z\mathbf{k}) \\
 & = & \frac{1}{2} ( - \omega_1 q_x - \omega_2 q_y - \omega_3 q_z ) +
@@ -24,6 +24,15 @@ their dot product:
 \end{eqnarray*}
 The rate of change is orthogonal to $\mathbf{q}$, and therefore it is always
 a tangent to the sphere, touching it at the point corresponding to $\mathbf{q}$.
+
+We can determine the magnitude $||\dot{\mathbf{q}}||$ from the sum of squares of the
+components given above and find it to be
+$||\dot{\mathbf{q}}|| = \frac{1}{2}||\bm{\omega}||\,||\mathbf{q}||$. Since we always
+require $\mathbf{q}$ to be a unit quaternion, we can reduce this to
+\begin{equation}
+\label{quatRateOfChangeMagnitude}
+||\dot{\mathbf{q}}|| = \frac{1}{2}||\bm{\omega}||.
+\end{equation}
 
 \subsection{Corrected quaternion integration\label{quatIntegrationDerivation}}
 
@@ -100,9 +109,8 @@ equation~\ref{quatDerivationSetup}:
 &=& \sin\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
 \end{eqnarray*}
 
-Thus we establish the validity of this expression for $f$ and obtain
-equation~\ref{quatRateOfChangeCorrected}. Finally observe that by using L'Hospital's rule,
-we can find value of $f$ for an infinitessimally small time step:
+Thus we establish the validity of this expression for $f$. Observe that by using 
+L'Hospital's rule, we can find value of $f$ for an infinitessimally small time step:
 $$
 \lim_{\Delta t \to 0} f = \lim_{\Delta t \to 0} \frac{ \frac{||\bm{\omega}||}{2}
     \cos^{-2}\left(\frac{||\bm{\omega}||\Delta t}{2}\right) }{ ||\bm{\omega}|| } =
@@ -110,3 +118,41 @@ $$
 $$
 i.e. we obtain the original equation~\ref{quatRateOfChange} for the
 instantaneous rate of change.
+
+Now let $\Delta \mathbf{q} = \Delta t \dot{\mathbf{q}} =
+    \frac{\Delta t}{2} \tilde{\bm{\omega}} \mathbf{q}$.
+From equation~\ref{quatRateOfChangeMagnitude} we find that
+$||\Delta\mathbf{q}|| = \frac{||\bm{\omega}||\Delta t}{2}$.
+Hence we can simplify the expression for the quaternion correcting factor by expressing it
+in terms of $\Delta \mathbf{q}$ as follows:
+$$
+\Delta t f \tilde{\bm{\omega}}\mathbf{q} = \frac{\Delta t}{||\bm{\omega}||\Delta t}
+    \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right) \tilde{\bm{\omega}} \mathbf{q} =
+    \tan\left(||\Delta\mathbf{q}||\right) \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}
+$$
+
+This expression now has a clear geometric interpretation with respect to the 4D geometry:
+$||\Delta\mathbf{q}||$ is measured in radians, and it corresponds to the {\em correct}
+angle between the old and the new vector $\mathbf{q}$. Since $\mathbf{q}$ and
+$\dot{\mathbf{q}}$ are orthogonal, we have a right-angled triangle between the origin,
+the old and the new points $\mathbf{q}$, and hence we can use the $\tan$ function to
+evaluate the required length of the side in direction $\Delta\mathbf{q}$.
+
+Finally we can combine this correction and the subsequent quaternion normalisation into
+a single function:
+\begin{eqnarray*}
+\mathbf{q}(t+\Delta t) = \mathrm{Quergs}(\mathbf{q}(t), \Delta\mathbf{q}) &=&
+    \frac{\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
+        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}}{
+    ||\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
+        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}||} \\
+&=& \frac{\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
+        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}}{
+    \sqrt{1 + \tan^2\left(||\Delta\mathbf{q}||\right)}} \\
+&=& \frac{\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
+        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}}{
+    \cos\left(||\Delta\mathbf{q}||\right)}
+\end{eqnarray*}
+The last expression is simplest (and again allows geometric interpretation), but probably
+the penultimate expression is more useful for numerical evaluation, since it involves only
+one trigonometric function.
