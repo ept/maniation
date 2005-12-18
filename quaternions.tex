@@ -1,7 +1,7 @@
 \section{Quaternions}
 \subsection{The need for Quaternions}
 Besides its position, every rigid body in 3D space may have an orientation. This introduces an
-additional three degrees of freedom for each stationary body (six degrees of freedom if
+additional three degrees of freedom for each stationary body (six if
 angular velocity is included). Unfortunately, there is no similarly neat representation of
 orientation as cartesian coordinates are for the position. The most common schemes describe
 orientation in terms of a rotation operation which transforms a vector in the body's local
@@ -12,19 +12,19 @@ described here, all have their advantages and disadvantages.
 {\em Euler angles} are probably the most intuitive representation of a 3D rotation, describing
 it as a series of three rotations about different axes. These axes are fixed by convention, so it
 suffices to specify the three angles of rotation. However, this scheme has a number of drawbacks
-which are extensively discussed in the literature: amongst other things, it is possible that
-rotation about an axis freezes during an animation (``Gimbal lock'') unless all special cases
-are handled very carefully.
+which are extensively discussed in the literature~\cite{Saunders:PhD,Shoemake:85}: amongst other
+things, it is possible that rotation about an axis freezes during an animation (``Gimbal lock'')
+unless all special cases are handled very carefully.
 
-{\em Rotation matrices} are commonly used because they are well understood, easily generalize
+{\em Rotation matrices} are commonly used because they are well understood, easily generalise
 to other dimensions and allow efficient combination with other linear transformations (scaling
 and shearing~-- translation may also be included if homogeneous coordinates are employed).
 Unfortunately, many operations required for animation of rotations are awkward to implement
 since this representation uses nine numbers (a $3\times3$ matrix) to represent three degrees
-of freedom, thus introducing six additional side-conditions.
+of freedom, thus introducing six additional side-conditions which must be maintained.
 
-{\em Quaternions} are a popular alternative to the two previous schemes, and they are also
-used extensively in this project.
+{\em Quaternions}~\cite{Shoemake:85,Eberly:01} are a popular alternative to the two
+previous schemes, and they are also used extensively in this project.
 
 \subsection{Definition and properties}
 Mathematically, quaternions can be regarded as numbers with one real part and three
@@ -88,8 +88,8 @@ $\mathbf{a} = (a_1, a_2, a_3)$ with $||\mathbf{a}|| = 1$, the quaternion describ
 \end{equation}
 It can easily be verified that this quaternion always has unit magnitude.
 We shall assume throughout this project that the rotation thus described is clockwise (as seen
-when looking in the direction of the vector $\mathbf{a}$), i.e. that it is given by the
-``right-hand rule''.
+when looking in the direction of the vector $\mathbf{a}$) in a right-hand coordinate system,
+i.e. that it is given by the ``right-hand rule''.
 
 To rotate a vector $\mathbf{v} = (v_1, v_2, v_3)$ by a quaternion $\mathbf{q}$, we first
 convert it into its corresponding quaternion $\tilde{\mathbf{v}}$ as defined in
@@ -104,7 +104,8 @@ that the rotated vector $\mathbf{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime
 the vector corresponding to $\tilde{\mathbf{v}}^\prime$ (i.e. $\mathbf{v}^\prime$ is
 contained in the three complex parts of the quaternion product).
 
-Some authors, notably Shoemake, choose to define the product in equation~\ref{quatTransform} in
+Some authors, notably Shoemake~\cite{Shoemake:85}, choose to define the product in
+equation~\ref{quatTransform} in
 the reverse order. The choice is a matter of convention, since it merely changes the effect
 of this operation from being a clockwise to a counter-clockwise rotation. We chose the clockwise
 convention because it is consistent with the usual definition of the angular velocity vector
@@ -117,20 +118,21 @@ right to left. To verify that this is the case, the identity
 $(q_1 q_2)^{-1} = q_2^{-1} q_1^{-1}$ is useful.
 
 \subsection{Quaternion integration}
+
 In a dynamics simulation, the angular momentum of a body is determined by solving the
 differential equation of motion, given the torques acting on the body. Similarly, the
 orientation of the body should be found by numerical integration, given the angular
-velocity. Angular velocity or momentum can be represented easily using a 3D vector whose
+velocity. Angular velocity can be represented easily using a 3D vector whose
 direction is the axis of rotation and whose magnitude is the scalar quantity (e.g. in
 radians per second). As we have seen, such a concise representation is not possible for
 orientation, which leads to some complications.
 
-At this point it might be helpful to consider a different view on quaternions. The set of
+At this point it might be helpful to consider a geometric view on quaternions. The set of
 unit quaternions, defined by equation~\ref{unitQuat}, can be understood as the surface of
-a unit sphere in a four-dimensional vector space. Each point on this hypersphere corresponds
-to a particular quaternion. It also turns out that each pair of opposite points on this
-sphere represent exactly the same rotation; thus all possible rotations are contained in
-one hemisphere, no matter where the sphere is cut in half.
+a unit sphere in a four-dimensional vector space (also called a ``glome''\cite{MathWorld:4D}).
+Each point on this hypersphere corresponds to a particular rotation. It also turns out that each pair of
+opposite points on this sphere represent exactly the same rotation; thus all possible
+rotations are contained in one hemisphere, no matter where the sphere is cut in half.
 
 The instantaneous rate of change of a quaternion $\mathbf{q}$ over time is usually given
 in the literature as
@@ -140,8 +142,8 @@ in the literature as
 \end{equation}
 where $\tilde{\bm{\omega}}$ is the quaternion corresponding to the angular velocity
 vector $\bm{\omega}$. The space of all possible values of $\dot{\mathbf{q}}$ is
-conceptually a three-dimensional subspace tangential to the sphere at the point $\mathbf{q}$
-in 4D space (proof in appendix~\ref{quatRateOfChangeOrthogonal}). Therefore adding an
+conceptually a hyperplane (a three-dimensional subspace) tangential to the sphere at the point
+$\mathbf{q}$ in 4D space (proof in appendix~\ref{quatRateOfChangeOrthogonal}). Therefore adding an
 infinitessimal amount of $\dot{\mathbf{q}}$ to $\mathbf{q}$ will preserve the property of
 unit magnitude; this is exactly what we should expect of the derivative.
 
@@ -149,10 +151,11 @@ Unfortunately this formula fails in practice since simulations use finite time s
 shall be demonstrated using Euler's method; it should, however, be pointed out that more
 sophisticated methods like RK4 are equally affected. Consider the value of $\mathbf{q}$ at
 the next time step, $\mathbf{q}(t + \Delta t) = \mathbf{q}(t) + \Delta t \dot{\mathbf{q}}(t)$.
-For any non-zero $\Delta t$ this point will always lie outside the unit sphere
-($||\mathbf{q}(t + \Delta t)|| > 1$). This is usually compensated by re-normalizing the
-quaternion after the ODE solving step. Geometrically, this re-normalization can be understood as
-drawing a line through the origin and the point $\mathbf{q}(t) + \Delta t \dot{\mathbf{q}}(t)$,
+For any non-zero $\Delta t$ and $\dot{\mathbf{q}}$ this point will always lie outside the
+unit sphere due to the orthogonality of $\mathbf{q}$ and $\dot{\mathbf{q}}$.
+This is usually compensated by re-normalizing the quaternion after the ODE solving step.
+Geometrically, this re-normalization can be understood as drawing a straight line through
+the origin and the point $\mathbf{q}(t) + \Delta t \dot{\mathbf{q}}(t)$,
 intersecting this line with the unit sphere and replacing $\mathbf{q}(t + \Delta t)$ by this
 point of intersection.
 
@@ -164,19 +167,63 @@ erroneous. Consider the limiting case, a body rotating infinitely fast
 a quarter of the way around the unit sphere, while it would have been correct to perform an
 infinite number of revolutions around the quaternion sphere.
 
-We can solve this problem by introducing an additional factor into the definition of
-$\dot{\mathbf{q}}$, replacing equation~\ref{quatRateOfChange}:
+We can solve this problem by scaling $\Delta\mathbf{q}(t) = \Delta t \dot{\mathbf{q}}(t)$
+depending on its magnitude, so that it maps to the correct point on the sphere after
+re-normalisation. We can combine this scaling and re-normalisation into one convenient
+function to perform a {\em Qu}at{\em er}nion inte{\em g}ration {\em s}tep, or `Quergs'
+in short\footnote{This is of course in the spirit of Shoemake~\cite{Shoemake:85}, whose
+``Slerp'' function is an `acronym' of {\em S}pherical {\em l}inear int{\em erp}olation.}:
 \begin{equation}
-\label{quatRateOfChangeCorrected}
-\dot{\mathbf{q}}_{\Delta t}(t) = \frac{1}{||\bm{\omega}||\Delta t}
-    \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
-    \tilde{\bm{\omega}}(t)\mathbf{q}(t)
+\label{quergs}
+\mathrm{Quergs}(\mathbf{q}, \Delta\mathbf{q}) =
+    \frac{\mathbf{q} + \tan\left(||\Delta\mathbf{q}||\right)
+        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}}{
+    \sqrt{||\mathbf{q}||^2 + \tan^2\left(||\Delta\mathbf{q}||\right)}}
 \end{equation}
-This formula is derived in appendix~\ref{quatIntegrationDerivation}. Given the simulation time
-step as an additional parameter, it ensures that the tangent is always scaled appropriately so
-that the correct result is obtained after renormalization. This assumes a constant angular
-velocity, which is appropriate since the solver for the equations of linear motion makes an
-analoguous assumption. When implementing this formula, care must be taken around the
+
+This formula is derived in appendix~\ref{quatIntegrationDerivation}.
+When implementing this formula, care must be taken around the
 discontinuities of the $\tan$ function, where numerical instability may occur. These
 discontinuities are reached whenever a body performs an odd multiple of half
 revolutions during a single time step.
+
+Quergs implements one step of Euler's method for solving an ODE over a quaternion.
+Where for Euler's method over an euclidian vector we would write
+$\mathbf{a}(t + \Delta t) = \mathbf{a}(t) + \Delta t\,\dot{\mathbf{a}}(t,\;\mathbf{a}(t))$,
+for quaternions we simply use
+$\mathbf{q}(t + \Delta t) = \mathrm{Quergs}(\mathbf{q}(t),\; \Delta t\,\dot{\mathbf{q}}(t)) =
+    \mathrm{Quergs}(\mathbf{q}(t),\; \frac{\Delta t}{2}\,\tilde{\bm{\omega}}(t)\mathbf{q}(t))$.
+
+We can apply Quergs to better ODE solvers by following the same pattern: wherever the solver
+computes the sum of a quantity and a delta of that quantity (a delta being a derivative
+scaled with the a time step size and other factors), we substitute Quergs in place of that
+addition. Assume we have a function $\dot{\mathbf{q}}(t,\; \mathbf{q}(t))$ which computes the
+instantaneous rate of change at time $t$, given the state $\mathbf{q}(t)$. Then we can define
+the formulae for the fourth-order Runge-Kutta solver (RK4, based on the definition
+in~\cite{NRinC}) over quaternions as follows:
+\begin{eqnarray*}
+\Delta\mathbf{q}_1 & = & \Delta t\;\dot{\mathbf{q}}\left(t,\;\mathbf{q}(t)\right) \\
+\Delta\mathbf{q}_2 & = & \Delta t\;\dot{\mathbf{q}}\left(t + \frac{\Delta t}{2},\;
+    \mathrm{Quergs}\left(\mathbf{q}(t),\; \frac{1}{2}\Delta\mathbf{q}_1\right)\right) \\
+\Delta\mathbf{q}_3 & = & \Delta t\;\dot{\mathbf{q}}\left(t + \frac{\Delta t}{2},\;
+    \mathrm{Quergs}\left(\mathbf{q}(t),\; \frac{1}{2}\Delta\mathbf{q}_2\right)\right) \\
+\Delta\mathbf{q}_4 & = & \Delta t\;\dot{\mathbf{q}}\left(t + \Delta t,\;
+    \mathrm{Quergs}\left(\mathbf{q}(t),\; \Delta\mathbf{q}_3\right)\right) \\
+\mathbf{q}(t + \Delta t) & = & \mathrm{Quergs}\left(\mathbf{q}(t),\;
+    \frac{1}{6}\Delta\mathbf{q}_1 + \frac{1}{3}\Delta\mathbf{q}_2 +
+    \frac{1}{3}\Delta\mathbf{q}_3 + \frac{1}{6}\Delta\mathbf{q}_4\right)
+\end{eqnarray*}
+
+Why is it correct to compute the weighted sum over $\Delta\mathbf{q}_1$ to
+$\Delta\mathbf{q}_4$ in the last formula, when we have replaced all other additions
+by calls to Quergs? Remember that finite movements on the quaternion hypersphere are
+equivalent to rotations in 4D, and that these are not commutative. Differential
+rotations are, however, commutative~-- like in 3D. (This is the reason why we can
+use component-by-component integration to determine angular momentum:
+like angular velocity, it is a differential of rotation.) Here, $\Delta\mathbf{q}_1$ to
+$\Delta\mathbf{q}_4$ are also weighted differentials, and therefore subject to
+conventional summation. Finally observe that each of $\Delta\mathbf{q}_1$ to
+$\Delta\mathbf{q}_4$ is orthogonal to $\mathbf{q}$ (appendix~\ref{quatRateOfChangeOrthogonal}),
+and that therefore the weighted sum of all of these, expressed as a vector, also
+lies in the hyperplane which is tangential to the unit sphere at the point $\mathbf{q}$,
+and is therefore a valid derivative.
