@@ -1,4 +1,274 @@
 \section{Rigid body dynamics\label{rigidBodyAppendix}}
 \subsection{Useful definitions}
+
+Given any vector $\mathbf{a} = (a_1, a_2, a_3)^T$, we can define its dual
+tensor, written as a $3\times3$ matrix, to be
+\begin{equation}
+\mathbf{a}^* = \left[\begin{array}{ccc}
+    0 & -a_3 & a_2 \\ a_3 & 0 & -a_1 \\ -a_2 & a_1 & 0
+    \end{array}\right]
+\end{equation}
+(see \cite{RHB:02,BaraffWitkin:97} and also Kalra~\cite{Kalra:95}, who defines it to be
+the transpose of the expression above).
+The dual allows us to re-write a vector cross product as a matrix multiplication:
+\begin{equation}
+\mathbf{a}\times\mathbf{b} = \mathbf{a}^*\,\mathbf{b}
+\end{equation}
+
+Let us also recall some basic identities of vector and matrix algebra~\cite{RHB:02}:
+\begin{eqnarray*}
+\mathbf{a}\times\mathbf{a} & = & \mathbf{0} \\
+\mathbf{a}\times\mathbf{b} & = & -\mathbf{b}\times\mathbf{a} \\
+\mathbf{a}\cdot\mathbf{b} & = & \mathbf{a}^T\,\mathbf{b} \\
+\mathbf{a}\cdot(\mathbf{b}\times\mathbf{c}) & = & \mathbf{b}\cdot(\mathbf{c}\times\mathbf{a}) \\
+    & = & \mathbf{c}\cdot(\mathbf{a}\times\mathbf{b}) \\
+\mathbf{a}\times(\mathbf{b}\times\mathbf{c}) & = &
+    \mathbf{b}(\mathbf{a}\cdot\mathbf{c}) - \mathbf{c}(\mathbf{a}\cdot\mathbf{b}) \\
+(\mathbf{A}\mathbf{B})^T & = & \mathbf{B}^T\mathbf{A}^T
+\end{eqnarray*}
+
+
 \subsection{Conservation of angular momentum\label{correctBrettAppendix}}
+
+This argument is modelled after~\cite{Ruf:02}. The moment of inertia $\mathbf{L}$ of a rigid
+body is defined as
+\begin{equation}
+\label{correctBrett1}
+\mathbf{L} = \mathbf{I}\bm{\omega}
+\end{equation}
+where $\mathbf{I}$ is the inertia tensor and $\bm{\omega}$ is the angular velocity vector.
+Torque is the rate of change of angular momentum over time. Using the chain rule,
+\begin{equation}
+\label{correctBrett2}
+\bm{\tau} = \dot{\mathbf{L}} = \dot{\mathbf{I}}\bm{\omega} + \mathbf{I}\dot{\bm{\omega}}
+\end{equation}
+
+We can further evaluate $\dot{\mathbf{I}}$ by writing it as a product with a rotation matrix
+$\mathbf{R}$ and its transpose:
+\begin{equation}
+\label{correctBrett3}
+\mathbf{I} = \mathbf{RI}_\mathrm{body}\mathbf{R}^T
+\end{equation}
+
+It can be shown that such a decomposition of the inertia tensor always exists, and that
+$\mathbf{I}_\mathrm{body}$ is a diagonal, time-invariant matrix containing the moments
+of inertia about the body's principal axes~\cite{Feynman:63}. Hence we obtain
+\begin{equation}
+\label{correctBrett4}
+\dot{\mathbf{I}} = \dot{\mathbf{R}}\mathbf{I}_\mathrm{body}\mathbf{R}^T +
+    \mathbf{RI}_\mathrm{body}\frac{\mathrm{d}}{\mathrm{d}t}\mathbf{R}^T
+\end{equation}
+
+Witkin~\cite{BaraffWitkin:97} derives that $\dot{\mathbf{R}} = \bm{\omega}^*\,\mathbf{R}$
+for a rotation matrix $\mathbf{R}$ and an angular velocity vector $\bm{\omega}$.
+Using this identity and taking the differential operator onto the inside of the
+transpose at the end of equation~\ref{correctBrett4},
+\begin{eqnarray}
+\dot{\mathbf{I}} &=& \bm{\omega}^*\,\mathbf{RI}_\mathrm{body}\mathbf{R}^T +
+    \mathbf{RI}_\mathrm{body}(\bm{\omega}^*\,\mathbf{R})^T \nonumber\\
+&=& \bm{\omega}^*\,\mathbf{RI}_\mathrm{body}\mathbf{R}^T -
+    \mathbf{RI}_\mathrm{body}\mathbf{R}^T\bm{\omega}^* \nonumber\\
+&=& \bm{\omega}^*\,\mathbf{I} - \mathbf{I}\bm{\omega}^* \label{correctBrett5}
+\end{eqnarray}
+
+Substituting equation~\ref{correctBrett5} back into~\ref{correctBrett2}:
+\begin{eqnarray}
+\bm{\tau} & = & \mathbf{I}\dot{\bm{\omega}} + \bm{\omega}^*\,\mathbf{I}\bm{\omega} -
+    \mathbf{I}\bm{\omega}^*\,\bm{\omega} \nonumber \\
+& = & \mathbf{I}\dot{\bm{\omega}} + \bm{\omega}^*\,\mathbf{I}\bm{\omega} \label{correctBrett6}
+\end{eqnarray}
+
+Equation~\ref{correctBrett6} corrects the similar expression in~\cite{Saunders:PhD},
+page~34. From this we deduce that if we want to calculate the angular velocity of a rigid
+body, the value we need to feed into our ODE solver is
+\begin{equation}
+\dot{\bm{\omega}} = \mathbf{I}^{-1}\bm{\tau} -
+    \mathbf{I}^{-1}\bm{\omega}^*\,\mathbf{I}\bm{\omega}.
+\end{equation}
+This means that even if the sum of all torques acting on the body is zero, its angular
+velocity may change if $\mathbf{I}$ is not diagonal (i.e. if the body is somehow asymmetric).
+Remember that angular momentum is conserved if there are no external torques~\cite{Feynman:63}.
+Thus in order for the simulation to conserve angular momentum correctly, the value of
+$\bm{\omega}^*\,\mathbf{I}\bm{\omega}$ must always be subtracted from the torques.
+
+
 \subsection{Lagrange multiplier constraints}
+
+Both~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD} omit details of how to derive the Jacobians
+$\mathbf{J}$ and $\dot{\mathbf{J}}$ for a custom constraint. The following procedure was deduced
+by the author after pondering over some source code implementing one type of constraint
+(specifically equations~\ref{constrEx1J} and~\ref{constrEx1JDot} below). The source code
+was kindly provided by Brett Saunders. (It should be emphasised that the code was used only
+for this derivation and not copied otherwise. The implementation in this project is based
+on the following derivation, not the original code.)
+
+We start by defining a function $\mathbf{C}$ which evaluates to zero (or the null vector) for
+all states which satisfy the constraint, and any non-zero value for all other states. This
+function must be twice differentiable. We continue by calculating the first and second
+derivatives with respect to time, $\dot{\mathbf{C}}$ and $\ddot{\mathbf{C}}$.
+
+For any sort of valid constraint, we should be able to massage both $\dot{\mathbf{C}}$ and
+$\ddot{\mathbf{C}}$ into a sum of products form. Moreover, in each product in
+$\dot{\mathbf{C}}$, at least one of the variables should be either the linear velocity of
+the centre of mass of one of the bodies, or the angular velocity of one of the bodies.
+Use algebra to make this `chosen variable' the rightmost variable in each product, and
+evaluate the rest of the product to a single matrix.
+
+Now observe equation~\ref{cDotAndCDDot}. We can easily factor our expression for
+$\dot{\mathbf{C}}$ into $\mathbf{J}$ and $\dot{\mathbf{x}}$ (since the latter contains
+the linear and angular velocities for all bodies). $\mathbf{J}$ has the same number of rows
+as there are constraints, and $6n$ columns for a system of $n$ bodies. Each of the matrices
+in our expression for $\dot{\mathbf{C}}$ also has the same number of rows as there are
+constraints, and has 3 columns. All we need to do is to find the correct horizontal position
+of each of these matrices in $\mathbf{J}$, depending on the location of the `chosen variable'
+in $\dot{\mathbf{x}}$. Thus we obtain the matrix $\mathbf{J}$.
+
+Observe equation~\ref{cDotAndCDDot} again. Now we know $\ddot{\mathbf{C}}$, $\dot{\mathbf{x}}$,
+$\mathbf{J}$ and $\ddot{\mathbf{x}}$~-- no problem. Evaluate
+$\ddot{\mathbf{C}} - \mathbf{J}\ddot{\mathbf{x}}$, remembering that $\ddot{\mathbf{x}}$ is
+the vector of linear accelerations and angular accelerations. The result should be an
+expression which we can bring into just the same kind of sum of products form as we previously
+did with $\dot{\mathbf{C}}$. By exactly the same procedure we factor out the linear velocities
+and angular velocities (not accelerations!), thus obtaining $\dot{\mathbf{J}}$.
+
+In case you were in doubt, this procedure is of course executed by a human on paper prior to
+implementation. The simulation program will just plug numbers into the hard-coded expressions
+for $\mathbf{C}$, $\dot{\mathbf{C}}$, $\mathbf{J}$ and $\dot{\mathbf{J}}$ during each time step
+of the simulation.
+
+Let us consider some examples of constraints to clarify the procedure.
+
+\subsubsection{Example 1: Fixed point in space}
+
+Let us implement a constraint which `nails' a particular point in a rigid body to a fixed point
+in world space. (It's a very flexible nail, because despite fixing the position, it allows all
+three modes of rotation.) Let $\mathbf{p}$ be the position of the centre of mass of our rigid
+body, $\mathbf{s}$ the vector from the centre of mass to the point in the body we want to attach,
+$\bm{\omega}$ the angular velocity of the rigid body, and $\mathbf{t}$ the coordinates in world
+space that we want to nail the point to. Then we can set up a very simple constraint function,
+\begin{equation}
+\mathbf{C} = \mathbf{p} + \mathbf{s} - \mathbf{t}
+\end{equation}
+which equals the null vector when $\mathbf{p}+\mathbf{s}$ and $\mathbf{t}$ coincide, as required.
+Since this is a three-dimensional vector equation, we are actually defining three constraints
+at once. Since $\mathbf{t}$ does not change over time, we obtain
+\begin{eqnarray}
+\dot{\mathbf{C}} &=& \dot{\mathbf{p}} + \bm{\omega}\times\mathbf{s} \nonumber\\
+&=& \dot{\mathbf{p}} - \mathbf{s}^*\,\bm{\omega} \\
+\ddot{\mathbf{C}} &=& \ddot{\mathbf{p}} + \dot{\bm{\omega}}\times\mathbf{s} +
+    \bm{\omega}\times(\bm{\omega}\times\mathbf{s}) \nonumber\\
+&=& \ddot{\mathbf{p}} - \mathbf{s}^*\,\dot{\bm{\omega}} -
+    (\bm{\omega}\times\mathbf{s})^*\,\bm{\omega}
+\end{eqnarray}
+(cf. similar derivations in~\cite{Kalra:95}). We have already moved the `chosen variables' to
+the rightmost position of each product. We will now factor $\dot{\mathbf{C}}$ and write out the
+components of $\mathbf{J}$ in terms of the vector components:
+
+\begin{equation}
+\label{constrEx1J}
+\dot{\mathbf{C}} = \left[\begin{array}{ccc} 1&0&0\\0&1&0\\0&0&1 \end{array}\right]
+    \dot{\mathbf{p}} + \left[\begin{array}{ccc}
+    0 & s_3 & -s_2 \\ -s_3 & 0 & s_1 \\ s_2 & -s_1 & 0
+    \end{array}\right] \bm{\omega}
+\end{equation}
+
+The two matrices in equation~\ref{constrEx1J} thus form two slices of $\mathbf{J}$ at
+the locations appropriate for $\dot{\mathbf{p}}$ and $\bm{\omega}$. We now continue to the
+next step of the procedure:
+
+\begin{eqnarray}
+\dot{\mathbf{J}}\dot{\mathbf{x}} = 
+\ddot{\mathbf{C}} - \mathbf{J}\ddot{\mathbf{x}} &=&
+    \big(\ddot{\mathbf{p}} - \mathbf{s}^*\,\dot{\bm{\omega}} -
+    (\bm{\omega}\times\mathbf{s})^*\,\bm{\omega}\big) -
+    (\ddot{\mathbf{p}} - \mathbf{s}^*\,\dot{\bm{\omega}}) \nonumber\\
+& = & -(\bm{\omega}\times\mathbf{s})^*\,\bm{\omega} \nonumber\\
+& = & \left[\begin{array}{ccc} 0 &
+    \omega_1 s_2 - \omega_2 s_1 &
+    \omega_1 s_3 - \omega_3 s_1 \\
+    \omega_2 s_1 - \omega_1 s_2 & 0 &
+    \omega_2 s_3 - \omega_3 s_2 \\
+    \omega_3 s_1 - \omega_1 s_3 &
+    \omega_3 s_2 - \omega_2 s_3 & 0
+    \end{array}\right] \bm{\omega} \nonumber\\\label{constrEx1JDot}
+\end{eqnarray}
+
+We see that here there is only one slice for $\dot{\mathbf{J}}$; the rest of the matrix
+is zero. Since $\bm{\omega}$ also occurs inside the matrix, there are actually several
+alternative representations of this matrix which are equally valid.
+
+\subsubsection{Example 2: Ball-and-socket joint}
+
+Two rigid bodies are attached together at a particular point in each of the bodies.
+They may not separate, but all three rotational degrees of freedom are permitted. This is
+a good representation e.g. of a human shoulder joint.
+
+Let $\mathbf{a}$ and $\mathbf{b}$ be the positions of the centres of mass in the first and
+second rigid body respectively. Let $\mathbf{s}$ be the vector from $\mathbf{a}$ to the 
+attachment point, and $\mathbf{t}$ the vector from $\mathbf{b}$ to the attachment point.
+Also let $\bm{\omega}$ be the angular velocity of the first body, and $\bm{\phi}$ that
+of the second. Then our constraint function and its derivatives are:
+
+\begin{eqnarray}
+\mathbf{C} &=& \mathbf{a} + \mathbf{s} - \mathbf{b} - \mathbf{t} \\
+\dot{\mathbf{C}} &=& \dot{\mathbf{a}} + \bm{\omega}\times\mathbf{s} -
+    \dot{\mathbf{b}} - \bm{\phi}\times\mathbf{t} \\
+\ddot{\mathbf{C}} &=& \ddot{\mathbf{a}} + \dot{\bm{\omega}}\times\mathbf{s} +
+    \bm{\omega}\times(\bm{\omega}\times\mathbf{s}) -
+    \ddot{\mathbf{b}} - \dot{\bm{\phi}}\times\mathbf{t} -
+    \bm{\phi}\times(\bm{\phi}\times\mathbf{t})
+\end{eqnarray}
+
+The rest of the derivation is very similar to the previous example. We obtain four
+matrix slices for $\mathbf{J}$ and two slices for $\dot{\mathbf{J}}$.
+
+
+\subsubsection{Example 3: Confinement to a plane}
+
+A particular point in a rigid body is constrained to always lie within a particular plane.
+It may move arbitrarily within that plane, and the body may rotate about the constrained point.
+
+Let $\mathbf{b}$ be some arbitrary point inside the plane, $\mathbf{n}$ the normal vector of
+the plane, $\mathbf{p}$ the centre of mass of the rigid body, $\bm{\omega}$ its angular
+velocity, and $\mathbf{s}$ the vector from $\mathbf{p}$ to the point in the body at which the
+constraint applies. Now the plane is specified as the set of all points $\mathbf{r}$ which
+satisfy $(\mathbf{r} - \mathbf{b})\cdot\mathbf{n} = 0$.
+
+This time, we lose only one degree of freedom, so our constraint function is a scalar. For
+consistency's sake, we will write it as a one-row vector.
+
+\begin{eqnarray}
+\mathbf{C} &=& \mathbf{n}\cdot(\mathbf{p} + \mathbf{s} - \mathbf{b}) \nonumber\\
+&=& \mathbf{n}\cdot\mathbf{p} + \mathbf{n}\cdot\mathbf{s} - \mathbf{n}\cdot\mathbf{b} \\
+\dot{\mathbf{C}} & = & \mathbf{n}\cdot\dot{\mathbf{p}} +
+    \mathbf{n}\cdot(\bm{\omega}\times\mathbf{s}) \nonumber\\
+&=& \mathbf{n}^T\dot{\mathbf{p}} - \mathbf{n}^T \mathbf{s}^*\,\bm{\omega} \\
+\ddot{\mathbf{C}} &=& \mathbf{n}\cdot\ddot{\mathbf{p}} +
+    \mathbf{n}\cdot(\dot{\bm{\omega}}\times\mathbf{s}) +
+    \mathbf{n}\cdot\big(\bm{\omega}\times(\bm{\omega}\times\mathbf{s})\big) \nonumber\\
+&=& \mathbf{n}^T\ddot{\mathbf{p}} - \mathbf{n}^T \mathbf{s}^*\,\dot{\bm{\omega}} -
+    \mathbf{n}^T (\bm{\omega}\times\mathbf{s})^*\,\bm{\omega}
+\end{eqnarray}
+
+Writing out the components of $\dot{\mathbf{C}}$:
+\begin{equation}
+\dot{\mathbf{C}} = \left[\begin{array}{ccc} n_1 & n_2 & n_3 \end{array}\right] \dot{\mathbf{p}} +
+    \left[\begin{array}{c}
+    n_3 s_2 - n_2 s_3 \\
+    n_1 s_3 - n_3 s_1 \\
+    n_2 s_1 - n_1 s_2 \end{array}\right]^T \bm{\omega}
+\end{equation}
+(the second slice of $\mathbf{J}$ has been written transposed for better readability). Again
+we proceed as before:
+
+\begin{eqnarray}
+\dot{\mathbf{J}}\dot{\mathbf{x}} & = & \ddot{\mathbf{C}} - \mathbf{J}\ddot{\mathbf{x}} \nonumber\\
+&=& -\mathbf{n}^T (\bm{\omega}\times\mathbf{s})^*\,\bm{\omega} \nonumber\\
+&=& \left[\begin{array}{c}
+    n_3 \omega_1 s_2 - n_3 \omega_2 s_1 - n_2 \omega_1 s_2 + n_2 \omega_2 s_1 \\
+    n_1 \omega_1 s_2 - n_1 \omega_2 s_1 - n_3 \omega_2 s_3 + n_3 \omega_3 s_2 \\
+    n_2 \omega_2 s_3 - n_2 \omega_3 s_2 - n_1 \omega_3 s_1 + n_1 \omega_1 s_3
+    \end{array}\right]^T \bm{\omega}
+\end{eqnarray}
+Again note the transposition~-- in this example, $\mathbf{J}$ and $\dot{\mathbf{J}}$ only
+have one row.
