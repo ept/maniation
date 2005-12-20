@@ -23,8 +23,8 @@ Unfortunately, many operations required for animation of rotations are awkward t
 since this representation uses nine numbers (a $3\times3$ matrix) to represent three degrees
 of freedom, thus introducing six additional side-conditions which must be maintained.
 
-{\em Quaternions}~\cite{Shoemake:85,Eberly:01} are a popular alternative to the two
-previous schemes, and they are also used extensively in this project.
+{\em Quaternions}~\cite{Shoemake:85,Eberly:01,MathWorld:Quaternion} are a popular alternative
+to the two previous schemes, and they are also used extensively in this project.
 
 \subsection{Definition and properties}
 Mathematically, quaternions can be regarded as numbers with one real part and three
@@ -60,7 +60,7 @@ quaternion dot product as
 The dot product is commutative, contrary to the `normal' quaternion product.
 
 Sometimes we will need to relate a 3D vector to a quaternion with zero real part.
-For a given vector $\mathbf{u} = (u_1, u_2, u_3)$ we define the corresponding
+For a given vector $\mathbf{u} = (u_1, u_2, u_3)^T$ we define the corresponding
 quaternion to be
 \begin{equation}
 \label{vectorToQuat}
@@ -80,7 +80,8 @@ This condition reduces the number of degrees of freedom to three, as required.
 
 Every unit quaternion represents a rotation of angle $\theta$ about an arbitrary axis.
 If the axis passes through the origin and has a direction given by the vector
-$\mathbf{a} = (a_1, a_2, a_3)$ with $||\mathbf{a}|| = 1$, the quaternion describing this rotation is
+$\mathbf{a} = (a_1, a_2, a_3)^T$ with $||\mathbf{a}|| = 1$, the quaternion describing
+this rotation is
 \begin{equation}
 \label{quatRotation}
 \mathbf{q} = \cos\left(\frac{\theta}{2}\right) + (a_1\mathbf{i} + a_2\mathbf{j} +
@@ -91,7 +92,7 @@ We shall assume throughout this project that the rotation thus described is cloc
 when looking in the direction of the vector $\mathbf{a}$) in a right-hand coordinate system,
 i.e. that it is given by the ``right-hand rule''.
 
-To rotate a vector $\mathbf{v} = (v_1, v_2, v_3)$ by a quaternion $\mathbf{q}$, we first
+To rotate a vector $\mathbf{v} = (v_1, v_2, v_3)^T$ by a quaternion $\mathbf{q}$, we first
 convert it into its corresponding quaternion $\tilde{\mathbf{v}}$ as defined in
 equation~\ref{vectorToQuat} and then calculate the quaternion product
 \begin{equation}
@@ -100,7 +101,7 @@ equation~\ref{vectorToQuat} and then calculate the quaternion product
 \end{equation}
 
 If we expand this formula, we find that the real part of the result is always zero, and
-that the rotated vector $\mathbf{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime)$ is
+that the rotated vector $\mathbf{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime)^T$ is
 the vector corresponding to $\tilde{\mathbf{v}}^\prime$ (i.e. $\mathbf{v}^\prime$ is
 contained in the three complex parts of the quaternion product).
 
@@ -115,7 +116,7 @@ Observe that under this convention, if $\mathbf{q}$ is itself a product of quate
 result of this transformation is the same as if the rotations corresponding to the factors
 of $\mathbf{q}$ had been applied starting with the rightmost factor, and continuing from
 right to left. To verify that this is the case, the identity
-$(q_1 q_2)^{-1} = q_2^{-1} q_1^{-1}$ is useful.
+$(q_1 q_2)^* = q_2^* q_1^*$ is useful~\cite{MathWorld:Quaternion}.
 
 \subsection{Quaternion integration}
 
