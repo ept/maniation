@@ -1,0 +1,150 @@
+\section{Constrained rigid body dynamics}
+The methods we have developed so far allow the simulation of a single rigid body with forces
+acting on it. Further challenges arise when we consider multibody systems in which the bodies
+interact in some way. We will primarily be interested in articulated bodies, that is, systems
+of individual rigid bodies held together by joints. Joints allow rotation but cannot be
+separated. (The human body is a good example of such an articulated body.)
+
+There are various strategies for implementing articulated bodies. {\em Lagrangian mechanics}
+is a commonplace method in physics and engineering, in which the state of the system is expressed
+in terms of a set of {\em generalised coordinates}. The position and orientation of each sub-body
+is then a function of these generalised coordinates, and outside forces can be transformed
+back into the generalised coordinates, where they are handled. For example, consider two rigid
+bodies which are held together by a ball-and-socket joint~\cite{Kalra:95}. Without the joint,
+the system would have 12 degrees of freedom at rest: three translational and three rotational
+degrees for each of the bodies. In a Lagrangian formulation, the two connected bodies would be
+expressed in nine coordinates: six for translation and rotation of the first body, and three
+for the rotation of the second body with respect to the first.
+
+Lagrangian mechanics has the advantage that if formulated correctly, the system will always in a
+legal state, no matter what the values of the coordinates are. It also allows very fast
+computation. On the downside, the functions to transform the coordinates become very hard or
+impossible to find for complicated systems, so the method does not scale well.
+
+An alternative approach to the problem is to initially grant each sub-body its full number of
+degrees of freedom, and then to impose constraints on the system. We can then ensure that the
+constraints are always maintained by excerting appropriate forces and torques on the bodies.
+Finding these forces is commonly done by means of {\em Lagrange multipliers}~-- note that
+despite the similarity in name, this method has very little in common with Lagrangian mechanics.
+
+Lagrange multipliers are used to implement constrained rigid body mechanics in this project,
+because once set up, such a system can handle a large variety of situations with ease.
+The mathematical formulation of Lagrange multipliers is derived in~\cite{BaraffWitkin:97} and
+extended in~\cite{Saunders:PhD} (also see~\cite{Baraff:96} for an optimized algorithm),
+therefore we only state the results here.
+
+Consider a system of $n$ rigid bodies at a particular point in time. Each body has a vector
+pointing to its centre of mass, and an orientation. Assume that we can concatenate these
+parameters of all bodies into a global state vector\footnote{Witkin calls this vector
+$\mathbf{q}$; we use $\mathbf{x}$ here to avoid confusion with quaternions.} $\mathbf{x}$.
+Containing a value for each degree of freedom, $\mathbf{x}$ will have $6n$ rows. In practice
+we will never need to write down $\mathbf{x}$ explicitly; instead we will work with its
+first and second derivative in time, $\dot{\mathbf{x}}$ and $\ddot{\mathbf{x}}$ respectively.
+
+For example, in a system with two bodies, having centre of mass positions $\mathbf{a}$ and
+$\mathbf{b}$, and angular velocities $\bm{\omega}$ and $\bm{\phi}$ respectively, we would
+have
+\begin{equation}
+\label{lagrangeStateVector}
+\dot{\mathbf{x}} = \left[ \begin{array}{c}
+    \dot{\mathbf{a}}\\ \bm{\omega}\\ \dot{\mathbf{b}}\\ \bm{\phi} \end{array}\right]
+\quad\quad\mathrm{and}\quad\quad
+\ddot{\mathbf{x}} = \left[ \begin{array}{c}
+    \ddot{\mathbf{a}}\\ \dot{\bm{\omega}}\\ \ddot{\mathbf{b}}\\ \dot{\bm{\phi}} \end{array}\right]
+\end{equation}
+
+Now assume that we want to impose $m$ constraints on this system, where each constraint
+effectively reduces the number of degrees of freedom by one. (A constraint specifying a
+ball-and-socket joint, as described earlier, would therefore have to be expressed as a
+vector of three constraints.) Express each constraint as a function $C$ which is zero
+when the constraint is satisfied. We can then combine all constraint functions into a
+single $m$-row constraint vector $\mathbf{C}$. Each valid configuration of the system must
+satisfy $\mathbf{C} = \mathbf{0}$, the null vector.
+
+To find the constraint maintaining forces, we must know how a change in state or a change in
+time affects the value of $\mathbf{C}$. To this end, we must calculate the first two partial
+derivatives of $\mathbf{C}$ with respect to time, $\dot{\mathbf{C}}$ and $\ddot{\mathbf{C}}$.
+We also calculate the Jacobian matrix~\cite{RHB:02} $\mathbf{J}$ which contains all partial
+derivatives of $\mathbf{C}$ w.r.t. all coordinates of $\mathbf{x}$, and the similarly
+defined Jacobian $\dot{\mathbf{J}}$ of $\dot{\mathbf{C}}$:
+\begin{equation}
+J_{ij} = \frac{\partial C_i}{\partial x_j} \quad\quad\mathrm{and}\quad\quad
+\dot{J}_{ij} = \frac{\partial \dot{C}_i}{\partial x_j}
+\end{equation}
+
+Both $\mathbf{J}$ and $\dot{\mathbf{J}}$ are $6n\times m$ matrices. However, since we do not
+have an explicit expression for $\mathbf{x}$, we cannot calculate them directly using
+partial differentiation. Instead we make use of the following results of the chain rule:
+\begin{equation}
+\dot{\mathbf{C}} = \mathbf{J}\dot{\mathbf{x}} \quad\quad\mathrm{and}\quad\quad
+\ddot{\mathbf{C}} = \dot{\mathbf{J}}\dot{\mathbf{x}} + \mathbf{J}\ddot{\mathbf{x}}.
+\end{equation}
+Appendix~\ref{rigidBodyAppendix} gives examples of derivations using these equations.
+
+Two more quantities are required before we can determine the forces and torques which maintain
+our constraints. We need to add up all the other forces and torques acting on each of the $n$
+sub-bodies (for example due to gravity or muscular activity) and concatenate them into a single
+$6n$-row vector $\bm{\Phi}$, just as we did for $\mathbf{x}$. Re-using the two-body case of
+equation~\ref{lagrangeStateVector}:
+\begin{equation}
+\bm{\Phi} = \left[\begin{array}{l}
+    \sum \mathbf{F}_A \\
+    \left( \sum \bm{\tau}_A \right) - \bm{\omega}\times(\mathbf{I}_A\,\bm{\omega}) \\
+    \sum \mathbf{F}_B \\
+    \left( \sum \bm{\tau}_B \right) - \bm{\phi}\times(\mathbf{I}_B\,\bm{\phi})
+    \end{array}\right]
+\end{equation}
+where $\mathbf{F}$ denotes a force vector, $\bm{\tau}$ a torque vector and $\mathbf{I}_A$
+the moment of inertia of body~A in the world frame. The expression
+$\bm{\omega}\times(\mathbf{I}_A\,\bm{\omega})$ and its analogue for the other bodies do
+not strictly represent torques, but subtracting them here ensures that angular momentum is
+conserved in the absence of other torques. See appendix~\ref{correctBrettAppendix} for the
+derivation of this expression.
+
+And finally, we require the {\em mass-inertia tensor} $\mathbf{M}$ and its inverse
+$\mathbf{M}^{-1}$. Both are $6n\times6n$ matrices of the form
+\begin{equation}
+\label{massInertiaTensor}
+\mathbf{M} = \left[ \begin{array}{ccccccc}
+    \mu_1\mathbf{1} \\ & \mathbf{I}_1 \\ &&
+    \mu_2\mathbf{1} \\ &&& \mathbf{I}_2 \\ &&&& \ddots \\ &&&&&
+    \mu_n\mathbf{1} \\ &&&&&& \mathbf{I}_n
+    \end{array}\right]
+\end{equation}
+
+Here $\mu_i$ denotes the (scalar) mass of body $i$, $\mathbf{1}$ stands for the $3\times3$
+identity matrix, and $\mathbf{I}_i$ is the inertia tensor (written as a $3\times3$ matrix)
+of body $i$ in the world frame. All empty regions are zero. While $\mu_i$ will typically
+stay constant over time, $\mathbf{I}_i$ may depend on the orientation of body $i$.\footnote{If
+we know the principal axes of the body, we can express $\mathbf{I}$ in a time-invariant
+form combined with rotations into the principal axes frame and back again
+(see~\cite{BaraffWitkin:97}), which saves us a lot of effort.} The inverse $\mathbf{M}^{-1}$
+is obtained by replacing each $\mu$ by $\frac{1}{\mu}$ and each $\mathbf{I}$ by
+$\mathbf{I}^{-1}$ in equation~\ref{massInertiaTensor}.
+
+Now we can set up the equation\footnote{Here we adopt the sign convention
+of~\cite{BaraffWitkin:97}, which is the opposite of~\cite{Saunders:PhD}.}
+\begin{equation}
+\label{lagrangeEquation}
+-\mathbf{JM}^{-1}\mathbf{J}^T\bm{\lambda} = \dot{\mathbf{J}}\dot{\mathbf{x}} +
+    \mathbf{JM}^{-1}\bm{\Phi} + k\mathbf{C} + d\dot{\mathbf{C}}
+\end{equation}
+in which all variables except $\bm{\lambda}$ are known. The meaning of this equation and
+its two skalar constants $k$ and $d$ is discussed in~\cite{BaraffWitkin:97}
+and~\cite{Saunders:PhD}. For us it will suffice to consider it to be a `black box' which can be
+given to a linear equation solver to obtain $\bm{\lambda}$.
+
+$\bm{\lambda}$ is an $m$-row vector of so-called Lagrange multipliers (after which this method
+is named), where $m$ is the number of constraints. Once we have solved for it, we can compute
+the expression
+\begin{equation}
+\hat{\bm{\Phi}} = \mathbf{J}^T\,\bm{\lambda}.
+\end{equation}
+$\hat{\bm{\Phi}}$ has the same format as $\bm{\Phi}$, and indeed it is the vector containing
+the forces and torques which we need to additionally apply to each body to ensure that they
+continue to satisfy the constraints! The bodies' constrained movements are calculated by
+the generalised form of the familiar formula $\ddot{x} = \frac{F}{m}$:
+\begin{equation}
+\ddot{\mathbf{x}} = \mathbf{M}^{-1}\,(\bm{\Phi} + \hat{\bm{\Phi}})
+\end{equation}
+This result, $\ddot{\mathbf{x}}$, can now be fed directly into our ODE solver.
