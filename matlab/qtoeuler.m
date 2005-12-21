@@ -1,7 +1,7 @@
 function [rotX, rotY, rotZ] = qtoeuler(quat)
     % uses the roll/pitch/yaw convention (Shoemake:85).
     
-    m = qtomatrix(quat);
+    m = qtomatrix(quat)'; % need to transpose to get back to Shoemake's convention
     sy = -m(1,3);
     cy = sqrt(1 - sy^2);
     if (abs(cy) < 1e-6)
