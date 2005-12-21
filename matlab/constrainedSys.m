@@ -1,6 +1,7 @@
 function newstatus = constrainedSys(status, time)
 
-    systemFunc = str2func("pendulum");
+    %systemFunc = str2func("pendulum");
+    systemFunc = str2func("doublepend");
 
     [inertia, invInertia, initStatus, constrFuncs, forcesAndTorques] = systemFunc(status);
     if (rows(status) == 0)
