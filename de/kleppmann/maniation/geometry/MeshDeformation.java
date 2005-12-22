@@ -140,7 +140,7 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
             deformed.toDoubleArray(coordinates, 3*coordIndex);
             coordIndex++;
         }
-        for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet())
+        /*for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet())
             entry.getValue().updateBBox();
         for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet()) {
             CollisionVolume vol1 = entry.getValue();
@@ -153,6 +153,6 @@ public class MeshDeformation implements AnimateObject, GeometryUpdater {
                             entry.getKey().getName() + " and " + target.getName());
                 }
             }
-        }
+        }*/
     }
 }
