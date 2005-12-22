@@ -5,10 +5,13 @@ import java.text.DecimalFormat;
 
 public class Quaternion {
     
-    private double w, x, y, z;
+    private double w, x, y, z, mag;
     private Quaternion inverse;
     
-    private Quaternion() {}
+    public Quaternion() {
+        this.w = 1.0; this.x = 0.0; this.y = 0.0; this.z = 0.0;
+        this.inverse = new Quaternion();
+    }
 
     public Quaternion(double w, double x, double y, double z) {
         this.w = w;
@@ -22,6 +25,15 @@ public class Quaternion {
         this.inverse.y = -y/m;
         this.inverse.z = -z/m;
         this.inverse.inverse = this;
+        this.mag = Math.sqrt(m);
+    }
+    
+    public Quaternion(Vector3D v) {
+        this.w = 0.0;
+        this.x = v.getComponent(0);
+        this.y = v.getComponent(1);
+        this.z = v.getComponent(2);
+        this.inverse = null;
     }
 
     public double getW() {
@@ -57,15 +69,44 @@ public class Quaternion {
         );
     }
     
+    public Quaternion add(Quaternion other) {
+        return new Quaternion(this.w+other.w, this.x+other.x,
+                this.y+other.y, this.z+other.z);
+    }
+    
+    public Quaternion subtract(Quaternion other) {
+        return new Quaternion(this.w-other.w, this.x-other.x,
+                this.y-other.y, this.z-other.z);
+    }
+    
+    public Quaternion quergs(Quaternion delta) {
+        double mag = delta.getMagnitude();
+        if (mag < 1e-20) return this;
+        long n = Math.round(mag/Math.PI - 0.5);
+        double d = mag - Math.PI*(n + 0.5);
+        if ((d < 1e-6) && (d > -1e-6)) return new Quaternion(delta.w/mag,
+                delta.x/mag, delta.y/mag, delta.z/mag);
+        double t = Math.tan(mag)/mag;
+        double wn = this.w + t*delta.w;
+        double xn = this.x + t*delta.x;
+        double yn = this.y + t*delta.y;
+        double zn = this.z + t*delta.z;
+        mag = Math.sqrt(wn*wn + xn*xn + yn*yn + zn*zn);
+        return new Quaternion(wn/mag, xn/mag, yn/mag, zn/mag);
+    }
+    
     public Quaternion getInverse() {
         return inverse;
     }
     
-    public Vector transform(Vector v) {
+    public Vector3D transform(Vector3D v) {
         if (v.getDimension() != 3) throw new IllegalArgumentException();
-        Quaternion vq = new Quaternion(0.0, v.getElement(0), v.getElement(1), v.getElement(2));
-        Quaternion t = mult(vq).mult(inverse);
-        return new Vector(t.x, t.y, t.z);
+        Quaternion t = mult(new Quaternion(v)).mult(inverse);
+        return new Vector3D(t.x, t.y, t.z);
+    }
+    
+    public double getMagnitude() {
+        return mag;
     }
 
     public Quaternion interpolateTo(Quaternion dest, double amount) {
