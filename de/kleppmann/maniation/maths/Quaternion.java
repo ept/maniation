@@ -8,9 +8,13 @@ public class Quaternion {
     private double w, x, y, z, mag;
     private Quaternion inverse;
     
+    private Quaternion(boolean nonsense) {}
+    
     public Quaternion() {
         this.w = 1.0; this.x = 0.0; this.y = 0.0; this.z = 0.0;
-        this.inverse = new Quaternion();
+        this.inverse = new Quaternion(true);
+        inverse.w = 1.0; inverse.x = 0.0; inverse.y = 0.0; inverse.z = 0.0;
+        inverse.inverse = this;
     }
 
     public Quaternion(double w, double x, double y, double z) {
@@ -19,7 +23,7 @@ public class Quaternion {
         this.y = y;
         this.z = z;
         double m = w*w + x*x + y*y + z*z;
-        this.inverse = new Quaternion();
+        this.inverse = new Quaternion(true);
         this.inverse.w = w/m;
         this.inverse.x = -x/m;
         this.inverse.y = -y/m;

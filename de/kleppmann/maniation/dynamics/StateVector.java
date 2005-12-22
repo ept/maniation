@@ -1,5 +1,6 @@
 package de.kleppmann.maniation.dynamics;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import de.kleppmann.maniation.maths.Quaternion;
@@ -105,5 +106,15 @@ public class StateVector implements Vector {
             body.setAngularMomentum(new Vector3D(getComponent(i+10), getComponent(i+11), getComponent(i+12)));
             i += 13;
         }
+    }
+    
+    public String toString() {
+        DecimalFormat format = new DecimalFormat("######0.00000");
+        String result = "";
+        for (int i=0; i<getDimension(); i++) {
+            if (!result.equals("")) result += ", ";
+            result += format.format(getComponent(i));
+        }
+        return result + ";";
     }
 }

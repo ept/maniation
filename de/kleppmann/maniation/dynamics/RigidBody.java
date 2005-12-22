@@ -22,6 +22,7 @@ public class RigidBody {
         angmom = new Vector3D();
         orient = new Quaternion();
         toPrincipalAxes = new Quaternion();
+        mass = 1.0;
         inertia = new Vector3D(1.0, 1.0, 1.0);
         invInertia = new Vector3D(1.0, 1.0, 1.0);
     }
@@ -40,8 +41,9 @@ public class RigidBody {
         return pos;
     }
     
-    void setCoMPosition(Vector3D pos) {
+    protected void setCoMPosition(Vector3D pos) {
         this.pos = pos;
+        upToDate = false;
     }
     
     public Vector3D getCoMVelocity() {
@@ -53,8 +55,9 @@ public class RigidBody {
         return mom;
     }
     
-    void setLinearMomentum(Vector3D mom) {
+    protected void setLinearMomentum(Vector3D mom) {
         this.mom = mom;
+        upToDate = false;
     }
     
     public Vector3D getForces() {
@@ -66,8 +69,9 @@ public class RigidBody {
         return orient;
     }
     
-    void setOrientation(Quaternion orient) {
+    protected void setOrientation(Quaternion orient) {
         this.orient = orient;
+        upToDate = false;
     }
     
     public Quaternion getRateOfRotation() {
@@ -84,8 +88,9 @@ public class RigidBody {
         return angmom;
     }
     
-    void setAngularMomentum(Vector3D angmom) {
+    protected void setAngularMomentum(Vector3D angmom) {
         this.angmom = angmom;
+        upToDate = false;
     }
     
     public Vector3D getTorques() {
