@@ -22,5 +22,6 @@ function retval = plotblender(result)
             px = rx; py = ry; pz = rz;
         endfor
     endfor
+    data = real(data);
     save -ascii blenderdata data
 endfunction
