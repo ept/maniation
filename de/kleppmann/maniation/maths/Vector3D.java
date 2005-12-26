@@ -20,6 +20,10 @@ public class Vector3D implements Vector {
                 this.z*right.x - this.x*right.z,
                 this.x*right.y - this.y*right.x);
     }
+    
+    public Matrix33 dual() {
+        return new Matrix33(0, -z, y, z, 0, -x, -y, x, 0);
+    }
 
     public int getDimension() {
         return 3;

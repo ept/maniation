@@ -6,6 +6,11 @@ public class VectorImpl implements Vector {
 
     private double values[];
     
+    public VectorImpl(int dimension) {
+        values = new double[dimension];
+        for (int i=0; i<dimension; i++) values[i] = 0.0;
+    }
+    
     public VectorImpl(double[] values) {
         this.values = values;
     }
