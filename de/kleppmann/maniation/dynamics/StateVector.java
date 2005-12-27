@@ -109,12 +109,15 @@ public class StateVector implements Vector {
     }
     
     public String toString() {
-        DecimalFormat format = new DecimalFormat("######0.00000");
+        DecimalFormat format = new DecimalFormat("######0.000000000000000");
         String result = "";
         for (int i=0; i<getDimension(); i++) {
-            if (!result.equals("")) result += ", ";
-            result += format.format(getComponent(i));
+            int j = i;
+            // Octave uses a different quaternion component order
+            if ((i % 13 >= 3) && (i % 13 < 6)) j++;
+            if (i % 13 == 6) j -= 3;
+            result += " " + format.format(getComponent(j));
         }
-        return result + ";";
+        return result;
     }
 }
