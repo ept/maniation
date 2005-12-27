@@ -12,6 +12,32 @@ public class SparseMatrix implements Matrix {
         Matrix getMatrix();
     }
     
+
+    public static class SliceImpl implements Slice {
+        private Matrix m;
+        private int startRow, startColumn, rows, columns;
+        
+        public SliceImpl(Matrix m, int startRow, int startColumn) {
+            this.m = m; this.startRow = startRow; this.startColumn = startColumn;
+            this.rows = m.getRows(); this.columns = m.getColumns();
+        }
+        public int getStartRow() {
+            return startRow;
+        }
+        public int getStartColumn() {
+            return startColumn;
+        }
+        public int getRows() {
+            return rows;
+        }
+        public int getColumns() {
+            return columns;
+        }
+        public Matrix getMatrix() {
+            return m;
+        }
+    }
+
     private int rows, columns;
     private List<Slice> slices = new java.util.ArrayList<Slice>();
 
