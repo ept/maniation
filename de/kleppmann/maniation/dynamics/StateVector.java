@@ -1,7 +1,6 @@
 package de.kleppmann.maniation.dynamics;
 
 import java.text.DecimalFormat;
-import java.util.List;
 
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector;
@@ -9,16 +8,15 @@ import de.kleppmann.maniation.maths.Vector3D;
 
 public class StateVector implements Vector {
     
-    private List<RigidBody> bodies = new java.util.ArrayList<RigidBody>();
+    private DynamicScene scene;
     private boolean derivative = false;
     
-    void applyProperties(StateVector source) {
-        this.bodies = source.bodies;
-        this.derivative = source.derivative;
+    public StateVector(DynamicScene scene) {
+        this.scene = scene;
     }
     
-    List<RigidBody> getBodies() {
-        return bodies;
+    public DynamicScene getScene() {
+        return scene;
     }
     
     public boolean isDerivative() {
@@ -30,23 +28,18 @@ public class StateVector implements Vector {
     }
     
     StateVector getDerivative() {
-        StateVector result = new StateVector();
-        result.applyProperties(this);
-        result.setDerivative(true);
+        StateVector result = new StateVector(scene);
+        result.derivative = true;
         return result;
     }
 
-    public void addBody(RigidBody body) {
-        bodies.add(body);
-    }
-
     public int getDimension() {
-        return 13*bodies.size();
+        return 13*scene.getBodies().size();
     }
 
     public double getComponent(int index) {
-        RigidBody body = bodies.get(index/13);
-        int n = index - index/13;
+        RigidBody body = scene.getBodies().get(index/13);
+        int n = index % 13;
         if (!derivative) {
             if (n < 3) return body.getCoMPosition().getComponent(n);
             if (n == 3) return body.getOrientation().getW();
@@ -98,7 +91,7 @@ public class StateVector implements Vector {
     
     public void updateBodies() {
         int i=0;
-        for (RigidBody body : bodies) {
+        for (RigidBody body : scene.getBodies()) {
             body.setCoMPosition(new Vector3D(getComponent(i), getComponent(i+1), getComponent(i+2)));
             body.setOrientation(new Quaternion(getComponent(i+3), getComponent(i+4), 
                     getComponent(i+5), getComponent(i+6)));

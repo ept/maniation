@@ -9,11 +9,12 @@ class StateVectorModified extends StateVector {
     private double[] state;
 
     public StateVectorModified(StateVector origin, Operation operation, StateVector operand) {
+        super(origin.getScene());
         if (origin.getDimension() != operand.getDimension()) throw new IllegalArgumentException();
         if (origin.isDerivative() && !operand.isDerivative()) {
             StateVector tmp = origin; origin = operand; operand = tmp;
         }
-        applyProperties(origin);
+        setDerivative(origin.isDerivative());
         this.state = new double[super.getDimension()];
         switch (operation) {
         case MULT_COMPONENTS:

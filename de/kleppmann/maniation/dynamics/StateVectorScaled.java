@@ -7,7 +7,8 @@ class StateVectorScaled extends StateVector {
     private double factor;
     
     public StateVectorScaled(StateVector origin, double factor) {
-        applyProperties(origin);
+        super(origin.getScene());
+        setDerivative(origin.isDerivative());
         this.factor = factor;
     }
 
