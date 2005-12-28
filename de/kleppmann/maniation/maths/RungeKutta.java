@@ -1,11 +1,14 @@
 package de.kleppmann.maniation.maths;
 
+import java.util.List;
+
 public class RungeKutta implements ODESolver {
     
     private ODE ode;
     private double time = 0.0;
     private double h, hmin = 1e-10, eps = 1e-6;
     private Vector status;
+    private List<String> log = new java.util.ArrayList<String>();
 
     public RungeKutta(ODE ode, double timeStepGuess) {
         this.ode = ode;
@@ -39,7 +42,7 @@ public class RungeKutta implements ODESolver {
 
     public int solveUpTo(double finishTime) {
         int steps = 0;
-        System.out.println(status);
+        log.add(status.toString());
         while (time + hmin < finishTime) {
             if (time + h > finishTime) h = finishTime - time;
             Vector k1 = ode.derivative(time,         status                  ).mult(h);
@@ -50,10 +53,13 @@ public class RungeKutta implements ODESolver {
                                 k2.mult(1/3.0).add(
                                 k3.mult(1/3.0).add(
                                 k4.mult(1/6.0)))));
-            System.out.println(status);
+            log.add(status.toString());
             time += h; steps++;
         }
         return steps;
     }
 
+    public List<String> getLog() {
+        return log;
+    }
 }
