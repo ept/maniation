@@ -4,88 +4,6 @@ import java.util.List;
 
 public class SparseMatrix implements Matrix {
     
-    public interface Slice {
-        int getStartRow();
-        int getStartColumn();
-        Matrix getMatrix();
-    }
-    
-
-    public static class SliceImpl implements Slice {
-        private Matrix m;
-        private int startRow, startColumn;
-        
-        public SliceImpl(Matrix m, int startRow, int startColumn) {
-            this.m = m; this.startRow = startRow; this.startColumn = startColumn;
-        }
-        public int getStartRow() {
-            return startRow;
-        }
-        public int getStartColumn() {
-            return startColumn;
-        }
-        public Matrix getMatrix() {
-            return m;
-        }
-    }
-    
-    
-    private static class SliceTranspose implements Slice {
-        private Slice origin;
-        public SliceTranspose(Slice origin) {
-            this.origin = origin;
-        }
-        public Matrix getMatrix() {
-            return origin.getMatrix().transpose();
-        }
-        public int getStartColumn() {
-            return origin.getStartRow();
-        }
-        public int getStartRow() {
-            return origin.getStartColumn();
-        }
-    }
-
-    
-    private static class SliceInverse implements Slice {
-        private Slice origin;
-        public SliceInverse(Slice origin) {
-            if (origin.getStartRow() != origin.getStartColumn())
-                throw new UnsupportedOperationException();
-            this.origin = origin;
-        }
-        public Matrix getMatrix() {
-            return origin.getMatrix().inverse();
-        }
-        public int getStartColumn() {
-            return origin.getStartColumn();
-        }
-        public int getStartRow() {
-            return origin.getStartRow();
-        }
-    }
-    
-    
-    private static class SliceScaled implements Slice {
-        private Matrix scaled;
-        private int row, col;
-        public SliceScaled(Slice origin, double factor) {
-            this.scaled = origin.getMatrix().mult(factor);
-            this.row = origin.getStartRow();
-            this.col = origin.getStartColumn();
-        }
-        public Matrix getMatrix() {
-            return scaled;
-        }
-        public int getStartColumn() {
-            return col;
-        }
-        public int getStartRow() {
-            return row;
-        }
-    }
-
-    
     private int rows, columns;
     private Slice[] slices;
     private SliceTree root;
@@ -219,6 +137,88 @@ public class SparseMatrix implements Matrix {
     }
 
         
+    public interface Slice {
+        int getStartRow();
+        int getStartColumn();
+        Matrix getMatrix();
+    }
+    
+
+    public static class SliceImpl implements Slice {
+        private Matrix m;
+        private int startRow, startColumn;
+        
+        public SliceImpl(Matrix m, int startRow, int startColumn) {
+            this.m = m; this.startRow = startRow; this.startColumn = startColumn;
+        }
+        public int getStartRow() {
+            return startRow;
+        }
+        public int getStartColumn() {
+            return startColumn;
+        }
+        public Matrix getMatrix() {
+            return m;
+        }
+    }
+    
+    
+    private static class SliceTranspose implements Slice {
+        private Slice origin;
+        public SliceTranspose(Slice origin) {
+            this.origin = origin;
+        }
+        public Matrix getMatrix() {
+            return origin.getMatrix().transpose();
+        }
+        public int getStartColumn() {
+            return origin.getStartRow();
+        }
+        public int getStartRow() {
+            return origin.getStartColumn();
+        }
+    }
+
+    
+    private static class SliceInverse implements Slice {
+        private Slice origin;
+        public SliceInverse(Slice origin) {
+            if (origin.getStartRow() != origin.getStartColumn())
+                throw new UnsupportedOperationException();
+            this.origin = origin;
+        }
+        public Matrix getMatrix() {
+            return origin.getMatrix().inverse();
+        }
+        public int getStartColumn() {
+            return origin.getStartColumn();
+        }
+        public int getStartRow() {
+            return origin.getStartRow();
+        }
+    }
+    
+    
+    private static class SliceScaled implements Slice {
+        private Matrix scaled;
+        private int row, col;
+        public SliceScaled(Slice origin, double factor) {
+            this.scaled = origin.getMatrix().mult(factor);
+            this.row = origin.getStartRow();
+            this.col = origin.getStartColumn();
+        }
+        public Matrix getMatrix() {
+            return scaled;
+        }
+        public int getStartColumn() {
+            return col;
+        }
+        public int getStartRow() {
+            return row;
+        }
+    }
+
+    
     private class SliceTree {
         private SliceTree left = null, right = null;
         private Slice slice = null;
