@@ -125,6 +125,29 @@ public class Quaternion {
                 v1*this.z + v2*dest.z);
     }
     
+    public EulerAngles toEuler() {
+        double sy = 2.0*(w*y - x*z);
+        double cy = Math.sqrt(1 - sy*sy);
+        double sx, cx, sz, cz;
+        
+        if (Math.abs(cy) < 1e-6) {
+            sx = 2.0*(w*x - y*z);
+            cx = 1.0 - 2.0*(x*x + z*z);
+            sz = 0.0;
+            cz = 1.0;
+        } else {
+            sx = 2.0*(y*z + w*x)/cy;
+            cx = (1.0 - 2.0*(x*x + y*y))/cy;
+            sz = 2.0*(x*y + w*z)/cy;
+            cz = (1.0 - 2.0*(y*y + z*z))/cy;
+        }
+
+        double rotX = Math.acos(cx); if (sx < 0) rotX = 2*Math.PI - rotX;
+        double rotY = Math.acos(cy); if (sy < 0) rotY = 2*Math.PI - rotY;
+        double rotZ = Math.acos(cz); if (sz < 0) rotZ = 2*Math.PI - rotZ;
+        return new EulerAngles(EulerAngles.Convention.ROLL_PITCH_YAW, rotX, rotY, rotZ);
+    }
+    
     public static Quaternion getXRotation(double angle) {
         return new Quaternion(Math.cos(angle/2.0), Math.sin(angle/2.0), 0.0, 0.0);
     }
