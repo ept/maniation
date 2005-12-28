@@ -3,6 +3,7 @@ package de.kleppmann.maniation.maths;
 public class MatrixImpl implements Matrix {
     
     private double[][] m;
+    private MatrixImpl transpose = null;
 
     public MatrixImpl(int rows, int columns) {
         if ((rows < 1) || (columns < 1)) throw new IllegalArgumentException();
@@ -31,11 +32,13 @@ public class MatrixImpl implements Matrix {
     }
 
     public Matrix transpose() {
+        if (transpose != null) return transpose;
         double[][] t = new double[getColumns()][getRows()];
         for (int i=0; i<m.length; i++)
             for (int j=0; j<m[i].length; j++)
                 t[j][i] = m[i][j];
-        return new MatrixImpl(t);
+        transpose = new MatrixImpl(t);
+        return transpose;
     }
 
     public Matrix inverse() {
