@@ -3,7 +3,7 @@ package de.kleppmann.maniation.maths;
 public class ConjugateGradient {
     
     private int size;
-    private Matrix a;
+    private Matrix[] alist;
     private Vector b;
     private double tolerance = 1e-6;
     private int maxIter;
@@ -12,17 +12,25 @@ public class ConjugateGradient {
     
     public enum Method { SIMPLE, PRECONDITION, MAGNITUDE, MAXIMUM };
 
-    public ConjugateGradient(Matrix a, Vector b) {
+    public ConjugateGradient(Matrix[] alist, Vector b) {
+        if (alist.length == 0) throw new IllegalArgumentException();
         // Determine the maximum size of the problem
-        size = a.getColumns();
-        if (a.getRows() > size) size = a.getRows();
-        if (b.getDimension() > size) size = b.getDimension();
-        // Ensure the matrix is square
-        if (a.getRows() != size || a.getColumns() != size) {
-            SparseMatrix anew = new SparseMatrix(size, size);
-            anew.addSlice(new SparseMatrix.SliceImpl(a, 0, 0));
-            this.a = anew;
-        } else this.a = a;
+        size = b.getDimension();
+        for (Matrix a : alist) {
+            if (a.getRows() > size) size = a.getRows();
+            if (a.getColumns() > size) size = a.getColumns();
+        }
+        // Ensure the matrices are square
+        this.alist = new Matrix[alist.length];
+        for (int i=0; i<alist.length; i++) {
+            Matrix a = alist[i];
+            if (a.getRows() != size || a.getColumns() != size) {
+                SparseMatrix.Slice[] slices = new SparseMatrix.Slice[1];
+                slices[0] = new SparseMatrix.SliceImpl(a, 0, 0);
+                SparseMatrix anew = new SparseMatrix(size, size, slices);
+                this.alist[i] = anew;
+            } else this.alist[i] = a;
+        }
         // Ensure the vector has the same dimension as the matrix
         if (b.getDimension() != size) {
             double[] bnew = new double[size];
@@ -30,14 +38,38 @@ public class ConjugateGradient {
             for (int i=b.getDimension(); i<bnew.length; i++) bnew[i] = 0.0;
             this.b = new VectorImpl(bnew);
         } else this.b = b;
-        // Get inverse of the diagonal of matrix a
-        double[] diag = new double[size];
-        for (int i=0; i<size; i++) {
-            double c = this.a.getComponent(i,i);
-            if (c < 1e-16 && c > -1e-16) diag[i] = 1.0; else diag[i] = 1.0/c;
-        }
-        diagInv = new VectorImpl(diag);
+        // Other stuff
+        calcDiagonal();
         maxIter = 100*size;
+    }
+    
+    private void calcDiagonal() {
+        // Get the diagonal of the product of all matrices a
+        double[] diag = new double[size];
+        if (alist.length == 1) {
+            for (int i=0; i<size; i++) diag[i] = alist[0].getComponent(i,i);
+        } else if (alist.length == 2) {
+            for (int i=0; i<size; i++) {
+                diag[i] = 0.0;
+                for (int j=0; j<size; j++)
+                    diag[i] += alist[0].getComponent(i,j)*alist[1].getComponent(j,i);
+            }                    
+        } else {
+            Matrix middle = alist[1], end = alist[alist.length-1];
+            for (int i=2; i<alist.length-1; i++) middle = middle.mult(alist[i]);
+            for (int i=0; i<size; i++) {
+                diag[i] = 0.0;
+                for (int j=0; j<size; j++)
+                    for (int k=0; k<size; k++)
+                        diag[i] += alist[0].getComponent(i,j)*middle.getComponent(j,k)*
+                                end.getComponent(k,i);
+            }
+        }
+        // Calculate inverse
+        for (int i=0; i<size; i++)
+            if ((diag[i] < 1e-16) && (diag[i] > -1e-16)) diag[i] = 1.0;
+            else diag[i] = 1.0/diag[i];
+        diagInv = new VectorImpl(diag);
     }
 
     public Vector solve() {
@@ -56,9 +88,12 @@ public class ConjugateGradient {
                 pp = pp.mult(bk).add(zz);
             }
             bkDen = bkNum;
-            z = a.mult(p);
+            z = p; zz = pp;
+            for (int i=alist.length-1; i>=0; i--) {
+                z = alist[i].mult(z);
+                zz = alist[i].mult(zz);
+            }
             ak = bkNum/pp.mult(z);
-            zz = a.mult(pp);
             x = x.add(p.mult(ak));
             r = r.subtract(z.mult(ak));
             rr = rr.subtract(zz.mult(ak));
