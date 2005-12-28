@@ -112,6 +112,13 @@ public class Quaternion {
     public double getMagnitude() {
         return mag;
     }
+    
+    public Matrix33 toMatrix() {
+        return new Matrix33(
+                1.0 - 2.0*(y*y + z*z),       2.0*(x*y - w*z),       2.0*(x*z + w*y),
+                      2.0*(x*y + w*z), 1.0 - 2.0*(x*x + z*z),       2.0*(y*z - w*x),
+                      2.0*(x*z - w*y),       2.0*(y*z + w*x), 1.0 - 2.0*(x*x + y*y));
+    }
 
     public Quaternion interpolateTo(Quaternion dest, double amount) {
         double theta = Math.acos(this.x*dest.x + this.y*dest.y + this.z*dest.z + this.w*dest.w);
