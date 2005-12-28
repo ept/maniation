@@ -18,9 +18,9 @@ public class VectorImpl implements Vector {
     public String toString() {
         DecimalFormat format = new DecimalFormat("######0.00000");
         String result = "";
-        for (int i=0; i<values.length; i++) {
+        for (int i=0; i<getDimension(); i++) {
             if (!result.equals("")) result += ", ";
-            result += format.format(values[i]);
+            result += format.format(getComponent(i));
         }
         return "Vector(" + result + ")";
     }
@@ -35,39 +35,43 @@ public class VectorImpl implements Vector {
     
     public Vector mult(double scalar) {
         double[] newv = new double[getDimension()];
-        for (int i=0; i<getDimension(); i++) newv[i] = scalar*values[i];
+        for (int i=0; i<getDimension(); i++) newv[i] = scalar*getComponent(i);
         return new VectorImpl(newv);
     }
     
     public double mult(Vector v) {
         if (v.getDimension() != getDimension()) throw new IllegalArgumentException();
         double result = 0.0;
-        for (int i=0; i<getDimension(); i++) result += values[i] * v.getComponent(i);
+        for (int i=0; i<getDimension(); i++)
+            result += this.getComponent(i) * v.getComponent(i);
         return result;
     }
     
     public Vector multComponents(Vector v) {
         if (v.getDimension() != getDimension()) throw new IllegalArgumentException();
         double[] newv = new double[getDimension()];
-        for (int i=0; i<getDimension(); i++) newv[i] = values[i] * v.getComponent(i);
+        for (int i=0; i<getDimension(); i++)
+            newv[i] = this.getComponent(i) * v.getComponent(i);
         return new VectorImpl(newv);
     }
 
     public Vector add(Vector v) {
         if (v.getDimension() != getDimension()) throw new IllegalArgumentException();
         double[] newv = new double[getDimension()];
-        for (int i=0; i<getDimension(); i++) newv[i] = values[i] + v.getComponent(i);
+        for (int i=0; i<getDimension(); i++)
+            newv[i] = this.getComponent(i) + v.getComponent(i);
         return new VectorImpl(newv);
     }
     
     public Vector subtract(Vector v) {
         if (v.getDimension() != getDimension()) throw new IllegalArgumentException();
         double[] newv = new double[getDimension()];
-        for (int i=0; i<getDimension(); i++) newv[i] = values[i] - v.getComponent(i);
+        for (int i=0; i<getDimension(); i++)
+            newv[i] = this.getComponent(i) - v.getComponent(i);
         return new VectorImpl(newv);
     }
     
     public void toDoubleArray(double[] array, int offset) {
-        for (int i=0; i<getDimension(); i++) array[offset+i] = values[i];
+        for (int i=0; i<getDimension(); i++) array[offset+i] = getComponent(i);
     }
 }

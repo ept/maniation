@@ -34,9 +34,9 @@ public class MatrixImpl implements Matrix {
     public Matrix transpose() {
         if (transpose != null) return transpose;
         double[][] t = new double[getColumns()][getRows()];
-        for (int i=0; i<m.length; i++)
-            for (int j=0; j<m[i].length; j++)
-                t[j][i] = m[i][j];
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++)
+                t[j][i] = getComponent(i,j);
         transpose = new MatrixImpl(t);
         return transpose;
     }
@@ -47,20 +47,20 @@ public class MatrixImpl implements Matrix {
 
     public Matrix mult(double scalar) {
         double[][] t = new double[getRows()][getColumns()];
-        for (int i=0; i<m.length; i++)
-            for (int j=0; j<m[i].length; j++)
-                t[i][j] = scalar*m[i][j];
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++)
+                t[i][j] = scalar*getComponent(i,j);
         return new MatrixImpl(t);
     }
 
     public Matrix mult(Matrix other) {
         if (this.getColumns() != other.getRows()) throw new IllegalArgumentException();
         double[][] t = new double[getRows()][other.getColumns()];
-        for (int i=0; i<m.length; i++)
+        for (int i=0; i<getRows(); i++)
             for (int j=0; j<other.getColumns(); j++) {
                 t[i][j] = 0.0;
-                for (int k=0; k<m[i].length; k++)
-                    t[i][j] += m[i][k]*other.getComponent(k,j);
+                for (int k=0; k<getColumns(); k++)
+                    t[i][j] += getComponent(i,k)*other.getComponent(k,j);
             }
         if ((t.length == 3) && (t[0].length == 3))
             return new Matrix33(
@@ -73,9 +73,10 @@ public class MatrixImpl implements Matrix {
     public Vector mult(Vector vec) {
         if (this.getColumns() != vec.getDimension()) throw new IllegalArgumentException();
         double[] v = new double[this.getRows()];
-        for (int i=0; i<m.length; i++) {
+        for (int i=0; i<getRows(); i++) {
             v[i] = 0.0;
-            for (int j=0; j<m[i].length; j++) v[i] += m[i][j]*vec.getComponent(j);
+            for (int j=0; j<getColumns(); j++)
+                v[i] += this.getComponent(i,j) * vec.getComponent(j);
         }
         if (v.length == 3) return new Vector3D(v[0], v[1], v[2]);
         return new VectorImpl(v);
@@ -85,8 +86,9 @@ public class MatrixImpl implements Matrix {
         if ((getRows() != other.getRows()) || (getColumns() != other.getColumns()))
             throw new IllegalArgumentException();
         double[][] t = new double[getRows()][getColumns()];
-        for (int i=0; i<m.length; i++)
-            for (int j=0; j<m[i].length; j++) t[i][j] = m[i][j] + other.getComponent(i,j);
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++)
+                t[i][j] = this.getComponent(i,j) + other.getComponent(i,j);
         return new MatrixImpl(t);
     }
 
@@ -94,8 +96,9 @@ public class MatrixImpl implements Matrix {
         if ((getRows() != other.getRows()) || (getColumns() != other.getColumns()))
             throw new IllegalArgumentException();
         double[][] t = new double[getRows()][getColumns()];
-        for (int i=0; i<m.length; i++)
-            for (int j=0; j<m[i].length; j++) t[i][j] = m[i][j] - other.getComponent(i,j);
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++)
+                t[i][j] = this.getComponent(i,j) - other.getComponent(i,j);
         return new MatrixImpl(t);
     }
 }
