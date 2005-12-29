@@ -7,12 +7,17 @@ public class VectorImpl implements Vector {
     private double values[];
     
     public VectorImpl(int dimension) {
+        dimension = Math.max(dimension, 1);
         values = new double[dimension];
         for (int i=0; i<dimension; i++) values[i] = 0.0;
     }
     
     public VectorImpl(double[] values) {
         this.values = values;
+        if ((values == null) || (values.length == 0)) {
+            this.values = new double[1];
+            this.values[0] = 0.0;
+        }
     }
 
     public String toString() {

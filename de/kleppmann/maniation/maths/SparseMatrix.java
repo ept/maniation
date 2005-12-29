@@ -34,8 +34,8 @@ public class SparseMatrix implements Matrix {
     }
 
     public SparseMatrix(int rows, int columns, Slice[] slices) {
-        this.rows = rows;
-        this.columns = columns;
+        this.rows = Math.max(rows, 1);
+        this.columns = Math.max(columns, 1);
         this.root = new SliceTree();
         List<Slice> sList = new java.util.ArrayList<Slice>();
         for (Slice s : slices) {

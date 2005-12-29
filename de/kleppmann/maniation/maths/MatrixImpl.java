@@ -14,8 +14,6 @@ public class MatrixImpl implements Matrix {
     }
     
     public MatrixImpl(double[][] components) {
-        if ((components.length < 1) || (components[0].length < 1)) 
-            throw new IllegalArgumentException();
         m = components;
     }
 
