@@ -5,6 +5,7 @@ import java.util.List;
 import de.kleppmann.maniation.maths.ConjugateGradient;
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.ODE;
+import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
@@ -65,12 +66,22 @@ public class ConstrainedRigidBodies implements ODE, DynamicScene {
         return s.getDerivative();
     }
     
-    private void applyConstraintForces(Vector forces) {
+    private void applyConstraintForces(Vector lambda) {
+        Vector constForce;
+        if (allConstraints.getJacobian().getRows() == lambda.getDimension()) {
+            constForce = allConstraints.getJacobian().transpose().mult(lambda);
+        } else {
+            SparseMatrix.Slice[] slices = new SparseMatrix.Slice[1];
+            slices[0] = new SparseMatrix.SliceImpl(allConstraints.getJacobian().transpose(), 0, 0);
+            SparseMatrix jac = new SparseMatrix(allConstraints.getJacobian().getColumns(),
+                    lambda.getDimension(), slices);
+            constForce = jac.mult(lambda);
+        }
         for (int i=bodies.size()-1; i>=0; i--) {
-            bodies.get(i).addForce(new Vector3D(forces.getComponent(6*i),
-                    forces.getComponent(6*i+1), forces.getComponent(6*i+2)));
-            bodies.get(i).addTorque(new Vector3D(forces.getComponent(6*i+3),
-                    forces.getComponent(6*i+4), forces.getComponent(6*i+5)));
+            bodies.get(i).addForce(new Vector3D(constForce.getComponent(6*i),
+                    constForce.getComponent(6*i+1), constForce.getComponent(6*i+2)));
+            bodies.get(i).addTorque(new Vector3D(constForce.getComponent(6*i+3),
+                    constForce.getComponent(6*i+4), constForce.getComponent(6*i+5)));
         }
     }
 
