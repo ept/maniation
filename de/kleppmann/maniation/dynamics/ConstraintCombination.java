@@ -21,7 +21,7 @@ public class ConstraintCombination {
         this.scene = scene;
         List<SparseMatrix.Slice> j    = new java.util.ArrayList<SparseMatrix.Slice>();
         List<SparseMatrix.Slice> jdot = new java.util.ArrayList<SparseMatrix.Slice>();
-        int constrCount = 0;
+        constrCount = 0;
         for (Constraint constr : scene.getConstraints()) {
             for (Map.Entry<RigidBody,Matrix> entry : constr.getJacobian().entrySet()) {
                 j.add(new JacobianSlice(constr, constrCount, entry.getKey(), false));
