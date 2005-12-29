@@ -11,16 +11,17 @@ public class TestDynamics {
     public TestDynamics() {
         super();
         ConstrainedRigidBodies crb = new ConstrainedRigidBodies();
-        Gyroscope gyro = new Gyroscope();
-        crb.addBody(gyro);
+        /*Gyroscope gyro = new Gyroscope();
+        crb.addBody(gyro);*/
+        MultiPendulum.setup(crb, 1);
         RungeKutta solver = new RungeKutta(crb, 0.1);
-        solver.solveUpTo(50.0);
+        solver.solveUpTo(20.0);
         try {
             FileWriter writer = new FileWriter("/home/martin/graphics/maniation/matlab/javadata");
             writer.write("# name: data\n");
             writer.write("# type: matrix\n");
             writer.write("# rows: " + solver.getLog().size() + "\n");
-            writer.write("# columns: 13\n");
+            writer.write("# columns: " + crb.getInitial().getDimension() + "\n");
             for (String line : solver.getLog()) writer.write(line + "\n");
             writer.close();
         } catch (IOException e) {
