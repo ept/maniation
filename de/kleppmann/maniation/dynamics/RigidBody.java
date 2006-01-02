@@ -75,11 +75,6 @@ public class RigidBody {
         return forces;
     }
     
-    protected void addForce(Vector3D force) {
-        if (!upToDate) deriveQuantities();
-        forces = forces.add(force);
-    }
-    
     public Quaternion getOrientation() {
         return orient;
     }
@@ -113,13 +108,19 @@ public class RigidBody {
         return torques;
     }
     
-    protected void addTorque(Vector3D torque) {
-        if (!upToDate) deriveQuantities();
-        torques = torques.add(torque);
-    }
-    
     public MassInertia getMassInertia() {
         return massInertia;
+    }
+    
+    public double getEnergy() {
+        Vector3D gravity = new Vector3D(0, 1, 0);
+        double potential = gravity.mult(getCoMPosition());
+        double kinetic = 0.5*mass*getCoMVelocity().mult(getCoMVelocity());
+        Vector3D omega = toPrincipalAxes.transform(
+                getOrientation().getInverse().transform(getAngularVelocity()));
+        Vector3D osq = omega.multComponents(omega);
+        double rotational = 0.5*principalInertia.mult(osq);
+        return potential + kinetic + rotational;
     }
     
     
