@@ -21,7 +21,7 @@ public class VectorImpl implements Vector {
     }
 
     public String toString() {
-        DecimalFormat format = new DecimalFormat("######0.00000");
+        DecimalFormat format = new DecimalFormat("######0.000000000000000");
         String result = "";
         for (int i=0; i<getDimension(); i++) {
             if (!result.equals("")) result += ", ";

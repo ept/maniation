@@ -73,7 +73,7 @@ public class ConjugateGradient {
     }
 
     public Vector solve() {
-        System.out.println("*** Conjugate gradient solver started");
+        //System.out.println("*** Conjugate gradient solver started");
         int iter = 0;
         double ak, bk, bkDen = 1.0, bkNum, bNorm, xNorm, zm1Norm, zNorm, err;
         Vector x = new VectorImpl(size), r = b, rr = b, z = b.multComponents(diagInv);
@@ -111,7 +111,7 @@ public class ConjugateGradient {
                 xNorm = norm(x);
                 if (err <= 0.5*xNorm) err /= xNorm; else continue;
             }
-            System.out.println("Iteration " + iter + ": error " + err);
+            //System.out.println("Iteration " + iter + ": error " + err);
             if (err <= tolerance) break;
         }
         return x;

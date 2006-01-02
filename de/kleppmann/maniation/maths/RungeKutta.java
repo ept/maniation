@@ -42,6 +42,7 @@ public class RungeKutta implements ODESolver {
 
     public int solveUpTo(double finishTime) {
         int steps = 0;
+        //System.out.println("Status: " + status);
         log.add(status.toString());
         while (time + hmin < finishTime) {
             if (time + h > finishTime) h = finishTime - time;
@@ -53,6 +54,7 @@ public class RungeKutta implements ODESolver {
                                 k2.mult(1/3.0).add(
                                 k3.mult(1/3.0).add(
                                 k4.mult(1/6.0)))));
+            //System.out.println("Status: " + status);
             log.add(status.toString());
             time += h; steps++;
         }
