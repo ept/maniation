@@ -4,7 +4,8 @@ import java.text.DecimalFormat;
 
 public class Vector3D implements Vector {
     
-    private double x, y, z;
+    private double x, y, z, mag;
+    private boolean magCalc = false;
     
     public Vector3D() {
         this.x = 0.0; this.y = 0.0; this.z = 0.0;
@@ -23,6 +24,12 @@ public class Vector3D implements Vector {
     
     public Matrix33 dual() {
         return new Matrix33(0, -z, y, z, 0, -x, -y, x, 0);
+    }
+    
+    public double magnitude() {
+        if (!magCalc) mag = Math.sqrt(x*x + y*y + z*z);
+        magCalc = true;
+        return mag;
     }
 
     public int getDimension() {
