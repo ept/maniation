@@ -23,13 +23,14 @@ public class Quaternion {
         this.y = y;
         this.z = z;
         double m = w*w + x*x + y*y + z*z;
+        this.mag = Math.sqrt(m);
         this.inverse = new Quaternion(true);
         this.inverse.w = w/m;
         this.inverse.x = -x/m;
         this.inverse.y = -y/m;
         this.inverse.z = -z/m;
+        this.inverse.mag = 1.0/this.mag;
         this.inverse.inverse = this;
-        this.mag = Math.sqrt(m);
     }
     
     public Quaternion(Vector3D v) {
