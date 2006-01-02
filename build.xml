@@ -1,12 +1,12 @@
 <project name="maniation" default="compile">
 
     <!-- settings for PWF -->
-    <property name="realityinabox" location="../../../dev/project"/>
-    <property name="jre" location="../../../jre1.5.0_05"/>
+    <!--property name="realityinabox" location="../../../dev/project"/>
+    <property name="jre" location="../../../jre1.5.0_05"/-->
 
     <!-- settings for penpen -->
-    <!--property name="realityinabox" location="../../dev/project"/>
-    <property name="jre" location="/usr/java/jdk1.5.0_04/jre"/-->
+    <property name="realityinabox" location="../../dev/project"/>
+    <property name="jre" location="/usr/java/jdk1.5.0_04/jre"/>
 
     <target name="init">
         <path id="classpath">
@@ -36,5 +36,18 @@
         <java classname="de.kleppmann.maniation.Maniation" fork="true" jvm="${jre}/bin/java">
             <classpath refid="classpath"/>
         </java>
+    </target>
+
+    <taskdef name="statcvs" classname="net.sf.statcvs.ant.StatCvsTask"
+        classpath="../../statcvs-0.2.2/statcvs.jar"/>
+
+    <target name="stats">
+        <mkdir dir="stats"/>
+        <exec executable="cvs" output="cvs.log" error="/dev/null">
+            <arg line="log"/>
+        </exec>
+        <statcvs projectDirectory="." cvsLogFile="cvs.log"
+            outputDirectory="stats" title="Part II Project" />
+        <delete file="cvs.log"/>
     </target>
 </project>
