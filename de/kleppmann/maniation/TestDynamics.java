@@ -13,7 +13,7 @@ public class TestDynamics {
         ConstrainedRigidBodies crb = new ConstrainedRigidBodies();
         /*Gyroscope gyro = new Gyroscope();
         crb.addBody(gyro);*/
-        MultiPendulum.setup(crb, 1);
+        MultiPendulum.setup(crb, 2);
         RungeKutta solver = new RungeKutta(crb, 0.1);
         solver.solveUpTo(20.0);
         try {
