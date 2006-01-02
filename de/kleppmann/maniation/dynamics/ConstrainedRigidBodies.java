@@ -7,7 +7,6 @@ import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.ODE;
 import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
-import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
 
 public class ConstrainedRigidBodies implements ODE, DynamicScene {
@@ -52,39 +51,13 @@ public class ConstrainedRigidBodies implements ODE, DynamicScene {
         if (!(state instanceof StateVector)) throw new IllegalArgumentException();
         StateVector s = (StateVector) state;
         s.updateBodies();
+        //System.out.println("State: " + s);
+        //System.out.println("Energy: " + bodies.get(0).getEnergy());
         allConstraints.update();
-        Vector term1 = allConstraints.getJacobianDot().mult(velocities);
-        Vector term2 = allConstraints.getJacobian().mult(inertia.inverse().mult(forces));
-        Vector rhs = term1.add(term2).add(allConstraints.getPenalty()).add(
-                allConstraints.getPenaltyDot()).mult(-1.0);
-        Matrix[] lhs = new Matrix[3];
-        lhs[0] = allConstraints.getJacobian();
-        lhs[1] = inertia.inverse();
-        lhs[2] = allConstraints.getJacobian().transpose();
-        ConjugateGradient solver = new ConjugateGradient(lhs, rhs);
-        applyConstraintForces(solver.solve());
-        return s.getDerivative();
+        //System.out.println("Deriv: " + s.getDerivative());
+        return s.getDerivative().add(new ConstraintForces());
     }
     
-    private void applyConstraintForces(Vector lambda) {
-        Vector constForce;
-        if (allConstraints.getJacobian().getRows() == lambda.getDimension()) {
-            constForce = allConstraints.getJacobian().transpose().mult(lambda);
-        } else {
-            SparseMatrix.Slice[] slices = new SparseMatrix.Slice[1];
-            slices[0] = new SparseMatrix.SliceImpl(allConstraints.getJacobian().transpose(), 0, 0);
-            SparseMatrix jac = new SparseMatrix(allConstraints.getJacobian().getColumns(),
-                    lambda.getDimension(), slices);
-            constForce = jac.mult(lambda);
-        }
-        for (int i=bodies.size()-1; i>=0; i--) {
-            bodies.get(i).addForce(new Vector3D(constForce.getComponent(6*i),
-                    constForce.getComponent(6*i+1), constForce.getComponent(6*i+2)));
-            bodies.get(i).addTorque(new Vector3D(constForce.getComponent(6*i+3),
-                    constForce.getComponent(6*i+4), constForce.getComponent(6*i+5)));
-        }
-    }
-
 
     private class ForceVector extends VectorImpl {
         public ForceVector() {
@@ -118,6 +91,44 @@ public class ConstrainedRigidBodies implements ODE, DynamicScene {
             int n = index % 6;
             if (n < 3) return body.getCoMVelocity().getComponent(n);
             return body.getAngularVelocity().getComponent(n - 3);
+        }
+    }
+    
+    
+    private class ConstraintForces extends StateVector {
+        
+        private Vector constForce;
+
+        public ConstraintForces() {
+            super(ConstrainedRigidBodies.this);
+            Vector term1 = allConstraints.getJacobianDot().mult(velocities);
+            Vector term2 = allConstraints.getJacobian().mult(inertia.inverse().mult(forces));
+            Vector rhs = term1.add(term2).add(allConstraints.getPenalty()).add(
+                    allConstraints.getPenaltyDot()).mult(-1.0);
+            Matrix[] lhs = new Matrix[3];
+            lhs[0] = allConstraints.getJacobian();
+            lhs[1] = inertia.inverse();
+            lhs[2] = allConstraints.getJacobian().transpose();
+            Vector lambda = (new ConjugateGradient(lhs, rhs)).solve();
+            if (allConstraints.getJacobian().getRows() == lambda.getDimension()) {
+                constForce = allConstraints.getJacobian().transpose().mult(lambda);
+            } else {
+                SparseMatrix.Slice[] slices = new SparseMatrix.Slice[1];
+                slices[0] = new SparseMatrix.SliceImpl(allConstraints.getJacobian().transpose(), 0, 0);
+                SparseMatrix jac = new SparseMatrix(allConstraints.getJacobian().getColumns(),
+                        lambda.getDimension(), slices);
+                constForce = jac.mult(lambda);
+            }
+        }
+
+        public double getComponent(int index) {
+            int mod = (index % 13) - 7, div = index / 13;
+            if (mod < 0) return 0.0;
+            return constForce.getComponent(6*div + mod);
+        }
+
+        public boolean isDerivative() {
+            return true;
         }
     }
 }
