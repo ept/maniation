@@ -19,14 +19,14 @@ public class JointConstraint implements Constraint {
     public Vector3D getPenalty() {
         Vector3D s = body1.getOrientation().transform(localPos1);
         Vector3D t = body2.getOrientation().transform(localPos2);
-        return body1.getCoMPosition().add(s).subtract(body1.getCoMPosition()).subtract(t);
+        return body1.getCoMPosition().add(s).subtract(body2.getCoMPosition()).subtract(t);
     }
 
     public Vector3D getPenaltyDot() {
         Vector3D s = body1.getOrientation().transform(localPos1);
         Vector3D t = body2.getOrientation().transform(localPos2);
         return body1.getCoMVelocity().add(body1.getAngularVelocity().cross(s)).
-            subtract(body1.getCoMVelocity()).subtract(body2.getAngularVelocity().cross(t));
+            subtract(body2.getCoMVelocity()).subtract(body2.getAngularVelocity().cross(t));
     }
 
     public Map<RigidBody, Matrix> getJacobian() {
