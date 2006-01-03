@@ -272,3 +272,83 @@ we proceed as before:
 \end{eqnarray}
 Again note the transposition~-- in this example, $\mathbf{J}$ and $\dot{\mathbf{J}}$ only
 have one row.
+
+\subsubsection{Example 4: Relative rotation of two bodies}
+
+In example~2, we derived the formulae for a ball-and-socket joint. How can we express other types
+of joints? A good way of doing this is by augmenting the ball-and-socket constraint with
+additional constraints which restrict the set of valid rotations. We can constrain the orientation
+of a single rigid body by requiring that the quaternion's axis of rotation must lie within a
+particular plane. This plane must pass through the centre of mass of the constrained body and
+has a normal vector $\mathbf{n}$. Remembering equation~\ref{quatRotation}, we can set up the
+constraint function to be
+\begin{eqnarray}
+\label{constrEx4C}
+\mathbf{C} & = & \mathrm{Re}(\tilde{\mathbf{n}}\mathbf{q}) \\
+& = & - n_1 q_x - n_2 q_y - n_3 q_z \nonumber
+\end{eqnarray}
+where $\mathbf{q}$ is the quaternion specifying the body's orientation. Here we extract only the
+real part of the quaternion product, thus we have a scalar constraint like in the previous
+example. The real part of the quaternion product implicitly contains the dot product with the
+axis of rotation, hence equating it to zero requires the axis to lie in the specified plane.
+This reduces the number of degrees of freedom by one, provided the constraint is not redundant.
+
+It is not completely easy to visualize what this type of constraint means. One good way to look
+at it is to consider a standard two-axis joystick. If it is placed on a table, the two axes of
+rotation lie in a plane parallel to the surface of this table. If you cannot turn the stick about
+its own axis, the normal of the constraint plane is orthogonal to the table surface.
+Don't be confused by the fact that the joystick handle happens to point in the direction of the
+normal~-- any sort of obscure shape may be substituted in its place without changing the nature
+of the constraint!
+
+A more common sort of joint is the hinge, which we find in most doors, in our knees and elbows.
+It allows rotation only about one particular axis. We can conveniently express it by employing two
+constraints on the same body, each of which confines the axis to a plane. If the two planes are
+not parallel, the axis about which rotation may occur corresponds to the line of intersection of
+these two planes. If they are parallel, one of the constraints is redundant. In other words,
+to make a hinge joint, we first add a ball-and-socket joint, then we find two nonparallel vectors
+which are both orthogonal to the hinge axis, and use them as normal vectors for two rotatation
+constraints. This reduces the original number of six degrees of freedom to one~-- the angle of the
+hinge.
+
+If we want to constrain the possible rotations between two rigid bodies, all we need to do is make
+$\mathbf{n}$ in equation~\ref{constrEx4C} vary with the orientation of the connected body.
+Let $\bm{\omega}$ be the angular velocity of the first body, and $\bm{\phi}$ the angular velocity
+of the second body. The constraint plane normal $\mathbf{n}$ is expressed in world coordinates and
+is attached to the second body (i.e. $\dot{\mathbf{n}} = \bm{\phi}\times\mathbf{n}$). $\mathbf{q}$
+is the quaternion expressing the rotation from the first body's frame to the second body's.
+Although the expression for $\mathbf{C}$ looks so innocent, its two derivatives are rather
+verbose, so we shall spare the reader the gruesome details of the derivation and merely state the
+result:
+
+\begin{eqnarray}
+\dot{\mathbf{C}} &=& \mathbf{J}\left[\begin{array}{c} \bm{\omega}\\\bm{\phi} \end{array}\right] \\
+&=& \left[\begin{array}{c}
+        \frac{1}{2}( n_2 q_z - n_3 q_y - n_1 q_w) \\
+        \frac{1}{2}( n_3 q_x - n_1 q_z - n_2 q_w) \\
+        \frac{1}{2}( n_1 q_y - n_2 q_x - n_3 q_w)
+    \end{array}\right]^T \bm{\omega} +
+    \left[\begin{array}{c}
+        n_3 q_y - n_2 q_z \\ n_1 q_z - n_3 q_x \\ n_2 q_x - n_1 q_y
+    \end{array}\right]^T \bm{\phi} \nonumber \\
+\ddot{\mathbf{C}} &=& \mathbf{J}
+    \left[\begin{array}{c} \dot{\bm{\omega}}\\\dot{\bm{\phi}} \end{array}\right] +
+    \left[\begin{array}{cccccc} \dot{J}_1 & \dot{J}_2 & \dot{J}_3 & \dot{J}_4 &
+        \dot{J}_5 & \dot{J}_6 \end{array}\right]
+    \left[\begin{array}{c} \bm{\omega}\\\bm{\phi} \end{array}\right] \\
+\dot{J}_1 & = & \frac{3}{2} q_w (\phi_3 n_2 - \phi_2 n_3) +
+                \frac{3}{2} q_y (\phi_2 n_1 - \phi_1 n_2) + \nonumber\\*&&
+                \frac{3}{2} q_z (\phi_3 n_1 - \phi_1 n_3) +
+                \frac{1}{4} \omega_1 (q_x n_1 + q_y n_2 + q_z n_3) \nonumber\\
+\dot{J}_2 & = & \frac{3}{2} q_w (\phi_1 n_3 - \phi_3 n_1) +
+                \frac{3}{2} q_x (\phi_1 n_2 - \phi_2 n_1) + \nonumber\\*&&
+                \frac{3}{2} q_z (\phi_3 n_2 - \phi_2 n_3) +
+                \frac{1}{4} \omega_2 (q_x n_1 + q_y n_2 + q_z n_3) \nonumber\\
+\dot{J}_3 & = & \frac{3}{2} q_w (\phi_2 n_1 - \phi_1 n_2) +
+                \frac{3}{2} q_y (\phi_2 n_3 - \phi_3 n_2) + \nonumber\\*&&
+                \frac{3}{2} q_x (\phi_1 n_3 - \phi_3 n_1) +
+                \frac{1}{4} \omega_3 (q_x n_1 + q_y n_2 + q_z n_3) \nonumber\\
+\dot{J}_4 & = & q_y (\phi_1 n_2 - \phi_2 n_1) + q_z (\phi_1 n_3 - \phi_3 n_1) \nonumber\\
+\dot{J}_5 & = & q_x (\phi_2 n_1 - \phi_1 n_2) + q_z (\phi_2 n_3 - \phi_3 n_2) \nonumber\\
+\dot{J}_6 & = & q_x (\phi_3 n_1 - \phi_1 n_3) + q_y (\phi_3 n_2 - \phi_2 n_3) \nonumber
+\end{eqnarray}
