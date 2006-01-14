@@ -23,5 +23,5 @@ function retval = plotblender(result)
         endfor
     endfor
     data = real(data);
-    save -ascii blenderdata data
+    save -text blenderdata data
 endfunction
