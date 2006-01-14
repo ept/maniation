@@ -33,6 +33,18 @@ public class RigidBody {
         principalInertia = new Vector3D(1.0, 1.0, 1.0);
     }
     
+    protected void setMass(double mass) {
+        this.mass = mass;
+    }
+    
+    protected void setPrincipalInertia(Vector3D inertia) {
+        this.principalInertia = inertia;
+    }
+    
+    protected void setPrincipalAxes(Quaternion toPrincipalAxes) {
+        this.toPrincipalAxes = toPrincipalAxes;
+    }
+    
     private void deriveQuantities() {
         vel = mom.mult(1.0/mass);
         inertia = new Matrix33(principalInertia);
@@ -137,7 +149,8 @@ public class RigidBody {
 
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
-                if (row == column) return mass; else return 0.0;
+                if (row == column) return mass;
+                return 0.0;
             }
             if (!upToDate) deriveQuantities();
             return inertia.getComponent(row - 3, column - 3);
@@ -152,7 +165,8 @@ public class RigidBody {
     private class InverseMassInertia extends MassInertia {
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
-                if (row == column) return 1.0/mass; else return 0.0;
+                if (row == column) return 1.0/mass;
+                return 0.0;
             }
             if (!upToDate) deriveQuantities();
             return invInertia.getComponent(row - 3, column - 3);

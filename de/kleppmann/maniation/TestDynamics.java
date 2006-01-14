@@ -16,7 +16,7 @@ public class TestDynamics {
         /*MultiPendulum.setup(crb, 2);*/
         Centrifuge.setup(crb);
         RungeKutta solver = new RungeKutta(crb, 0.1);
-        solver.solveUpTo(20.0);
+        solver.solveUpTo(100.0);
         try {
             FileWriter writer = new FileWriter("/home/martin/graphics/maniation/matlab/javadata");
             writer.write("# name: data\n");
