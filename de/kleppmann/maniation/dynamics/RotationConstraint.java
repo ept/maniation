@@ -111,20 +111,20 @@ public class RotationConstraint implements Constraint {
         if (body1 != null) {
             double[][] m1 = {{0, 0, 0,
                 0.5 *(qw*x1*px - x8*px) +
-                0.25*(pw*x16*qx - x17*qx - x13*qw + x14*qz - x15*qy - qw*x16*px + x18*px),
+                0.25*(pw*x16*qx - x17*qx + x13*qw - x14*qz + x15*qy - qw*x16*px + x18*px),
                 0.5 *(qw*x1*py - x8*py) +
-                0.25*(pw*x16*qy - x17*qy - x13*qz - x14*qw + x15*qx - qw*x16*py + x18*py),
+                0.25*(pw*x16*qy - x17*qy + x13*qz + x14*qw - x15*qx - qw*x16*py + x18*py),
                 0.5 *(qw*x1*pz - x8*pz) +
-                0.25*(pw*x16*qz - x17*qz + x13*qy - x14*qx - x15*qw - qw*x16*pz + x18*pz) }};
+                0.25*(pw*x16*qz - x17*qz - x13*qy + x14*qx + x15*qw - qw*x16*pz + x18*pz) }};
             result.put(body1, new MatrixImpl(m1));
         }
         double[][] m2 = {{0, 0, 0,
-            0.25*(pw*x1*qx - qw*x1*px - x9*qx - x10*qw + x11*qz - x12*qy + x8*px) +
-            0.5 *(x17*qx + x13*qw - x14*qz + x15*qy - x16*pw*qx),
-            0.25*(pw*x1*qy - qw*x1*py - x9*qy - x10*qz - x11*qw + x12*qx + x8*py) +
-            0.5 *(x17*qy + x13*qz + x14*qw - x15*qx - x16*pw*qy),
-            0.25*(pw*x1*qz - qw*x1*pz - x9*qz + x10*qy - x11*qx - x12*qw + x8*pz) +
-            0.5 *(x17*qz - x13*qy + x14*qx + x15*qw - x16*pw*qz) }};
+            0.25*(pw*x1*qx - qw*x1*px - x9*qx + x10*qw - x11*qz + x12*qy + x8*px) +
+            0.5 *(x17*qx - x13*qw + x14*qz - x15*qy - x16*pw*qx),
+            0.25*(pw*x1*qy - qw*x1*py - x9*qy + x10*qz + x11*qw - x12*qx + x8*py) +
+            0.5 *(x17*qy - x13*qz - x14*qw + x15*qx - x16*pw*qy),
+            0.25*(pw*x1*qz - qw*x1*pz - x9*qz - x10*qy + x11*qx + x12*qw + x8*pz) +
+            0.5 *(x17*qz + x13*qy - x14*qx - x15*qw - x16*pw*qz) }};
         result.put(body2, new MatrixImpl(m2));
         return result;
     }
