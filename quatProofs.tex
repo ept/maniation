@@ -2,35 +2,35 @@
 \subsection{Instantaneous rate of change\label{quatRateOfChangeOrthogonal}}
 The instantaneous rate of change is given to be
 \begin{eqnarray*}
-\dot{\mathbf{q}} & = & \frac{1}{2}\bm{\omega}\mathbf{q} =
-    \frac{1}{2}(\omega_1\mathbf{i} + \omega_2\mathbf{j} + \omega_3\mathbf{k})
-    (q_w + q_x\mathbf{i} + q_y\mathbf{j} + q_z\mathbf{k}) \\
+\dot{\q{q}} & = & \frac{1}{2}\ve{\omega}\q{q} =
+    \frac{1}{2}(\omega_1\qi + \omega_2\qj + \omega_3\qk)
+    (q_w + q_x\qi + q_y\qj + q_z\qk) \\*
 & = & \frac{1}{2} ( - \omega_1 q_x - \omega_2 q_y - \omega_3 q_z ) +
-    \frac{\mathbf{i}}{2} ( \omega_1 q_w + \omega_2 q_z - \omega_3 q_y ) + \\
-&&  \frac{\mathbf{j}}{2} (-\omega_1 q_z + \omega_2 q_w + \omega_3 q_x ) +
-    \frac{\mathbf{k}}{2} ( \omega_1 q_y - \omega_2 q_x + \omega_3 q_w )
+    \frac{\qi}{2} ( \omega_1 q_w + \omega_2 q_z - \omega_3 q_y ) + \\*
+&&  \frac{\qj}{2} (-\omega_1 q_z + \omega_2 q_w + \omega_3 q_x ) +
+    \frac{\qk}{2} ( \omega_1 q_y - \omega_2 q_x + \omega_3 q_w )
 \end{eqnarray*}
 
-We now treat $\mathbf{q}$ and $\dot{\mathbf{q}}$ as 4D vectors and calculate
+We now treat \q{q} and $\dot{\q{q}}$ as 4D vectors and calculate
 their dot product:
 \begin{eqnarray*}
-\mathbf{q}\cdot\dot{\mathbf{q}} & = & \frac{1}{2} (
+\q{q}\cdot\dot{\q{q}} & = & \frac{1}{2} (
     - q_w \omega_1 q_x - q_w \omega_2 q_y - q_w \omega_3 q_z
-    + q_x \omega_1 q_w + q_x \omega_2 q_z - q_x \omega_3 q_y \\
+    + q_x \omega_1 q_w + q_x \omega_2 q_z - q_x \omega_3 q_y \\*
 &&  - q_y \omega_1 q_z + q_y \omega_2 q_w + q_y \omega_3 q_x
-    + q_z \omega_1 q_y - q_z \omega_2 q_x + q_z \omega_3 q_w ) \\
+    + q_z \omega_1 q_y - q_z \omega_2 q_x + q_z \omega_3 q_w ) \\*
 & = & 0.
 \end{eqnarray*}
-The rate of change is orthogonal to $\mathbf{q}$, and therefore it is always
-a tangent to the sphere, touching it at the point corresponding to $\mathbf{q}$.
+The rate of change is orthogonal to \q{q}, and therefore it is always
+a tangent to the sphere, touching it at the point corresponding to \q{q}.
 
-We can determine the magnitude $||\dot{\mathbf{q}}||$ from the sum of squares of the
+We can determine the magnitude $\norm{\dot{\q{q}}}$ from the sum of squares of the
 components given above and find it to be
-$||\dot{\mathbf{q}}|| = \frac{1}{2}||\bm{\omega}||\,||\mathbf{q}||$. Since we always
-require $\mathbf{q}$ to be a unit quaternion, we can reduce this to
+$\norm{\dot{\q{q}}} = \frac{1}{2}\norm{\ve{\omega}}\,\norm{\q{q}}$. Since we always
+require $\q{q}$ to be a unit quaternion, we can reduce this to
 \begin{equation}
 \label{quatRateOfChangeMagnitude}
-||\dot{\mathbf{q}}|| = \frac{1}{2}||\bm{\omega}||.
+\norm{\dot{\q{q}}} = \frac{1}{2}\norm{\ve{\omega}}.
 \end{equation}
 
 \subsection{Corrected quaternion integration\label{quatIntegrationDerivation}}
@@ -44,113 +44,113 @@ the linear transformation to get from the body's frame of reference into the wor
 frame) is given as a function of time by
 \begin{equation}
 \label{quatDerivationExact}
-\mathbf{q}(t) = \cos\left(\frac{||\bm{\omega}||t}{2}\right) +
-    \sin\left(\frac{||\bm{\omega}||t}{2}\right)\mathbf{i}
+\q{q}(t) = \cos\left(\frac{\norm{\ve{\omega}}t}{2}\right) +
+    \sin\left(\frac{\norm{\ve{\omega}}t}{2}\right)\qi
 \end{equation}
 (cf. equation~\ref{quatRotation}) and its angular velocity is
 \begin{equation}
-\bm{\omega} = (\omega_1, \omega_2, \omega_3)^T = (||\bm{\omega}||, 0, 0)^T
+\ve{\omega} = (\omega_1, \omega_2, \omega_3)^T = (\norm{\ve{\omega}}, 0, 0)^T
 \end{equation}
-for some arbitrary $||\bm{\omega}||$, measured in radians per unit time.
+for some arbitrary $\norm{\ve{\omega}}$, measured in radians per unit time.
 
 Now assume w.l.o.g. that we take a time step from $t = 0$ to $t = \Delta t$.
-Then we require that the result returned by Euler's method for $\mathbf{q}(\Delta t)$
+Then we require that the result returned by Euler's method for $\q{q}(\Delta t)$
 after re-normalization be equal to its exact value in equation~\ref{quatDerivationExact}:
 \begin{equation}
 \label{quatDerivationSetup}
-\cos\left(\frac{||\bm{\omega}||\Delta t}{2}\right) +
-    \sin\left(\frac{||\bm{\omega}||\Delta t}{2}\right)\mathbf{i} =
-    \frac{\mathbf{q}(0) + \Delta t \dot{\mathbf{q}}(0)}
-        {||\mathbf{q}(0) + \Delta t \dot{\mathbf{q}}(0)||}
+\cos\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) +
+    \sin\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)\qi =
+    \frac{\q{q}(0) + \Delta t \dot{\q{q}}(0)}
+        {\norm{\q{q}(0) + \Delta t \dot{\q{q}}(0)}}
 \end{equation}
 
-We know from examining the 4D geometry that the value assigned to $\dot{\mathbf{q}}$
+We know from examining the 4D geometry that the value assigned to $\dot{\q{q}}$
 in equation~\ref{quatRateOfChange} has the correct direction and merely needs to be
 corrected in magnitude. In other words, we are searching for a scalar function
-$f(\Delta t, ||\bm{\omega}||)$ which will allow $\dot{\mathbf{q}}$ to satisfy
+$f(\Delta t, \norm{\ve{\omega}})$ which will allow $\dot{\q{q}}$ to satisfy
 equation~\ref{quatDerivationSetup}:
 \begin{equation}
-\dot{\mathbf{q}}_{\Delta t}(t) = f\tilde{\bm{\omega}}(t)\mathbf{q}(t)
+\dot{\q{q}}_{\Delta t}(t) = f\tilde{\ve{\omega}}(t)\q{q}(t)
 \end{equation}
 
-Observe that under the above assumptions $\mathbf{q}(0) = 1$, and thus
-$\dot{\mathbf{q}}_{\Delta t}(0) = f ||\bm{\omega}|| \mathbf{i}$. Substituting this
+Observe that under the above assumptions $\q{q}(0) = 1$, and thus
+$\dot{\q{q}}_{\Delta t}(0) = f \norm{\ve{\omega}} \qi$. Substituting this
 into equation~\ref{quatDerivationSetup} and considering only the real part:
 \begin{eqnarray*}
-&& \cos\left(\frac{||\bm{\omega}||\Delta t}{2}\right) =
-    \left[1 + \left( f ||\bm{\omega}||\Delta t \right)^2 \right]^{-\frac{1}{2}} \\
+&& \cos\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) =
+    \left[1 + \left( f \norm{\ve{\omega}}\Delta t \right)^2 \right]^{-\frac{1}{2}} \\
 &\Leftrightarrow&
-    \left( f ||\bm{\omega}||\Delta t \right)^2 =
-    \frac{1}{\cos^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right)} - 1 \\
+    \left( f \norm{\ve{\omega}}\Delta t \right)^2 =
+    \frac{1}{\cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)} - 1 \\
 &\Leftrightarrow&
-    f(\Delta t, ||\bm{\omega}||) =
-    \frac{1}{||\bm{\omega}||\Delta t} \sqrt{\frac{
-        1 - \cos^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right)}{
-        \cos^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right)}} =
-    \frac{1}{||\bm{\omega}||\Delta t}
-        \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
+    f(\Delta t, \norm{\ve{\omega}}) =
+    \frac{1}{\norm{\ve{\omega}}\Delta t} \sqrt{\frac{
+        1 - \cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)}{
+        \cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)}} =
+    \frac{1}{\norm{\ve{\omega}}\Delta t}
+        \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
 \end{eqnarray*}
 
-To check, we substitute this result into the $\mathbf{i}$-imaginary part of
+To check, we substitute this result into the $\qi$-imaginary part of
 equation~\ref{quatDerivationSetup}:
 \begin{eqnarray*}
-\sin\left(\frac{||\bm{\omega}||\Delta t}{2}\right) & = &
-    \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
-    \left[ 1 + \tan^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
+\sin\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) & = &
+    \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
+    \left[ 1 + \tan^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
     \right]^{-\frac{1}{2}} \\
-&=& \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
-    \left[ \frac{\cos^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right) +
-    \sin^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right) }{
-    \cos^2\left(\frac{||\bm{\omega}||\Delta t}{2}\right) }
+&=& \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
+    \left[ \frac{\cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) +
+    \sin^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) }{
+    \cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) }
     \right]^{-\frac{1}{2}} \\
-&=& \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
-    \cos\left(\frac{||\bm{\omega}||\Delta t}{2}\right) \\
-&=& \sin\left(\frac{||\bm{\omega}||\Delta t}{2}\right)
+&=& \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
+    \cos\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) \\
+&=& \sin\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
 \end{eqnarray*}
 
 Thus we establish the validity of this expression for $f$. Observe that by using 
 L'Hospital's rule, we can find value of $f$ for an infinitessimally small time step:
 $$
-\lim_{\Delta t \to 0} f = \lim_{\Delta t \to 0} \frac{ \frac{||\bm{\omega}||}{2}
-    \cos^{-2}\left(\frac{||\bm{\omega}||\Delta t}{2}\right) }{ ||\bm{\omega}|| } =
+\lim_{\Delta t \to 0} f = \lim_{\Delta t \to 0} \frac{ \frac{\norm{\ve{\omega}}}{2}
+    \cos^{-2}\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) }{ \norm{\ve{\omega}} } =
     \frac{1}{2}
 $$
 i.e. we obtain the original equation~\ref{quatRateOfChange} for the
 instantaneous rate of change.
 
-Now let $\Delta \mathbf{q} = \Delta t \dot{\mathbf{q}} =
-    \frac{\Delta t}{2} \tilde{\bm{\omega}} \mathbf{q}$.
+Now let $\Delta \q{q} = \Delta t \dot{\q{q}} =
+    \frac{\Delta t}{2} \tilde{\ve{\omega}} \q{q}$.
 From equation~\ref{quatRateOfChangeMagnitude} we find that
-$||\Delta\mathbf{q}|| = \frac{||\bm{\omega}||\Delta t}{2}$.
+$\norm{\Delta\q{q}} = \frac{\norm{\ve{\omega}}\Delta t}{2}$.
 Hence we can simplify the expression for the quaternion correcting factor by expressing it
-in terms of $\Delta \mathbf{q}$ as follows:
+in terms of $\Delta \q{q}$ as follows:
 $$
-\Delta t f \tilde{\bm{\omega}}\mathbf{q} = \frac{\Delta t}{||\bm{\omega}||\Delta t}
-    \tan\left(\frac{||\bm{\omega}||\Delta t}{2}\right) \tilde{\bm{\omega}} \mathbf{q} =
-    \tan\left(||\Delta\mathbf{q}||\right) \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}
+\Delta t f \tilde{\ve{\omega}}\q{q} = \frac{\Delta t}{\norm{\ve{\omega}}\Delta t}
+    \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) \tilde{\ve{\omega}} \q{q} =
+    \tan\left(\norm{\Delta\q{q}}\right) \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}
 $$
 
 This expression now has a clear geometric interpretation with respect to the 4D geometry:
-$||\Delta\mathbf{q}||$ is measured in radians, and it corresponds to the {\em correct}
-angle between the old and the new vector $\mathbf{q}$. Since $\mathbf{q}$ and
-$\dot{\mathbf{q}}$ are orthogonal, we have a right-angled triangle between the origin,
-the old and the new points $\mathbf{q}$, and hence we can use the $\tan$ function to
-evaluate the required length of the side in direction $\Delta\mathbf{q}$.
+$\norm{\Delta\q{q}}$ is measured in radians, and it corresponds to the {\em correct}
+angle between the old and the new vector $\q{q}$. Since $\q{q}$ and
+$\dot{\q{q}}$ are orthogonal, we have a right-angled triangle between the origin,
+the old and the new points $\q{q}$, and hence we can use the $\tan$ function to
+evaluate the required length of the side in direction $\Delta\q{q}$.
 
 Finally we can combine this correction and the subsequent quaternion normalisation into
 a single function:
 \begin{eqnarray*}
-\mathbf{q}(t+\Delta t) = \mathrm{Quergs}(\mathbf{q}(t), \Delta\mathbf{q}) &=&
-    \frac{\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
-        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}}{
-    ||\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
-        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}||} \\
-&=& \frac{\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
-        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}}{
-    \sqrt{1 + \tan^2\left(||\Delta\mathbf{q}||\right)}} \\
-&=& \left[\mathbf{q}(t) + \tan\left(||\Delta\mathbf{q}||\right)
-        \frac{\Delta\mathbf{q}}{||\Delta\mathbf{q}||}\right]
-    \cos\left(||\Delta\mathbf{q}||\right)
+\q{q}(t+\Delta t) = \mathrm{Quergs}(\q{q}(t), \Delta\q{q}) &=&
+    \frac{\q{q}(t) + \tan\left(\norm{\Delta\q{q}}\right)
+        \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}}{
+    \norm{\q{q}(t) + \tan\left(\norm{\Delta\q{q}}\right)
+        \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}}} \\
+&=& \frac{\q{q}(t) + \tan\left(\norm{\Delta\q{q}}\right)
+        \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}}{
+    \sqrt{1 + \tan^2\left(\norm{\Delta\q{q}}\right)}} \\
+&=& \left[\q{q}(t) + \tan\left(\norm{\Delta\q{q}}\right)
+        \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}\right]
+    \cos\left(\norm{\Delta\q{q}}\right)
 \end{eqnarray*}
 The last expression is simplest (and again allows geometric interpretation), but probably
 the penultimate expression is more useful for numerical evaluation, since it involves only

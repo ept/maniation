@@ -1,6 +1,26 @@
 \documentclass{report}
 \usepackage{bm}
+\usepackage{ifthen}
 \bibliographystyle{plain}
+\newcommand{\norm}[1]{\mbox{$||#1||$}}      % Magnitude/Norm
+\newcommand{\ve}[1]{\mbox{$\ifthenelse{     % Vector
+    \equal{#1}{\alpha}\or\equal{#1}{\beta}\or\equal{#1}{\gamma}\or\equal{#1}{\delta}\or
+    \equal{#1}{\epsilon}\or\equal{#1}{\varepsilon}\or\equal{#1}{\zeta}\or\equal{#1}{\eta}\or
+    \equal{#1}{\theta}\or\equal{#1}{\vartheta}\or\equal{#1}{\iota}\or\equal{#1}{\kappa}\or
+    \equal{#1}{\lambda}\or\equal{#1}{\mu}\or\equal{#1}{\nu}\or\equal{#1}{\xi}\or
+    \equal{#1}{\pi}\or\equal{#1}{\varpi}\or\equal{#1}{\rho}\or\equal{#1}{\varrho}\or
+    \equal{#1}{\sigma}\or\equal{#1}{\varsigma}\or\equal{#1}{\tau}\or\equal{#1}{\upsilon}\or
+    \equal{#1}{\phi}\or\equal{#1}{\varphi}\or\equal{#1}{\chi}\or\equal{#1}{\psi}\or
+    \equal{#1}{\omega}\or\equal{#1}{\Gamma}\or\equal{#1}{\Delta}\or\equal{#1}{\Theta}\or
+    \equal{#1}{\Lambda}\or\equal{#1}{\Xi}\or\equal{#1}{\Pi}\or\equal{#1}{\Sigma}\or
+    \equal{#1}{\Upsilon}\or\equal{#1}{\Phi}\or\equal{#1}{\Psi}\or\equal{#1}{\Omega}}
+    {\bm{#1}}{\mathbf{#1}}$}}
+\newcommand{\m}[1]{\ve{#1}}                 % Matrix
+\newcommand{\dual}[1]{\mbox{$#1^*$}}        % Dual tensor
+\newcommand{\q}[1]{\mbox{$#1$}}             % Quaternion
+\newcommand{\qi}{\mbox{$\mathrm{i}$}}       % Quaternion i component
+\newcommand{\qj}{\mbox{$\mathrm{j}$}}       % Quaternion j component
+\newcommand{\qk}{\mbox{$\mathrm{k}$}}       % Quaternion k component
 \begin{document}
 \input quaternions
 \input constraints
@@ -9,6 +29,7 @@
 All work presented in this appendix, unless otherwise specified, is the sole work
 of the author and is not given in any of the literature which the author is aware of.
 \input quatProofs
+\input rigidBody
 \input constrEx
 \end{appendix}
 \bibliography{diss}

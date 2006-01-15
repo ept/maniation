@@ -1,0 +1,139 @@
+\section{Rigid body dynamics\label{rigidBodyAppendix}}
+\subsection{Useful definitions}
+
+Given any vector $\ve{a} = (a_1, a_2, a_3)^T$, we can define its dual
+tensor, written as a $3\times3$ matrix, to be
+\begin{equation}
+\dual{\ve{a}} = \left[\begin{array}{ccc}
+    0 & -a_3 & a_2 \\ a_3 & 0 & -a_1 \\ -a_2 & a_1 & 0
+    \end{array}\right]
+\end{equation}
+(see \cite{RHB:02,BaraffWitkin:97} and also Kalra~\cite{Kalra:95}, who defines it to be
+the transpose of the expression above).
+The dual allows us to re-write a vector cross product as a matrix multiplication:
+\begin{equation}
+\ve{a}\times\ve{b} = \dual{\ve{a}}\,\ve{b}
+\end{equation}
+
+Let us also recall some basic identities of vector and matrix algebra~\cite{RHB:02}:
+\begin{eqnarray*}
+\ve{a}\times\ve{a} & = & \ve{0} \\
+\ve{a}\times\ve{b} & = & -\ve{b}\times\ve{a} \\
+\ve{a}\cdot\ve{b} & = & \ve{b}\cdot\ve{a} \\
+\ve{a}\cdot\ve{b} & = & \ve{a}^T\,\ve{b} \\
+\ve{a}\cdot(\ve{b}\times\ve{c}) & = & \ve{b}\cdot(\ve{c}\times\ve{a}) \\
+    & = & \ve{c}\cdot(\ve{a}\times\ve{b}) \\
+\ve{a}\times(\ve{b}\times\ve{c}) & = &
+    \ve{b}(\ve{a}\cdot\ve{c}) - \ve{c}(\ve{a}\cdot\ve{b}) \\
+(\m{A}\m{B})^T & = & \m{B}^T\m{A}^T
+\end{eqnarray*}
+
+
+\subsection{Conservation of angular momentum\label{correctBrettAppendix}}
+
+This argument is modelled after~\cite{Ruf:02}. The moment of inertia $\ve{L}$ of a rigid
+body is defined as
+\begin{equation}
+\label{correctBrett1}
+\ve{L} = \m{I}\ve{\omega}
+\end{equation}
+where $\m{I}$ is the inertia tensor and $\ve{\omega}$ is the angular velocity vector.
+Torque is the rate of change of angular momentum over time. Using the chain rule,
+\begin{equation}
+\label{correctBrett2}
+\ve{\tau} = \dot{\ve{L}} = \dot{\m{I}}\ve{\omega} + \m{I}\dot{\ve{\omega}}
+\end{equation}
+
+We can further evaluate $\dot{\m{I}}$ by writing it as a product with a rotation matrix
+$\m{R}$ and its transpose:
+\begin{equation}
+\label{correctBrett3}
+\m{I} = \m{R}\m{I}_\mathrm{body}\m{R}^T
+\end{equation}
+
+It can be shown that such a decomposition of the inertia tensor always exists, and that
+$\m{I}_\mathrm{body}$ is a diagonal, time-invariant matrix containing the moments
+of inertia about the body's principal axes~\cite{Feynman:63}. Hence we obtain
+\begin{equation}
+\label{correctBrett4}
+\dot{\m{I}} = \dot{\m{R}}\m{I}_\mathrm{body}\m{R}^T +
+    \m{R}\m{I}_\mathrm{body}\frac{\mathrm{d}}{\mathrm{d}t}\m{R}^T
+\end{equation}
+
+Witkin~\cite{BaraffWitkin:97} derives that $\dot{\m{R}} = \dual{\ve{\omega}}\,\m{R}$
+for a rotation matrix $\m{R}$ and an angular velocity vector $\ve{\omega}$.
+Using this identity and taking the differential operator onto the inside of the
+transpose at the end of equation~\ref{correctBrett4},
+\begin{eqnarray}
+\dot{\m{I}} &=& \dual{\ve{\omega}}\,\m{R}\m{I}_\mathrm{body}\m{R}^T +
+    \m{R}\m{I}_\mathrm{body}(\dual{\ve{\omega}}\,\m{R})^T \nonumber\\
+&=& \dual{\ve{\omega}}\,\m{R}\m{I}_\mathrm{body}\m{R}^T -
+    \m{R}\m{I}_\mathrm{body}\m{R}^T\dual{\ve{\omega}} \nonumber\\
+&=& \dual{\ve{\omega}}\,\m{I} - \m{I}\dual{\ve{\omega}} \label{correctBrett5}
+\end{eqnarray}
+
+Substituting equation~\ref{correctBrett5} back into~\ref{correctBrett2}:
+\begin{eqnarray}
+\ve{\tau} & = & \m{I}\dot{\ve{\omega}} + \dual{\ve{\omega}}\,\m{I}\ve{\omega} -
+    \m{I}\dual{\ve{\omega}}\,\ve{\omega} \nonumber \\
+& = & \m{I}\dot{\ve{\omega}} + \dual{\ve{\omega}}\,\m{I}\ve{\omega} \label{correctBrett6}
+\end{eqnarray}
+
+Equation~\ref{correctBrett6} corrects the similar expression in~\cite{Saunders:PhD},
+page~34. From this we deduce that if we want to calculate the angular velocity of a rigid
+body, the value we need to feed into our ODE solver is
+\begin{equation}
+\dot{\ve{\omega}} = \m{I}^{-1}\ve{\tau} -
+    \m{I}^{-1}\dual{\ve{\omega}}\,\m{I}\ve{\omega}.
+\end{equation}
+This means that even if the sum of all torques acting on the body is zero, its angular
+velocity may change if \m{I} is not diagonal (i.e. if the body is somehow asymmetric).
+Remember that angular momentum is conserved if there are no external torques~\cite{Feynman:63}.
+Thus in order for the simulation to conserve angular momentum correctly, the value of
+$\dual{\ve{\omega}}\,\m{I}\ve{\omega}$ must always be subtracted from the torques.
+
+
+\subsection{Lagrange multiplier constraints}
+
+Both~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD} omit details of how to derive the Jacobians
+$\m{J}$ and $\dot{\m{J}}$ for a custom constraint. The following procedure was deduced
+by the author after pondering over some source code implementing one type of constraint
+(specifically equations~\ref{constrEx1J} and~\ref{constrEx1JDot} below). The source code
+was kindly provided by Brett Saunders. (It should be emphasised that the code was used only
+for this derivation and not copied otherwise. The implementation in this project is based
+on the following derivation, not the original code.)
+
+We start by defining a function $\ve{c}$ which evaluates to zero (or the null vector) for
+all states which satisfy the constraint, and any non-zero value for all other states. 
+We then calculate the first and second derivatives with respect to time, $\dot{\ve{c}}$
+and $\ddot{\ve{c}}$, which must both exist.
+
+For any sort of valid constraint, we should be able to massage both $\dot{\ve{c}}$ and
+$\ddot{\ve{c}}$ into a sum of products form. Moreover, in each product in
+$\dot{\ve{c}}$, at least one of the variables should be either the linear velocity of
+the centre of mass of one of the bodies, or the angular velocity of one of the bodies.
+Use algebra to make this `chosen variable' the rightmost variable in each product, and
+evaluate the rest of the product to a single matrix.
+
+Now observe equation~\ref{cDotAndCDDot}. We can easily factor our expression for
+$\dot{\ve{c}}$ into $\m{J}$ and $\dot{\ve{x}}$ (since the latter contains
+the linear and angular velocities for all bodies). $\m{J}$ has the same number of rows
+as there are constraints, and $6n$ columns for a system of $n$ bodies. Each of the matrices
+in our expression for $\dot{\ve{c}}$ also has the same number of rows as there are
+constraints, and has 3 columns. All we need to do is to find the correct horizontal position
+of each of these matrices in $\m{J}$, depending on the location of the `chosen variable'
+in $\dot{\ve{x}}$. Thus we obtain the matrix $\m{J}$.
+
+Observe equation~\ref{cDotAndCDDot} again. Now we know $\ddot{\ve{c}}$, $\dot{\ve{x}}$,
+$\m{J}$ and $\ddot{\ve{x}}$~-- no problem. Evaluate
+$\ddot{\ve{c}} - \m{J}\ddot{\ve{x}}$, remembering that $\ddot{\ve{x}}$ is
+the vector of linear accelerations and angular accelerations. The result should be an
+expression which we can bring into just the same kind of sum of products form as we previously
+did with $\dot{\ve{c}}$. By exactly the same procedure we factor out the linear velocities
+and angular velocities (not accelerations!), thus obtaining $\dot{\m{J}}$.
+
+In case you were in doubt, this procedure is of course executed by a human on paper
+(possibly assisted by a symbolic algebra system) prior to
+implementation. The simulation program will just plug numbers into the hard-coded expressions
+for $\ve{c}$, $\dot{\ve{c}}$, $\m{J}$ and $\dot{\m{J}}$ during each time step
+of the simulation.
