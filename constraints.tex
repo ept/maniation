@@ -40,17 +40,16 @@ $\ve{q}$; we use $\ve{x}$ here to avoid confusion with quaternions.} $\ve{x}$.
 Containing a value for each degree of freedom, $\ve{x}$ will have $6n$ rows. In practice
 we will never need to write down $\ve{x}$ explicitly; instead we will work with its
 first and second derivative in time, $\dot{\ve{x}}$ and $\ddot{\ve{x}}$ respectively.
-
-For example, in a system with two bodies, having centre of mass positions $\ve{a}$ and
-$\ve{b}$, and angular velocities $\ve{\omega}$ and $\ve{\phi}$ respectively, we would
-have
+Say a body $i$ has a centre of mass position $\ve{r}_i$ and an angular velocity
+$\ve{\omega}_i$. Then we would have
 \begin{equation}
 \label{lagrangeStateVector}
 \dot{\ve{x}} = \left[ \begin{array}{c}
-    \dot{\ve{a}}\\ \ve{\omega}\\ \dot{\ve{b}}\\ \ve{\phi} \end{array}\right]
+    \dot{\ve{r}}_1\\ \ve{\omega}_1\\ \vdots\\ \dot{\ve{r}}_n\\ \ve{\omega}_n \end{array}\right]
 \quad\quad\mathrm{and}\quad\quad
 \ddot{\ve{x}} = \left[ \begin{array}{c}
-    \ddot{\ve{a}}\\ \dot{\ve{\omega}}\\ \ddot{\ve{b}}\\ \dot{\ve{\phi}} \end{array}\right]
+    \ddot{\ve{r}}_1\\ \dot{\ve{\omega}}_1\\ \vdots\\ \ddot{\ve{r}}_n\\ \dot{\ve{\omega}}_n
+    \end{array}\right]
 \end{equation}
 
 Now assume that we want to impose $m$ constraints on this system, where each constraint
@@ -85,26 +84,17 @@ Appendix~\ref{constraintAppendix} gives examples of derivations using these equa
 Two more quantities are required before we can determine the forces and torques which maintain
 our constraints. We need to add up all the other forces and torques acting on each of the $n$
 sub-bodies (for example due to gravity or muscular activity) and concatenate them into a single
-$6n$-row vector \ve{\Phi}, just as we did for \ve{x}. Re-using the two-body case of
-equation~\ref{lagrangeStateVector}:
+$6n$-row vector \ve{\Phi}, just as we did for \ve{x} (equation~\ref{lagrangeStateVector}):
 \begin{equation}
 \ve{\Phi} = \left[\begin{array}{l}
-    \sum \ve{F}_A \\
-    \left( \sum \ve{\tau}_A \right) - \ve{\omega}\times(\m{I}_A\,\ve{\omega}) \\
-    \sum \ve{F}_B \\
-    \left( \sum \ve{\tau}_B \right) - \ve{\phi}\times(\m{I}_B\,\ve{\phi})
+    \ve{F}_1 \\ \ve{\tau}_1 \\ \vdots \\ \ve{F}_n \\ \ve{\tau}_n
     \end{array}\right]
 \end{equation}
-where $\ve{F}_A$ denotes a force vector acting on the centre of mass of body~A, $\ve{\tau}_A$
-is a torque vector acting on body~A, and $\m{I}_A$
-the moment of inertia of body~A in the world frame. The expression
-$\ve{\omega}\times(\m{I}_A\,\ve{\omega})$ and its analogue for the other bodies do
-not strictly represent torques, but subtracting them here ensures that angular momentum is
-conserved in the absence of other torques. See appendix~\ref{correctBrettAppendix} for the
-derivation of this expression.
+where $\ve{F}_i$ denotes the sum of all forces acting on the centre of mass of body~$i$, and
+$\ve{\tau}_i$ is the sum of all torque vectors acting on body~$i$.
 
 And finally, we require the {\em mass-inertia tensor} \m{M} and its inverse
-$\m{M}^{-1}$. Both are $6n\times6n$ matrices of the form
+$\m{M}^{-1}$. \m{M} is a $6n\times6n$ matrix of the form
 \begin{equation}
 \label{massInertiaTensor}
 \m{M} = \left[ \begin{array}{ccccccc}
@@ -121,8 +111,8 @@ stay constant over time, $\m{I}_i$ may depend on the orientation of body $i$.\fo
 we know the principal axes of the body, we can express \m{I} in a time-invariant
 form combined with rotations into the principal axes frame and back again
 (see~\cite{BaraffWitkin:97}), which saves us a lot of effort.} The inverse $\m{M}^{-1}$
-is obtained by replacing each $\mu$ by $\frac{1}{\mu}$ and each $\m{I}$ by
-$\m{I}^{-1}$ in equation~\ref{massInertiaTensor}.
+has a very similar form: it is obtained by replacing each $\mu$ by $\frac{1}{\mu}$ and
+each $\m{I}$ by $\m{I}^{-1}$ in equation~\ref{massInertiaTensor}.
 
 Now we can set up the equation\footnote{Here we adopt the sign convention
 of~\cite{BaraffWitkin:97}, which is the opposite of~\cite{Saunders:PhD}.}
@@ -144,9 +134,5 @@ the expression
 \end{equation}
 $\hat{\ve{\Phi}}$ has the same format as $\ve{\Phi}$, and indeed it is the vector containing
 the forces and torques which we need to additionally apply to each body to ensure that they
-continue to satisfy the constraints! The bodies' constrained movements are calculated by
-the generalised form of the familiar formula $\ddot{x} = \frac{F}{m}$:
-\begin{equation}
-\ddot{\ve{x}} = \m{M}^{-1}\,(\ve{\Phi} + \hat{\ve{\Phi}})
-\end{equation}
-This result, $\ddot{\ve{x}}$, can now be fed directly into our ODE solver.
+continue to satisfy the constraints! All we therefore need to do is to add
+$\ve{\Phi} + \hat{\ve{\Phi}}$ and to feed the result into our ODE solver.

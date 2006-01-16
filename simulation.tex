@@ -1,0 +1,65 @@
+\section{Simulation outline}
+
+\subsection{Rigid body dynamics}
+
+Purpose of a dynamics simulation is to calculate the behaviour of a physical system over time.
+The equations of motion for simple systems can often be solved analytically, but they very
+rapidly become intractable as systems become more complex. Simulation is often the best
+method to numerically find an approximate solution to these equations.
+
+This project is concerned with the simulation of rigid bodies. These are good abstractions of
+most solid objects we come across in everyday life: they cannot change their shape, have no
+forces of their own, collide instantaneously, and cannot break. In this project we consider
+rigid bodies in three-dimensional space.
+
+At a particular point in time, a rigid body is fully determined by four quantities: the
+{\em position} of its centre of mass, its {\em orientation}, and its {\em linear} and
+{\em angular velocities}. These values usually change over time. The representation of
+orientation is discussed in section~\ref{quaternions}; each of the others can be
+represented as a three-dimensional vector. By convention we will use a right-handed Cartesian
+coordinate system.
+
+To characterise the body's dynamic behaviour, we also need to know its {\em inertial mass},
+a scalar quantity, and its {\em moment of inertia}, which is a rank-2 tensor (commonly written
+as a $3\times3$ matrix). While the mass stays constant, the moment of inertia may
+depend on the body's orientation~-- it is, however, constant when expressed with respect to the
+body's {\em principal axes}~\cite{Feynman:63}.
+
+Angular velocity appears to be a straightforward way of describing the body's rotation: the
+direction of the vector gives the axis of rotation, while its magnitude is the rate of rotation
+(most commonly given in radians per second). Unfortunately, in an asymmetric body, the angular
+velocity may vary over time even if there are no external influences on the body. It is therefore
+sometimes more convenient to use {\em angular momentum} instead, which is conserved in the
+absence of torques.
+
+\begin{table}[hbt]
+\begin{tabular}{|l|l|l|} \hline
+& {\em Linear} & {\em Angular} \\\hline
+Resistance to change & Mass $m$ & Moment of inertia \m{I} \\\hline
+Stationary state & Centre of mass & {\em see section \ref{quaternions}} \\
+                 & position \ve{r} & \\\hline
+Velocity & Linear velocity $\ve{v} = \dot{\ve{r}}$ & Angular velocity \ve{\omega} \\\hline
+Momentum & Linar momentum     & Angular momentum           \\
+         & $\ve{p} = m\ve{v}$ & $\ve{L} = \m{I}\ve{\omega}$\\\hline
+External influence & Force $\ve{F} = \dot{\ve{p}}$ & Torque $\ve{\tau} = \dot{\ve{L}}$ \\\hline
+\end{tabular}
+\caption{Summary of the physical quantities describing a rigid body\label{rigidBodySummary}}
+\end{table}
+
+Forces and torques acting on a body may change the momenta of a body as described in
+table~\ref{rigidBodySummary}. A force \ve{F} may be applied to any point $\ve{r}^\prime$ of
+a body. We can treat this as if the force had been applied to the centre of mass \ve{r}, and add
+an additional torque given by $\ve{\tau} = (\ve{r}^\prime - \ve{r})\times\ve{F}$. If multiple
+forces and torques are applied, all forces (applied to the centre of mass) may be added into
+a single vector, and similarly all torques may be added.
+
+So, in a nutshell, a rigid body simulation is a solution of the differential equations of
+motion. Forces are integrated over time to find linear momentum, torques are integrated to find
+angular momentum. From each of these we calculate linear and angular velocities, which are in turn
+integrated to find the position and orientation over the course of time. It is important that we
+integrate over torques (and not angular accelerations), otherwise the simulation will not
+correctly conserve angular momentum.
+
+\subsection{Solving ordinary differential equations}
+
+-- to be written --
