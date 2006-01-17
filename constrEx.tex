@@ -87,132 +87,230 @@ The rest of the derivation is very similar to the previous example. We obtain fo
 matrix slices for \m{J} and two slices for $\dot{\m{J}}$.
 
 
-\subsection{Confinement to a plane}
+\subsection{Rotation axis restriction (`Joystick')}
 
-A particular point in a rigid body is constrained to always lie within a particular plane.
-It may move arbitrarily within that plane, and the body may rotate about the constrained point.
-
-Let \ve{b} be some arbitrary point inside the plane, \ve{n} the normal vector of
-the plane, \ve{p} the centre of mass of the rigid body, \ve{\omega} its angular
-velocity, and \ve{s} the vector from \ve{p} to the point in the body at which the
-constraint applies. Now the plane is specified as the set of all points \ve{r} which
-satisfy $(\ve{r} - \ve{b})\cdot\ve{n} = 0$.
-
-This time, we lose only one degree of freedom, so our constraint function is a scalar. For
-consistency's sake, we will write it as a one-row vector.
-
-\begin{eqnarray}
-\ve{c} &=& \ve{n}\cdot(\ve{p} + \ve{s} - \ve{b}) \nonumber\\
-&=& \ve{n}\cdot\ve{p} + \ve{n}\cdot\ve{s} - \ve{n}\cdot\ve{b} \\
-\dot{\ve{c}} & = & \ve{n}\cdot\dot{\ve{p}} +
-    \ve{n}\cdot(\ve{\omega}\times\ve{s}) \nonumber\\
-&=& \ve{n}^T\dot{\ve{p}} - \ve{n}^T \dual{\ve{s}}\,\ve{\omega} \\
-\ddot{\ve{c}} &=& \ve{n}\cdot\ddot{\ve{p}} +
-    \ve{n}\cdot(\dot{\ve{\omega}}\times\ve{s}) +
-    \ve{n}\cdot\big(\ve{\omega}\times(\ve{\omega}\times\ve{s})\big) \nonumber\\
-&=& \ve{n}^T\ddot{\ve{p}} - \ve{n}^T \dual{\ve{s}}\,\dot{\ve{\omega}} -
-    \ve{n}^T \dual{(\ve{\omega}\times\ve{s})}\,\ve{\omega}
-\end{eqnarray}
-
-Writing out the components of $\dot{\ve{c}}$:
-\begin{equation}
-\dot{\ve{c}} = \left[\begin{array}{ccc} n_1 & n_2 & n_3 \end{array}\right] \dot{\ve{p}} +
-    \left[\begin{array}{c}
-    n_3 s_2 - n_2 s_3 \\
-    n_1 s_3 - n_3 s_1 \\
-    n_2 s_1 - n_1 s_2 \end{array}\right]^T \ve{\omega}
-\end{equation}
-(the second slice of $\m{J}$ has been written transposed for better readability). Again
-we proceed as before:
-
-\begin{eqnarray}
-\dot{\m{J}}\dot{\ve{x}} & = & \ddot{\ve{c}} - \m{J}\ddot{\ve{x}} \nonumber\\
-&=& -\ve{n}^T \dual{(\ve{\omega}\times\ve{s})}\,\ve{\omega} \nonumber\\
-&=& \left[\begin{array}{c}
-    n_3 \omega_1 s_2 - n_3 \omega_2 s_1 - n_2 \omega_1 s_2 + n_2 \omega_2 s_1 \\
-    n_1 \omega_1 s_2 - n_1 \omega_2 s_1 - n_3 \omega_2 s_3 + n_3 \omega_3 s_2 \\
-    n_2 \omega_2 s_3 - n_2 \omega_3 s_2 - n_1 \omega_3 s_1 + n_1 \omega_1 s_3
-    \end{array}\right]^T \ve{\omega}
-\end{eqnarray}
-Again note the transposition~-- in this example, $\m{J}$ and $\dot{\m{J}}$ only
-have one row.
-
-\subsection{Relative rotation of two bodies}
-
-In example~2, we derived the formulae for a ball-and-socket joint. How can we express other types
+We now have formulae to define a ball-and-socket joint. How can we express other types
 of joints? A good way of doing this is by augmenting the ball-and-socket constraint with
-additional constraints which restrict the set of valid rotations. We can constrain the orientation
-of a single rigid body by requiring that the quaternion's axis of rotation must lie within a
-particular plane. This plane must pass through the centre of mass of the constrained body and
-has a normal vector \ve{n}. Remembering equation~\ref{quatRotation}, we can set up the
-constraint function to be
-\begin{eqnarray}
-\label{constrEx4C}
-\ve{c} & = & \mathrm{Re}(\tilde{\ve{n}}\q{q}) \\
-& = & - n_1 q_x - n_2 q_y - n_3 q_z \nonumber
-\end{eqnarray}
-where \q{q} is the quaternion specifying the body's orientation. Here we extract only the
-real part of the quaternion product, thus we have a scalar constraint like in the previous
-example. The real part of the quaternion product implicitly contains the dot product with the
-axis of rotation, hence equating it to zero requires the axis to lie in the specified plane.
-This reduces the number of degrees of freedom by one, provided the constraint is not redundant.
+additional constraints which restrict the set of valid rotations. In this section we will
+derive expressions for a constraint which prohibits rotation about one particular axis~--
+or, in other words, confines the axis to a plane. Let us define a unit vector \ve{n} which
+points in the direction of the axis we want to prohibit; equivalently, this is the normal of
+the confinement plane.
 
 It is not completely easy to visualize what this type of constraint means. One good way to look
 at it is to consider a standard two-axis joystick. If it is placed on a table, the two axes of
-rotation lie in a plane parallel to the surface of this table. If you cannot turn the stick about
-its own axis, the normal of the constraint plane is orthogonal to the table surface.
+rotation lie in a plane parallel to the surface of this table. But you cannot turn the stick about
+its own axis. Hence the normal of the constraint plane is orthogonal to the table surface.
 Don't be confused by the fact that the joystick handle happens to point in the direction of the
 normal~-- any sort of obscure shape may be substituted in its place without changing the nature
 of the constraint!
 
 A more common sort of joint is the hinge, which we find in most doors, in our knees and elbows.
 It allows rotation only about one particular axis. We can conveniently express it by employing two
-constraints on the same body, each of which confines the axis to a plane. If the two planes are
-not parallel, the axis about which rotation may occur corresponds to the line of intersection of
-these two planes. If they are parallel, one of the constraints is redundant. In other words,
-to make a hinge joint, we first add a ball-and-socket joint, then we find two nonparallel vectors
-which are both orthogonal to the hinge axis, and use them as normal vectors for two rotatation
-constraints. This reduces the original number of six degrees of freedom to one~-- the angle of the
-hinge.
+`joystick' constraints on the same body, each of which confines the axis to a plane. Provided the
+two planes are not parallel, the axis about which rotation may occur corresponds to the line of
+intersection of these two planes. In summary, to make a hinge joint, we first add a
+ball-and-socket joint. Then we find two non-colinear vectors which are both orthogonal to the
+hinge axis, and use them as normal vectors for two `joystick' constraints. This reduces the
+original number of six degrees of freedom to one~-- the angle of the hinge.
 
-If we want to constrain the possible rotations between two rigid bodies, all we need to do is make
-\ve{n} in equation~\ref{constrEx4C} vary with the orientation of the connected body.
-Let \ve{\omega} be the angular velocity of the first body, and \ve{\phi} the angular velocity
-of the second body. The constraint plane normal \ve{n} is expressed in world coordinates and
-is attached to the second body (i.e. $\dot{\ve{n}} = \ve{\phi}\times\ve{n}$). \q{q}
-is the quaternion expressing the rotation from the first body's frame to the second body's.
-Although the expression for $\ve{c}$ looks so innocent, its two derivatives are rather
-verbose, so we shall spare the reader the gruesome details of the derivation and merely state the
-result:
+We shall now consider the relative rotation of two rigid bodies. Say the first body has an
+orientation quaternion \q{p} and angular velocity \ve{\phi}, and the second body orientation
+\q{q} and angular velocity \ve{\omega}. Assume that each quaternion expresses the rotation
+required to transform from the body's frame to the world frame. Then the quaternion product
+$\q{p}^{-1}\q{q}$ is the rotation required to transform from the second body's frame to the first
+one's~-- that is, the relative rotation of the two bodies.
 
+To confine the axis of rotation, we use the fact that the axis is contained in the imaginary
+parts of a quaternion (equation~\ref{quatRotation}, page~\pageref{quatRotation}). We want the dot
+product of this axis and the normal vector \ve{n} to be zero. Conveniently, the dot product
+happens to be implicitly present in the real part of the quaternion product
+(equation~\ref{quatProduct2}, page~\pageref{quatProduct2}). Hence we can define our constraint
+function as follows:
+\begin{equation}
+\ve{c} = \Re(\tilde{\ve{n}}\, \q{p}^{-1}\q{q})
+\end{equation}
+
+As with complex numbers, the function $\Re$ returns only the real part of its argument.
+Since the real part of $\tilde{\ve{n}}$ is zero by definition, this is just the dot product of
+\ve{n} and the axis of $\q{p}^{-1}\q{q}$, with an extra minus sign in front~(cf.
+equation~\ref{quatProduct2}). The constraint function is actually a scalar because we are only
+losing one degree of freedom, but for consistency's sake, we will write it as a one-component
+vector.
+
+The derivative of \q{q} with respect to time is
+$\dot{\q{q}} = \frac{1}{2}\tilde{\ve{\omega}}\q{q}$, as usual. Pushing the differential operator
+onto the inside of a quaternion inverse produces a minus sign and reverses the order, provided
+we are dealing with a unit quaternion:
+\begin{equation}
+\frac{\diff}{\diff t} \q{p} = \frac{1}{2}\tilde{\ve{\phi}}\,\q{p} \iff
+    \frac{\diff}{\diff t} (\q{p}^{-1}) = -\frac{1}{2}\q{p}\,\tilde{\ve{\phi}}
+\end{equation}
+
+We now have everything in place to calculate the constraint function derivatives:
 \begin{eqnarray}
-\dot{\ve{c}} &=& \m{J}\left[\begin{array}{c} \ve{\omega}\\\ve{\phi} \end{array}\right] \\
-&=& \left[\begin{array}{c}
-        \frac{1}{2}( n_2 q_z - n_3 q_y - n_1 q_w) \\
-        \frac{1}{2}( n_3 q_x - n_1 q_z - n_2 q_w) \\
-        \frac{1}{2}( n_1 q_y - n_2 q_x - n_3 q_w)
-    \end{array}\right]^T \ve{\omega} +
-    \left[\begin{array}{c}
-        n_3 q_y - n_2 q_z \\ n_1 q_z - n_3 q_x \\ n_2 q_x - n_1 q_y
-    \end{array}\right]^T \ve{\phi} \nonumber \\
-\ddot{\ve{c}} &=& \m{J}
-    \left[\begin{array}{c} \dot{\ve{\omega}}\\\dot{\ve{\phi}} \end{array}\right] +
-    \left[\begin{array}{cccccc} \dot{J}_1 & \dot{J}_2 & \dot{J}_3 & \dot{J}_4 &
-        \dot{J}_5 & \dot{J}_6 \end{array}\right]
-    \left[\begin{array}{c} \ve{\omega}\\\ve{\phi} \end{array}\right] \\
-\dot{J}_1 & = & \frac{3}{2} q_w (\phi_3 n_2 - \phi_2 n_3) +
-                \frac{3}{2} q_y (\phi_2 n_1 - \phi_1 n_2) + \nonumber\\*&&
-                \frac{3}{2} q_z (\phi_3 n_1 - \phi_1 n_3) +
-                \frac{1}{4} \omega_1 (q_x n_1 + q_y n_2 + q_z n_3) \nonumber\\
-\dot{J}_2 & = & \frac{3}{2} q_w (\phi_1 n_3 - \phi_3 n_1) +
-                \frac{3}{2} q_x (\phi_1 n_2 - \phi_2 n_1) + \nonumber\\*&&
-                \frac{3}{2} q_z (\phi_3 n_2 - \phi_2 n_3) +
-                \frac{1}{4} \omega_2 (q_x n_1 + q_y n_2 + q_z n_3) \nonumber\\
-\dot{J}_3 & = & \frac{3}{2} q_w (\phi_2 n_1 - \phi_1 n_2) +
-                \frac{3}{2} q_y (\phi_2 n_3 - \phi_3 n_2) + \nonumber\\*&&
-                \frac{3}{2} q_x (\phi_1 n_3 - \phi_3 n_1) +
-                \frac{1}{4} \omega_3 (q_x n_1 + q_y n_2 + q_z n_3) \nonumber\\
-\dot{J}_4 & = & q_y (\phi_1 n_2 - \phi_2 n_1) + q_z (\phi_1 n_3 - \phi_3 n_1) \nonumber\\
-\dot{J}_5 & = & q_x (\phi_2 n_1 - \phi_1 n_2) + q_z (\phi_2 n_3 - \phi_3 n_2) \nonumber\\
-\dot{J}_6 & = & q_x (\phi_3 n_1 - \phi_1 n_3) + q_y (\phi_3 n_2 - \phi_2 n_3) \nonumber
+\dot{\ve{c}} & = & \label{constrJoystickC}
+    \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\q{q}) -
+    \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\, \q{q}) \\
+\ddot{\ve{c}} & = & \label{constrJoystickCDot}
+    \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\dot{\ve{\omega}}}\,\q{q})
+  - \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\dot{\ve{\phi}}}\, \q{q}) \\*
+&&+ \frac{1}{4} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\tilde{\ve{\omega}}\, \q{q})
+  - \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\,\tilde{\ve{\omega}}\, \q{q})
+  + \frac{1}{4} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\,\tilde{\ve{\phi}}\, \q{q})
+    \nonumber
 \end{eqnarray}
+
+To manipulate these equations into the form required to find \m{J} we use the scalar/vector
+pair notation for quaternions~-- see page~\pageref{quatProduct2}.
+\begin{eqnarray*}
+\Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\q{q}) & = &
+    \Re\big( [0,\:\ve{n}]\: [p_w,\:-\ve{p}_v]\: [0,\:\ve{\omega}]\: [q_w,\:\ve{q}_v] \big) \\*
+&=& \Re\big( [\ve{n}\cdot\ve{p}_v,\: p_w\ve{n} - \ve{n}\times\ve{p}_v]\:
+             [-\ve{\omega}\cdot\ve{q}_v,\: q_w\ve{\omega} + \ve{\omega}\times\ve{q}_v] \big) \\*
+&=& -(\ve{n}\cdot\ve{p}_v) (\ve{\omega}\cdot\ve{q}_v) -
+    ( p_w\ve{n} - \ve{n}\times\ve{p}_v ) \cdot ( q_w\ve{\omega} + \ve{\omega}\times\ve{q}_v ) \\*
+&=& -\ve{n}^T \ve{p}_v \ve{q}_v^T \ve{\omega} - ( p_w\ve{n} + \ve{p}_v\times\ve{n} )^T
+    ( q_w\ve{\omega} - \ve{q}_v\times\ve{\omega} ) \\*
+&=& -\ve{n}^T \ve{p}_v \ve{q}_v^T \ve{\omega} - ( p_w\ve{n}^T - \ve{n}^T\dual{\ve{p}_v} )
+    ( q_w\ve{\omega} - \dual{\ve{q}_v}\,\ve{\omega} ) \\*
+&=& -\ve{n}^T \big( \ve{p}_v \ve{q}_v^T + ( p_w\m{1} - \dual{\ve{p}_v} )
+    ( q_w\m{1} - \dual{\ve{q}_v} ) \big)\, \ve{\omega}
+\end{eqnarray*}
+
+Here \m{1} denotes the $3\times3$ identity matrix. The same derivation is valid if we substitute
+\ve{\phi} for \ve{\omega}, hence we obtain the Jacobian
+\begin{eqnarray}
+\m{J}\dot{\ve{x}} & = & 
+    -\frac{1}{2} \ve{n}^T \big( \ve{p}_v \ve{q}_v^T + ( p_w\m{1} - \dual{\ve{p}_v} )
+    ( q_w\m{1} - \dual{\ve{q}_v} ) \big)\, \ve{\omega} \nonumber\\*
+&&  +\frac{1}{2} \ve{n}^T \big( \ve{p}_v \ve{q}_v^T + ( p_w\m{1} - \dual{\ve{p}_v} )
+    ( q_w\m{1} - \dual{\ve{q}_v} ) \big)\, \ve{\phi}
+\end{eqnarray}
+
+Now the first two terms of equation~\ref{constrJoystickCDot} are generated by $\m{J}\ddot{x}$, so
+for finding $\dot{\m{J}}$ we need only consider the last three terms. Let's evaluate the
+penultimate term (take a deep breath):
+\begin{eqnarray*}
+\Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\,\tilde{\ve{\omega}}\, \q{q}) & = &
+    \Re\big( [0,\:\ve{n}]\: [p_w,\:-\ve{p}_v]\: [0,\:\ve{\phi}]\: [0,\:\ve{\omega}]\:
+    [q_w,\:\ve{q}_v] \big) \\*
+&=& \Re\big( [0,\:\ve{n}]\: [\ve{p}_v \cdot \ve{\phi},\: p_w\ve{\phi} - \ve{p}_v\times\ve{\phi}]\:
+    [-\ve{\omega}\cdot\ve{q}_v,\: q_w\ve{\omega} + \ve{\omega}\times\ve{q}_v] \big) \\*
+&=& \Re\Big( \begin{array}[t]{lll} \big[ &
+    \ve{n}\cdot(\ve{p}_v\times\ve{\phi}) - p_w \ve{\phi}\cdot\ve{n}, &\\ &
+    (\ve{p}_v\cdot\ve{\phi}) \ve{n} + p_w\ve{n}\times\ve{\phi} -
+        \ve{n}\times(\ve{p}_v\times\ve{\phi}) \quad\big] &\\
+    \big[ & -\ve{\omega}\cdot\ve{q}_v,\: q_w\ve{\omega} +
+        \ve{\omega}\times\ve{q}_v \quad\big] & \Big) \end{array} \\
+&=& -\big( \ve{n}\cdot(\ve{p}_v\times\ve{\phi}) - p_w \ve{\phi}\cdot\ve{n} \big)
+     \big( \ve{\omega}\cdot\ve{q}_v \big) \\* &&
+    -\big( (\ve{p}_v\cdot\ve{\phi}) \ve{n} + p_w\ve{n}\times\ve{\phi} -
+        \ve{n}\times(\ve{p}_v\times\ve{\phi}) \big) \cdot
+     \big( q_w\ve{\omega} - \ve{q}_v\times\ve{\omega} \big) \\
+&=& -\big( \ve{n}\cdot(\ve{p}_v\times\ve{\phi}) \big) \big( \ve{q}_v\cdot\ve{\omega} \big)
+    + p_w (\ve{n}\cdot\ve{\phi}) (\ve{q}_v\cdot\ve{\omega}) \\* &&
+    +\big( \ve{n}\cdot(\ve{q}_v\times\ve{\omega}) \big) \big( \ve{p}_v\cdot\ve{\phi} \big)
+    - q_w (\ve{n}\cdot\ve{\omega}) (\ve{p}_v\cdot\ve{\phi}) \\* &&
+    -\big( \ve{n}\times(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi}) \big) \cdot
+     \big( q_w\ve{\omega} - \ve{q}_v\times\ve{\omega} \big) \\
+&=&  \ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\phi}\,\ve{q}_v^T \ve{\omega}
+    -\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}\,\ve{p}_v^T \ve{\phi} \\* &&
+    +(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi})^T \dual{\ve{n}}
+    (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}
+\end{eqnarray*}
+
+Fortunately, the other two terms of equation~\ref{constrJoystickCDot} we are interested in are
+very similar, so we can obtain them by substitution in the last expression. This gives us the
+following expression for $\dot{\m{J}}$:
+\begin{eqnarray}
+\dot{\m{J}}\dot{\ve{x}} &=&
+    \frac{1}{4}\Big( \ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\omega}\,\ve{q}_v^T
+    -\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}\,\ve{p}_v^T \nonumber\\*&&\quad
+    +(p_w\ve{\omega} - \ve{p}_v\times\ve{\omega})^T \dual{\ve{n}} (q_w\m{1} - \dual{\ve{q}_v})
+    \nonumber\\*&&\quad
+    -2\ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\phi}\,\ve{q}_v^T
+    -2(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi})^T \dual{\ve{n}} (q_w\m{1} - \dual{\ve{q}_v})
+    \Big)\, \ve{\omega} + \nonumber\\*&&
+    \frac{1}{4}\Big( \ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\phi}\,\ve{q}_v^T
+    -\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\phi}\,\ve{p}_v^T \nonumber\\*&&\quad
+    +(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi})^T \dual{\ve{n}} (q_w\m{1} - \dual{\ve{q}_v})
+    \nonumber\\*&&\quad
+    +2\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}\,\ve{p}_v^T \Big)\,\ve{\phi}
+\end{eqnarray}
+
+
+\subsection{Confinement to a plane (vertex/face collision) \label{vertexFaceConstraint}}
+
+This is the first constraint in this catalog which can sensibly be used as an inequality
+constraint. We want to define a constraint function whose value is the distance between a point
+and a plane, where the point is attached to one rigid body, and the plane to another. The plane
+is defined by a point in the plane and a normal vector. The distance should be positive if the
+point is on the side of the plane pointed to by the normal, and negative otherwise.
+If we put this constraint directly into the Lagrange multiplier equation, it will enforce the
+condition that the distance be zero~-- the point is confined to move only within the plane.
+But if we use the same constraint function in a collision context, we have a handler for the
+vertex/face collision case.
+
+Say \ve{a} is the centre of mass position of the body to which the plane is attached, and \ve{s}
+is the vector from the centre of mass to an arbitrary point in the plane. The angular velocity
+of this body is \ve{\omega}. The plane has a unit normal vector $\hat{\ve{n}}$
+($\norm{\hat{\ve{n}}} = 1$). The point we are interested in is $\ve{b} + \ve{t}$, where \ve{b} is
+the centre of mass position of the body to which the point belongs. This body has angular
+velocity \ve{\phi}.
+
+Then the constraint function and its derivatives are given by
+\begin{eqnarray}
+\ve{c} &=& (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot\hat{\ve{n}} \\
+\dot{\ve{c}} &=& (\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s})
+    \cdot\hat{\ve{n}} + (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot(\ve{\omega}\times\hat{\ve{n}})
+    \nonumber\\
+&=& \hat{\ve{n}}^T\dot{\ve{b}} - \hat{\ve{n}}^T\dot{\ve{a}} - \hat{\ve{n}}^T\dual{\ve{t}}\ve{\phi}
+    + (\ve{a} - \ve{b} - \ve{t})^T \dual{\hat{\ve{n}}} \ve{\omega} \\
+\ddot{\ve{c}} &=& \big( \ddot{\ve{b}} + \dot{\ve{\phi}}\times\ve{t} +
+    \ve{\phi}\times(\ve{\phi}\times\ve{t}) - \ddot{\ve{a}} \big) \cdot \hat{\ve{n}}+\nonumber\\*&&
+    2\big(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}}\big)
+    \cdot \big(\ve{\omega}\times\hat{\ve{n}}\big)
+    + \big(\ve{b} + \ve{t} - \ve{a}\big) \cdot \big( \dot{\ve{\omega}}\times\hat{\ve{n}} +
+    \ve{\omega}\times(\ve{\omega}\times\hat{\ve{n}}) \big) \nonumber\\
+&=&  \hat{\ve{n}}^T \ddot{\ve{b}}
+    -\hat{\ve{n}}^T \ddot{\ve{a}}
+    -\hat{\ve{n}}^T\dual{\ve{t}} \dot{\ve{\phi}}
+    +(\ve{a} - \ve{b} - \ve{t})^T \dual{\hat{\ve{n}}} \dot{\ve{\omega}} + \\*&&
+    \big( 2(\dot{\ve{a}} - \dot{\ve{b}} - \ve{\phi}\times\ve{t})^T \dual{\hat{\ve{n}}} 
+    +(\ve{a} - \ve{b} - \ve{t})^T \dual{(\ve{\omega}\times\hat{\ve{n}})}\big) \ve{\omega}
+    -\hat{\ve{n}}^T\dual{(\ve{\phi}\times\ve{t})} \ve{\phi} \nonumber
+\end{eqnarray}
+from which \m{J} and $\dot{\m{J}}$ can be read off as usual.
+
+
+\subsection{Edge/edge collision\label{edgeEdgeConstraint}}
+
+In this section we require a constraint function whose value is the shortest distance between
+two straight lines. The problem is closely related to the one in
+section~\ref{vertexFaceConstraint}. If used as an equality constraint, it could be used to
+simulate two metal rods which are joined together such that the join can move up or down either
+of the rods, but the rods always have to touch in one point. However, the practical use of such
+a system is rather limited. Much more important is the use of this constraint as an inequality,
+where it can handle the collision situation in which two edges collide.
+
+We assume that each straight line is connected to a rigid body. The first body's centre of mass
+is located at \ve{a}, its angular velocity is \ve{\omega}, \ve{s} is a vector from the centre
+of mass to an arbitrary point on the line, and \ve{u} is a unit vector pointing along the line.
+Similarly, the second body's CoM is \ve{b}, its angular velocity is \ve{\phi}, \ve{t} points at
+the line and \ve{v} points in the line's direction. We need to now distinguish two cases:
+either the lines are parallel within numerical tolerance
+($\norm{\ve{u}\times\ve{v}} \approx \ve{0}$), or they are not.
+
+If the lines are parallel, their distance is % TODO two cubes on top of each other
+
+If they are not parallel, we can find a unique plane which contains one line and is parallel to
+the other. This plane has a normal vector $\ve{n} = \ve{u}\times\ve{v}$ (or
+$\ve{n} = \ve{v}\times\ve{u}$, since this is just a convention). Interestingly this normal is the
+direction in which the force or impulse acts in the event of a collision. It is not obvious that
+this is the case, but by playing around with two books or similar, it is possible to convince
+oneself. Once we have normalized \ve{n} we can use it to determine the distance in the
+non-parallel case:
+\begin{equation}
+\ve{c} = (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot\frac{\ve{n}}{\norm{\ve{n}}}
+\end{equation}

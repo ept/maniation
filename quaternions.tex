@@ -98,14 +98,14 @@ components, observing the rules for multiplying \qi{}, \qj{} and \qk{}:
 && \quad\quad\quad (p_w q_w - p_x q_x - p_y q_y - p_z q_z) + \nonumber\\*
 && \quad\quad\quad (p_w q_x + p_x q_w + p_y q_z - p_z q_y) \,\qi + \nonumber\\*
 && \quad\quad\quad (p_w q_y + p_y q_w + p_z q_x - p_x q_z) \,\qj + \nonumber\\*
-&& \quad\quad\quad (p_w q_z + p_z q_w + p_x q_y - p_y q_x) \,\qk
+&& \quad\quad\quad (p_w q_z + p_z q_w + p_x q_y - p_y q_x) \,\qk \label{quatProduct}
 \end{eqnarray}
 
 We may occasionally find it convenient to write a quaternion as a pair consisting of a scalar
 (the real part) and a vector (the three imaginary parts):
 $\q{q} = [q_w, \ve{q}_v] = [q_w, (q_x, q_y, q_z)^T]$. Using this notation, we can write the
 quaternion product in terms of vector dot and cross products:
-\begin{equation}
+\begin{equation} \label{quatProduct2}
 \q{p}\q{q} = [p_w,\; \ve{p}_v]\;[q_w,\; \ve{q}_v] =
     [p_w q_w - \ve{p}_v \cdot \ve{q}_v,\;
     p_w \ve{q}_v + q_w \ve{p}_v + \ve{p}_v \times \ve{q}_v]
