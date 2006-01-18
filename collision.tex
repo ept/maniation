@@ -52,4 +52,68 @@ plane goes through the point of contact and is spanned by the directions of the 
 Modulo its sign, this plane's unit normal vector is unique~-- except if the two edges are
 parallel, which is a case we will ignore for now.
 
+Note that we are not trying to simulate friction at this point. The force in the direction of the
+contact plane normal merely stops interpenetration~-- if you were to push the book over the
+horizontal table surface, it would glide along without slowing down.
+
+How do we now compute this contact force in an arbitrary system, where there may be objects stacked
+on top of each other, different forces and torques acting, and so on? Like in
+section~\ref{constraints}, we can employ a constraint function. For a vertex/face contact, let the
+value of this function \ve{c} be the distance of the vertex point from the plane, being negative on
+one side and positive on the other; for an edge/edge contact, the value is the distance between the
+two straight lines. Of course, when we are in contact, the distance is zero in both cases. When we
+are in resting contact we also have $\dot{\ve{c}} = \ve{0}$, because the bodies are not moving
+relative to each other along the plane's normal~-- though they may be moving perpendicular to it,
+like in the case of the sliding book. The function becomes interesting when we consider its second
+derivative, $\ddot{\ve{c}}$. If positive values of \ve{c} represent legal states (in which the
+bodies are touching or separate), we can enforce the nonpenetration constraint by satisfying
+\begin{equation} \label{constrInequality}
+\ddot{\ve{c}} \ge \ve{0}.
+\end{equation}
+
+More exactly, if it is the case that $\ddot{\ve{c}} < \ve{0}$, we need to apply forces and torques
+to the bodies such that in total we have $\ddot{\ve{c}} = \ve{0}$. But when
+$\ddot{\ve{c}} \ge \ve{0}$, no force is applied (otherwise we would be glueing the book to the
+table). But how do we solve this inequality in practise? At this point we diverge from Baraff's
+method~\cite{BaraffWitkin:97}, who expresses equation~\ref{constrInequality} and additional
+side-conditions as a ``quadratic program'' and uses a specialised numerical solver.
+
+Let us take a much simpler approach and pretend for now that equation~\ref{constrInequality}
+contained an equals sign. Then this is a constraint like any other, which we can satisfy by using
+the Lagrange multiplier method of section~\ref{constraints}. Moreover, if there are multiple
+points of resting contact in the system, and also `real' constraints like joints between bodies,
+we can solve all of these simultaneously without thinking twice.
+
+So that the function \ve{c} can be used in the Lagrange multiplier method, we need to derive the
+Jacobian matrices \m{J} and $\dot{\m{J}}$ as we did for joints. This is easy to do for a
+vertex/face contact, as shown in appendix~\ref{vertexFaceConstraint}, and harder but perfectly
+possible for the edge/edge case (appendix~\ref{edgeEdgeConstraint}).
+
+However, having solved equation~\ref{lagrangeEquation} for \ve{\lambda}, we need to take care.
+Remember that each component of \ve{\lambda} specifies the `amount' of one particular constraint
+that should be applied to the system. If you examine the formulae in
+appendices~\ref{vertexFaceConstraint} and \ref{edgeEdgeConstraint}, you will notice that the
+product $\m{J}^T\ve{\lambda}$ can be directly interpreted as scaling a unit amount of forces and
+torques by a scalar~-- the scalar being the component of \ve{\lambda} corresponding to this
+constraint. Hence we can deduce that a positive value of the $\ve{\lambda}$ component generates
+forces and torques which push the bodies apart, while a negative value pulls them together (or
+vice versa, whichever sign convention is used). It is such a negative $\ve{\lambda}$ component
+that we must avoid.
+
+This gives us a basis for an algorithm which turns equation~\ref{constrInequality} back into what
+it actually is~-- an inequality: set up constraint functions for all contact points, and solve the
+system of linear equations for the Lagrange multiplier \ve{\lambda}. In this vector, find all
+components relating to contact constraints whose value is negative. (`Real' constraints are left
+untouched whatever their \ve{\lambda} component value is.) If there are none, calculate
+$\m{J}^T\ve{\lambda}$ and add the forces and torques to the system~-- then we are done. If there
+are negative components, completely discard the constraints to which they belong (since the bodies
+are accelerating away from each other in this point, the contact will break in the next time step),
+then repeat the solving for \ve{\lambda} with the reduced set of constraints. The process may take
+several iterations before terminating.
+
+I have not yet been successful in proving this algorithm correct, but despite extensive pondering
+I have not found any examples in which it fails either.
+
+\subsection{Colliding contact}
+
 
