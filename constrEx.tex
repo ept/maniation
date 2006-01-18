@@ -2,7 +2,7 @@
 
 Let us consider some examples of constraints to clarify the procedure.
 
-\subsection{Fixed point in space (`Nail')}
+\subsection{Fixed point in space (`Nail')\label{constrNail}}
 
 Let us implement a constraint which `nails' a particular point in a rigid body to a fixed point
 in world space. (It's a very flexible nail, because despite fixing the position, it allows all
@@ -61,7 +61,7 @@ We see that here there is only one slice for $\dot{\m{J}}$; the rest of the matr
 is zero. Since $\ve{\omega}$ also occurs inside the matrix, there are actually several
 alternative representations of this matrix which are equally valid.
 
-\subsection{Ball-and-socket joint}
+\subsection{Ball-and-socket joint\label{constrJoint}}
 
 Two rigid bodies are attached together at a particular point in each of the bodies.
 They may not separate, but all three rotational degrees of freedom are permitted. This is
@@ -87,7 +87,7 @@ The rest of the derivation is very similar to the previous example. We obtain fo
 matrix slices for \m{J} and two slices for $\dot{\m{J}}$.
 
 
-\subsection{Rotation axis restriction (`Joystick')}
+\subsection{Rotation axis restriction (`Joystick')\label{constrJoystick}}
 
 We now have formulae to define a ball-and-socket joint. How can we express other types
 of joints? A good way of doing this is by augmenting the ball-and-socket constraint with

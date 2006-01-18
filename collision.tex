@@ -1,0 +1,55 @@
+\section{Collision and contact}
+
+We now have all the mathematical facilities we need to simulate mechanical systems in which
+the acceleration functions are continuous over time. This already covers a large number of
+interesting systems, but unfortunately excludes any sort of collision between bodies. If we want
+to examine systems of separable but non-penetrating bodies, we have to open a whole new can of
+worms.
+
+Let us distinguish two cases of contact between bodies: resting contact and colliding contact.
+A book lying on your desk is in resting contact with the surface: their relative velocity is zero,
+but the desk excerts a force on the book to prevent it from penetrating into the surface.
+Colliding contact is given for example between the ground and a ball bouncing off it. In real
+life, the ball stays in contact with the ground for a finite length of time, during which it is
+deformed and experiences a finite force accelerating it upwards. In our simulation, however, we
+are working with rigid bodies which cannot be deformed, so we want the collision to happen
+instantaneously in the moment when the ball touches the ground. One way of looking at this is as
+an infinitely strong force acting over an infinitely short time, but a more useful representation
+is in terms of an impulse exchanged between the bodies.
+
+Creating a simulation involving contacts is generally seen as a difficult task.
+Baraff~\cite{BaraffWitkin:97} derives equations to handle collisions, and outlines (with a number
+of errors) a way of handling resting contact. Unfortunately his collision handling does not work
+in combination with constraints~-- it violates the assumption that the constraint function is
+twice differentiable~-- and his resting contact computation relies on a complicated and uncommon
+numerical routine. In this project, a new method of handling contacts is developed, which is
+simpler to implement, more powerful, and works perfectly together with constraints like those
+described in section~\ref{constraints}.
+
+In the rest of this section we will examine the simulation only at one point in time, at which
+the bodies in question are in contact. We also assume that we know the place at which the contact
+occurs. Algorithms for finding both the time and place of contact are discussed elsewhere in this
+report.
+
+\subsection{Resting contact}
+
+To keep things manageable, let us assume that we are dealing only with polyhedral bodies~-- bodies
+whose exterior consists of flat polygon faces, delimited by vertices, joined by straight edges.
+Since we will actually be working with a triangle mesh, this is fine.
+
+There are two main ways in which polyhedra can be in contact: either by a vertex of one body being
+inside a face of the other body, or by an edge of one body intersecting an edge of the other.
+There remain a few corner cases, but we will think about those later. The book lying on your desk
+may for example have four vertex/face contacts, each of the four corners of its back cover
+touching the face of the desk surface. You may visualize edge/edge contacts by holding the book
+such that its spine is touching the front edge of your desk.
+
+In both cases, for the bodies not to interpenetrate, they must excert equal and opposite forces on
+each other. This force must exactly balance the outside force, otherwise they would accelerate
+apart. Also in both cases the direction of the force is perpendicular to the plane of contact. In
+the vertex/face case, this plane is just the plane of the face polygon. In the edge/edge case, the
+plane goes through the point of contact and is spanned by the directions of the two edges involved.
+Modulo its sign, this plane's unit normal vector is unique~-- except if the two edges are
+parallel, which is a case we will ignore for now.
+
+
