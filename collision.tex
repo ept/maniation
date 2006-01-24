@@ -157,13 +157,39 @@ $\varepsilon = 1$ full elasticity\footnote{Values of $\varepsilon > 1$ are reser
 Fiction films.}.
 
 How do we now find the impulses we need to apply to the colliding bodies, and how do we
-simultaneously handle constraints? For now assume that we are dealing only with inelastic
-collisions, and we will include the factor $\varepsilon$ later. As previously for resting
-contact we can use a Lagrange multiplier method. However, this time we no longer have
-$\dot{\ve{c}} = \ve{0}$; in fact, $\dot{\ve{c}} = \ve{0}$ is exactly the situation we want after
-an inelastic collision: all constraints are satisfied, and points of contact are not moving apart.
+simultaneously handle constraints? As previously for resting contact we can use a Lagrange
+multiplier method. The constraint function \ve{c} must be set up to include all `real' constraints
+and all points of colliding contact. Points of resting contact or separating contacts must
+\emph{not} be included. Now for all points $i$ of colliding contact we have $\dot{\ve{c}}_i < 0$.
+Remember that this value is equal to (or at least proportional to) the relative velocity of the
+bodies in the point of contact. From conservation of momentum we can prove that for such a point,
+the relative velocity $\dot{\ve{c}}_i'$ after the collision is given by
+$\dot{\ve{c}}_i' = -\varepsilon_i \dot{\ve{c}}_i$.
 
-Start by concatenating the linear and angular momenta of all $n$ bodies into a single vector
+Assume for convenience that the first $m$ components of \ve{c} represent `real' constraints, and
+that the remaining $k$ components are due to colliding contacts. We can now formulate a condition
+which requires all `real' constraints to be satisfied after the collision, and also requires each
+collision to have performed the correct amount of elastic `bounce'. $\dot{\ve{c}}'$ is the
+required value of $\dot{\ve{c}}$ after the collision:
+\begin{equation}
+\dot{\ve{c}}' = \left[\begin{array}[m]{c}
+    \left. \begin{array}{c} 0 \\\vdots\\ 0 \end{array} \right\} m \\
+    -\varepsilon_1 \dot{\ve{c}}_{m+1} \\\vdots\\
+    -\varepsilon_k \dot{\ve{c}}_{m+k}
+    \end{array}\right]
+\end{equation}
+
+We can rewrite this as $\dot{\ve{c}}' = \dot{\ve{c}} - \m{E}\dot{\ve{c}}$, where \m{E} is the
+diagonal $m+k \times m+k$ matrix
+\begin{equation}
+\m{E} = \left[ \begin{array}{cc}
+    \begin{array}{ccc} 0 \\ & \ddots \\ && 0 \end{array} \\
+    \underbrace{\quad\quad\quad\quad}_m &
+    \begin{array}[t]{ccc} \varepsilon_1 \\ & \ddots \\ && \varepsilon_k \end{array}
+    \end{array} \right]
+\end{equation}
+
+Let us now concatenate the linear and angular momenta of all $n$ bodies into a single vector
 \ve{\Psi}, like we previously did for forces and torques (equation~\ref{PhiVector}):
 \begin{equation} \label{PsiVector}
 \ve{\Psi} = \left[\begin{array}{c}
@@ -172,29 +198,41 @@ Start by concatenating the linear and angular momenta of all $n$ bodies into a s
 
 From the definition of $\m{M}^{-1}$ (equation~\ref{massInertiaTensor}) we can deduce that
 $\dot{\ve{x}} = \m{M}^{-1}\ve{\Psi}$. What we require now is a vector $\ve{\Psi}_c$ which, when
-added to $\ve{\Psi}$, causes the constraints to be satisfied. It turns out\footnote{The argument
-is analogous to the derivation of the force vector in terms of Lagrange multipliers;
-see~\cite{BaraffWitkin:97} for details.} that this vector can be written as $\m{J}^T\ve{\lambda}$
-for some $m$-row vector \ve{\lambda}, where $m$ is the number of constraints including contact
-points. Using equation~\ref{cDotAndCDDot},
+added to $\ve{\Psi}$, causes the constraints to be satisfied:
 \begin{equation}
-\dot{\ve{c}} = \m{J}\dot{\ve{x}} = \m{J}\m{M}^{-1}(\ve{\Psi} + \ve{\Psi}_c) =
-    \m{J}\m{M}^{-1}\ve{\Psi} + \m{J}\m{M}^{-1}\m{J}^T\ve{\lambda}.
+\dot{\ve{c}} = \m{J}\dot{\ve{x}} = \m{J}\m{M}^{-1}\ve{\Psi} \quad\Longrightarrow\quad
+    \dot{\ve{c}}' = \m{J}\m{M}^{-1}(\ve{\Psi} + \ve{\Psi}_c)
 \end{equation}
-Setting this expression equal to zero gives us the equation we need to solve in order to satisfy
-all constraints:
-\begin{equation}
--\m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} = \m{J}\m{M}^{-1}\ve{\Psi}.
-\end{equation}
-This is just a system of linear equations which we can solve for \ve{\lambda}.
+(cf.\ equation~\ref{cDotAndCDDot}).
+It turns out\footnote{The argument is analogous to the derivation of the force vector in terms of
+Lagrange multipliers; see~\cite{BaraffWitkin:97} for details.} that this vector can be written as
+$\m{J}^T\ve{\lambda}$ for some $m+k$-row vector \ve{\lambda}. Hence we obtain
+\begin{eqnarray}
+\dot{\ve{c}}' &=& \m{J}\m{M}^{-1}(\ve{\Psi} + \m{J}^T\ve{\lambda}) \nonumber\\
+\dot{\ve{c}} - \m{E}\dot{\ve{c}} &=&
+    \m{J}\m{M}^{-1}\ve{\Psi} + \m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} \nonumber\\
+\m{J}\m{M}^{-1}\ve{\Psi} - \m{E}\m{J}\m{M}^{-1}\ve{\Psi} & = &
+    \m{J}\m{M}^{-1}\ve{\Psi} + \m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} \nonumber\\
+-\m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} &=& \m{E}\m{J}\m{M}^{-1}\ve{\Psi} \label{collisionLagrange}
+\end{eqnarray}
 
-We now approach the fiddly part of the algorithm. Like the force and torque vector in the previous
-section, $\m{J}^T\ve{\lambda}$ may not contain the impulses that we want. There may be unwanted
-impulses which are `glueing' bodies together. If the collisions are not completely inelastic, we
-also want to increase the impulse magnitudes by a factor of $1 + \varepsilon$ to simulate the
-`bouncing apart'.
+Equation~\ref{collisionLagrange} is just a system of linear equations which we can solve for
+\ve{\lambda}. The resulting vector $\ve{\Psi}_c = \m{J}^T\ve{\lambda}$ of impulses can be
+directly added to the rigid bodies' momenta.
 
-%Discard c>0
+We are not quite done yet. Having modified the bodies' momenta, the state of other contact points
+in the system may have changed. While the previously colliding contacts will have
+turned into resting or separating contacts, other (previously unconsidered) contacts may now
+be colliding! Thus we must repeat the whole process described in this section, ignoring the
+previous colliding points, and considering the new ones instead. If there are no new colliding
+contacts, we have finished.
+
+The bad news is that this algorithm is not guaranteed to terminate~-- indeed we can come up with
+situations in which it will run indefinitely. An easy way of solving this problem is by not
+allowing $\varepsilon$ to be too close to 1; then if a loop occurs, the system will eventually
+run out of energy and return to a resting contact.
 
 
 \subsection{Generalised collisions}
+
+-- to be written --
