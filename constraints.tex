@@ -85,7 +85,7 @@ To calculate the effect of the constraints, the next thing we need to know are t
 and torques already acting on the system, for example due to gravity or muscular activity. We
 concatenate these values for $n$ bodies into a single $6n$-row vector \ve{\Phi}, just as we did
 for \ve{x} (equation~\ref{lagrangeStateVector}):
-\begin{equation}
+\begin{equation} \label{PhiVector}
 \ve{\Phi} = \left[\begin{array}{c}
     \ve{F}_1 \\ \ve{\tau}_1 \\ \vdots \\ \ve{F}_n \\ \ve{\tau}_n
     \end{array}\right]

@@ -14,18 +14,24 @@ The dual allows us to re-write a vector cross product as a matrix multiplication
 \begin{equation}
 \ve{a}\times\ve{b} = \dual{\ve{a}}\,\ve{b}
 \end{equation}
+Note that $\dual{\ve{a}}^T = -\dual{\ve{a}}$.
 
 Let us also recall some basic identities of vector and matrix algebra~\cite{RHB:02}:
 \begin{eqnarray*}
-\ve{a}\times\ve{a} & = & \ve{0} \\
+\ve{a}\times\ve{a} & = & \ve{0}\quad\mathrm{(the~null~vector)} \\
 \ve{a}\times\ve{b} & = & -\ve{b}\times\ve{a} \\
+\ve{a}\times(\ve{b} + \ve{c}) & = & \ve{a}\times\ve{b} + \ve{a}\times\ve{c} \\
 \ve{a}\cdot\ve{b} & = & \ve{b}\cdot\ve{a} \\
 \ve{a}\cdot\ve{b} & = & \ve{a}^T\,\ve{b} \\
+\ve{a}\cdot(\ve{b} + \ve{c}) & = & \ve{a}\cdot\ve{b} + \ve{a}\cdot\ve{c} \\
 \ve{a}\cdot(\ve{b}\times\ve{c}) & = & \ve{b}\cdot(\ve{c}\times\ve{a}) \\
     & = & \ve{c}\cdot(\ve{a}\times\ve{b}) \\
 \ve{a}\times(\ve{b}\times\ve{c}) & = &
     \ve{b}(\ve{a}\cdot\ve{c}) - \ve{c}(\ve{a}\cdot\ve{b}) \\
-(\m{A}\m{B})^T & = & \m{B}^T\m{A}^T
+(\m{A}\m{B})\m{C} & = & \m{A}(\m{B}\m{C}) \\
+\m{A}(\m{B} + \m{C}) & = & \m{A}\m{B} + \m{A}\m{C} \\
+(\m{A}\m{B})^T & = & \m{B}^T\m{A}^T \\
+\m{A}\m{A}^{-1} = \m{A}^{-1}\m{A} & = & \m{1}\quad\mathrm{(the~identity~matrix)}
 \end{eqnarray*}
 
 
@@ -80,17 +86,19 @@ Substituting equation~\ref{correctBrett5} back into~\ref{correctBrett2}:
 \end{eqnarray}
 
 Equation~\ref{correctBrett6} corrects the similar expression in~\cite{Saunders:PhD},
-page~34. From this we deduce that if we want to calculate the angular velocity of a rigid
-body, the value we need to feed into our ODE solver is
+page~34. This means that the angular acceleration of a rigid body is given by
 \begin{equation}
-\dot{\ve{\omega}} = \m{I}^{-1}\ve{\tau} -
-    \m{I}^{-1}\dual{\ve{\omega}}\,\m{I}\ve{\omega}.
+\label{correctBrett7}
+\dot{\ve{\omega}} = \m{I}^{-1} (\ve{\tau} - \dual{\ve{\omega}}\,\m{I}\ve{\omega}).
 \end{equation}
-This means that even if the sum of all torques acting on the body is zero, its angular
-velocity may change if \m{I} is not diagonal (i.e.\ if the body is somehow asymmetric).
-Remember that angular momentum is conserved if there are no external torques~\cite{Feynman:63}.
-Thus in order for the simulation to conserve angular momentum correctly, the value of
-$\dual{\ve{\omega}}\,\m{I}\ve{\omega}$ must always be subtracted from the torques.
+where \ve{\tau} is the sum of all torque vectors acting on the body. This means that even if
+there are no torques, its angular velocity may change if \m{I} is not diagonal (i.e.\ if
+the body is somehow asymmetric). This effect is called \emph{free precession}.
+
+In a simulation, we usually integrate over torques to find angular momentum, and then calculate
+the angular velocity from the momentum in each time step using the current moment of inertia. In
+this case, the angular acceleration in equation~\ref{correctBrett7} is not needed. It is required
+only for purposes of computing constraint forces and torques.
 
 
 \subsection{Lagrange multiplier constraints}
