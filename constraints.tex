@@ -5,9 +5,9 @@ interact in some way. We will primarily be interested in articulated bodies, tha
 of individual rigid bodies held together by joints. Joints allow rotation but cannot be
 separated. (The human body is a good example of such an articulated body.)
 
-There are various strategies for implementing articulated bodies. {\em Lagrangian mechanics}
+There are various strategies for implementing articulated bodies. \emph{Lagrangian mechanics}
 is a commonplace method in physics and engineering, in which the state of the system is expressed
-in terms of a set of {\em generalised coordinates}. The position and orientation of each sub-body
+in terms of a set of \emph{generalised coordinates}. The position and orientation of each sub-body
 is then a function of these generalised coordinates, and outside forces can be transformed
 back into the generalised coordinates, where they are handled. For example, consider two rigid
 bodies which are held together by a ball-and-socket joint~\cite{Kalra:95}. Without the joint,
@@ -24,7 +24,7 @@ impossible to find for complicated systems, so the method does not scale well.
 An alternative approach to the problem is to initially grant each sub-body its full number of
 degrees of freedom, and then to impose constraints on the system. We can then ensure that the
 constraints are always maintained by excerting appropriate forces and torques on the bodies.
-Finding these forces is commonly done by means of {\em Lagrange multipliers}~-- note that
+Finding these forces is commonly done by means of \emph{Lagrange multipliers}~-- note that
 despite the similarity in name, this method has very little in common with Lagrangian mechanics.
 
 Lagrange multipliers are used to implement constrained rigid body mechanics in this project,
@@ -81,19 +81,29 @@ partial differentiation. Instead we make use of the following results of the cha
 \end{equation}
 Appendix~\ref{constraintAppendix} gives examples of derivations using these equations.
 
-Two more quantities are required before we can determine the forces and torques which maintain
-our constraints. We need to add up all the other forces and torques acting on each of the $n$
-sub-bodies (for example due to gravity or muscular activity) and concatenate them into a single
-$6n$-row vector \ve{\Phi}, just as we did for \ve{x} (equation~\ref{lagrangeStateVector}):
+To calculate the effect of the constraints, the next thing we need to know are the forces
+and torques already acting on the system, for example due to gravity or muscular activity. We
+concatenate these values for $n$ bodies into a single $6n$-row vector \ve{\Phi}, just as we did
+for \ve{x} (equation~\ref{lagrangeStateVector}):
 \begin{equation}
-\ve{\Phi} = \left[\begin{array}{l}
+\ve{\Phi} = \left[\begin{array}{c}
     \ve{F}_1 \\ \ve{\tau}_1 \\ \vdots \\ \ve{F}_n \\ \ve{\tau}_n
+    \end{array}\right]
+    \quad\quad\quad
+\ve{\Phi}_p = \left[\begin{array}{c}
+    \ve{0} \\ \dual{\ve{\omega}_1}\m{I}_1\ve{\omega}_1 \\ \vdots \\
+    \ve{0} \\ \dual{\ve{\omega}_n}\m{I}_n\ve{\omega}_n
     \end{array}\right]
 \end{equation}
 where $\ve{F}_i$ denotes the sum of all forces acting on the centre of mass of body~$i$, and
-$\ve{\tau}_i$ is the sum of all torque vectors acting on body~$i$.
+$\ve{\tau}_i$ is the sum of all torque vectors acting on body~$i$. The vector $\ve{\Phi}_p$
+accounts for the fact that a body's moment of inertia is in general not constant in the world
+frame\footnote{The subscript $p$ of this vector stands for \emph{precession}, since the
+variability of the moment of inertia causes free precession.}; $\m{I}_i$ is body $i$'s moment
+of inertia in the world frame at the current point in time.
+See appendix~\ref{correctBrettAppendix} for a derivation of $\ve{\Phi}_p$.
 
-And finally, we require the {\em mass-inertia tensor} \m{M} and its inverse
+And finally, we require the \emph{mass-inertia tensor} \m{M} and its inverse
 $\m{M}^{-1}$. \m{M} is a $6n\times6n$ matrix of the form
 \begin{equation}
 \label{massInertiaTensor}
@@ -119,7 +129,7 @@ of~\cite{BaraffWitkin:97}, which is the opposite of~\cite{Saunders:PhD}.}
 \begin{equation}
 \label{lagrangeEquation}
 -\m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} = \dot{\m{J}}\dot{\ve{x}} +
-    \m{J}\m{M}^{-1}\ve{\Phi} + k\ve{c} + d\dot{\ve{c}}
+    \m{J}\m{M}^{-1}(\ve{\Phi} - \ve{\Phi}_p) + k\ve{c} + d\dot{\ve{c}}
 \end{equation}
 in which all variables except $\ve{\lambda}$ are known. The meaning of this equation and
 its two scalar constants $k$ and $d$ is discussed in~\cite{BaraffWitkin:97}
@@ -130,9 +140,11 @@ $\ve{\lambda}$ is an $m$-row vector of so-called Lagrange multipliers (after whi
 is named), where $m$ is the number of constraints. Once we have solved for it, we can compute
 the expression
 \begin{equation}
-\hat{\ve{\Phi}} = \m{J}^T\,\ve{\lambda}.
+\ve{\Phi}_c = \m{J}^T\,\ve{\lambda}.
 \end{equation}
-$\hat{\ve{\Phi}}$ has the same format as $\ve{\Phi}$, and indeed it is the vector containing
+$\ve{\Phi}_c$ has the same format as $\ve{\Phi}$, and indeed it is the vector containing
 the forces and torques which we need to additionally apply to each body to ensure that they
 continue to satisfy the constraints! All we therefore need to do is to add
-$\ve{\Phi} + \hat{\ve{\Phi}}$ and to feed the result into our ODE solver.
+$\ve{\Phi} + \ve{\Phi}_c$ and to feed the result into our ODE solver. $\ve{\Phi}_p$ must not
+be subtracted from this term if the moment of inertia is recalculated based on the bodies'
+orientation.

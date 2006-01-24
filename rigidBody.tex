@@ -29,68 +29,68 @@ Let us also recall some basic identities of vector and matrix algebra~\cite{RHB:
 \end{eqnarray*}
 
 
-%   \subsection{Conservation of angular momentum\label{correctBrettAppendix}}
-%
-%   This argument is modelled after~\cite{Ruf:02}. The moment of inertia $\ve{L}$ of a rigid
-%   body is defined as
-%   \begin{equation}
-%   \label{correctBrett1}
-%   \ve{L} = \m{I}\ve{\omega}
-%   \end{equation}
-%   where $\m{I}$ is the inertia tensor and $\ve{\omega}$ is the angular velocity vector.
-%   Torque is the rate of change of angular momentum over time. Using the chain rule,
-%   \begin{equation}
-%   \label{correctBrett2}
-%   \ve{\tau} = \dot{\ve{L}} = \dot{\m{I}}\ve{\omega} + \m{I}\dot{\ve{\omega}}
-%   \end{equation}
-%
-%   We can further evaluate $\dot{\m{I}}$ by writing it as a product with a rotation matrix
-%   $\m{R}$ and its transpose:
-%   \begin{equation}
-%   \label{correctBrett3}
-%   \m{I} = \m{R}\m{I}_\mathrm{body}\m{R}^T
-%   \end{equation}
-%
-%   It can be shown that such a decomposition of the inertia tensor always exists, and that
-%   $\m{I}_\mathrm{body}$ is a diagonal, time-invariant matrix containing the moments
-%   of inertia about the body's principal axes~\cite{Feynman:63}. Hence we obtain
-%   \begin{equation}
-%   \label{correctBrett4}
-%   \dot{\m{I}} = \dot{\m{R}}\m{I}_\mathrm{body}\m{R}^T +
-%       \m{R}\m{I}_\mathrm{body}\frac{\diff}{\diff t}\m{R}^T
-%   \end{equation}
-%
-%   Witkin~\cite{BaraffWitkin:97} derives that $\dot{\m{R}} = \dual{\ve{\omega}}\,\m{R}$
-%   for a rotation matrix $\m{R}$ and an angular velocity vector $\ve{\omega}$.
-%   Using this identity and taking the differential operator onto the inside of the
-%   transpose at the end of equation~\ref{correctBrett4},
-%   \begin{eqnarray}
-%   \dot{\m{I}} &=& \dual{\ve{\omega}}\,\m{R}\m{I}_\mathrm{body}\m{R}^T +
-%       \m{R}\m{I}_\mathrm{body}(\dual{\ve{\omega}}\,\m{R})^T \nonumber\\
-%   &=& \dual{\ve{\omega}}\,\m{R}\m{I}_\mathrm{body}\m{R}^T -
-%       \m{R}\m{I}_\mathrm{body}\m{R}^T\dual{\ve{\omega}} \nonumber\\
-%   &=& \dual{\ve{\omega}}\,\m{I} - \m{I}\dual{\ve{\omega}} \label{correctBrett5}
-%   \end{eqnarray}
-%
-%   Substituting equation~\ref{correctBrett5} back into~\ref{correctBrett2}:
-%   \begin{eqnarray}
-%   \ve{\tau} & = & \m{I}\dot{\ve{\omega}} + \dual{\ve{\omega}}\,\m{I}\ve{\omega} -
-%       \m{I}\dual{\ve{\omega}}\,\ve{\omega} \nonumber \\
-%   & = & \m{I}\dot{\ve{\omega}} + \dual{\ve{\omega}}\,\m{I}\ve{\omega} \label{correctBrett6}
-%   \end{eqnarray}
-%
-%   Equation~\ref{correctBrett6} corrects the similar expression in~\cite{Saunders:PhD},
-%   page~34. From this we deduce that if we want to calculate the angular velocity of a rigid
-%   body, the value we need to feed into our ODE solver is
-%   \begin{equation}
-%   \dot{\ve{\omega}} = \m{I}^{-1}\ve{\tau} -
-%       \m{I}^{-1}\dual{\ve{\omega}}\,\m{I}\ve{\omega}.
-%   \end{equation}
-%   This means that even if the sum of all torques acting on the body is zero, its angular
-%   velocity may change if \m{I} is not diagonal (i.e. if the body is somehow asymmetric).
-%   Remember that angular momentum is conserved if there are no external torques~\cite{Feynman:63}.
-%   Thus in order for the simulation to conserve angular momentum correctly, the value of
-%   $\dual{\ve{\omega}}\,\m{I}\ve{\omega}$ must always be subtracted from the torques.
+\subsection{Free precession\label{correctBrettAppendix}}
+
+This argument is modelled after~\cite{Ruf:02}. The moment of inertia $\ve{L}$ of a rigid
+body is defined as
+\begin{equation}
+\label{correctBrett1}
+\ve{L} = \m{I}\ve{\omega}
+\end{equation}
+where $\m{I}$ is the inertia tensor and $\ve{\omega}$ is the angular velocity vector.
+Torque is the rate of change of angular momentum over time. Using the chain rule,
+\begin{equation}
+\label{correctBrett2}
+\ve{\tau} = \dot{\ve{L}} = \dot{\m{I}}\ve{\omega} + \m{I}\dot{\ve{\omega}}
+\end{equation}
+
+We can further evaluate $\dot{\m{I}}$ by writing it as a product with a rotation matrix
+$\m{R}$ and its transpose:
+\begin{equation}
+\label{correctBrett3}
+\m{I} = \m{R}\m{I}_\mathrm{body}\m{R}^T
+\end{equation}
+
+It can be shown that such a decomposition of the inertia tensor always exists, and that
+$\m{I}_\mathrm{body}$ is a diagonal, time-invariant matrix containing the moments
+of inertia about the body's principal axes~\cite{Feynman:63}. Hence we obtain
+\begin{equation}
+\label{correctBrett4}
+\dot{\m{I}} = \dot{\m{R}}\m{I}_\mathrm{body}\m{R}^T +
+    \m{R}\m{I}_\mathrm{body}\frac{\diff}{\diff t}\m{R}^T
+\end{equation}
+
+Witkin~\cite{BaraffWitkin:97} derives that $\dot{\m{R}} = \dual{\ve{\omega}}\,\m{R}$
+for a rotation matrix $\m{R}$ and an angular velocity vector $\ve{\omega}$.
+Using this identity and taking the differential operator onto the inside of the
+transpose at the end of equation~\ref{correctBrett4},
+\begin{eqnarray}
+\dot{\m{I}} &=& \dual{\ve{\omega}}\,\m{R}\m{I}_\mathrm{body}\m{R}^T +
+    \m{R}\m{I}_\mathrm{body}(\dual{\ve{\omega}}\,\m{R})^T \nonumber\\
+&=& \dual{\ve{\omega}}\,\m{R}\m{I}_\mathrm{body}\m{R}^T -
+    \m{R}\m{I}_\mathrm{body}\m{R}^T\dual{\ve{\omega}} \nonumber\\
+&=& \dual{\ve{\omega}}\,\m{I} - \m{I}\dual{\ve{\omega}} \label{correctBrett5}
+\end{eqnarray}
+
+Substituting equation~\ref{correctBrett5} back into~\ref{correctBrett2}:
+\begin{eqnarray}
+\ve{\tau} & = & \m{I}\dot{\ve{\omega}} + \dual{\ve{\omega}}\,\m{I}\ve{\omega} -
+    \m{I}\dual{\ve{\omega}}\,\ve{\omega} \nonumber \\
+& = & \m{I}\dot{\ve{\omega}} + \dual{\ve{\omega}}\,\m{I}\ve{\omega} \label{correctBrett6}
+\end{eqnarray}
+
+Equation~\ref{correctBrett6} corrects the similar expression in~\cite{Saunders:PhD},
+page~34. From this we deduce that if we want to calculate the angular velocity of a rigid
+body, the value we need to feed into our ODE solver is
+\begin{equation}
+\dot{\ve{\omega}} = \m{I}^{-1}\ve{\tau} -
+    \m{I}^{-1}\dual{\ve{\omega}}\,\m{I}\ve{\omega}.
+\end{equation}
+This means that even if the sum of all torques acting on the body is zero, its angular
+velocity may change if \m{I} is not diagonal (i.e.\ if the body is somehow asymmetric).
+Remember that angular momentum is conserved if there are no external torques~\cite{Feynman:63}.
+Thus in order for the simulation to conserve angular momentum correctly, the value of
+$\dual{\ve{\omega}}\,\m{I}\ve{\omega}$ must always be subtracted from the torques.
 
 
 \subsection{Lagrange multiplier constraints}

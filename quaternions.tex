@@ -8,21 +8,21 @@ it in terms of a rotation operation which transforms a vector in the body's loca
 coordinates into world coordinates (or vice-versa). But again, there are various different
 approaches to representing this rotation, all of which have advantages and disadvantages.
 
-{\em Euler angles} are probably the most intuitive representation of a 3D rotation, describing
+\emph{Euler angles} are probably the most intuitive representation of a 3D rotation, describing
 it as a series of three rotations about different axes. These axes are fixed by convention, so it
 suffices to specify the three angles of rotation. However, this scheme has a number of drawbacks
 which are extensively discussed in the literature~\cite{Saunders:PhD,Shoemake:85}: amongst other
 things, it is possible that rotation about one of the axes freezes during an animation
 (``Gimbal lock'') unless all special cases are handled very carefully.
 
-{\em Rotation matrices} are commonly used because they are well understood, easily generalise
+\emph{Rotation matrices} are commonly used because they are well understood, easily generalise
 to other dimensions and allow efficient combination with other linear transformations (scaling
 and shearing~-- translation may also be included if homogeneous coordinates are employed).
 Unfortunately, many operations required for animation of rotations are awkward to implement
 since this representation uses nine numbers (a $3\times3$ matrix) to represent three degrees
 of freedom, thus introducing six additional side-conditions which must be maintained.
 
-{\em Quaternions}~\cite{Shoemake:85,Eberly:01,MathWorld:Quaternion} are a popular alternative
+\emph{Quaternions}~\cite{Shoemake:85,Eberly:01,MathWorld:Quaternion} are a popular alternative
 to the two previous schemes, and they are also used extensively in this project.
 
 \subsection{Definition and properties}
@@ -86,7 +86,7 @@ this rotation is
 It can easily be verified that this quaternion always has unit magnitude.
 We shall assume throughout this project that the rotation thus described is clockwise (as seen
 when looking in the direction of the vector $\ve{a}$) in a right-hand coordinate system,
-i.e. that it is given by the ``right-hand rule''.
+i.e.\ that it is given by the ``right-hand rule''.
 
 Two rotations can be concatenated by multiplying their quaternions together. Because the order
 in which these rotations are applied is significant, this multiplication is not commutative~--
@@ -116,12 +116,12 @@ convert it into its corresponding quaternion $\tilde{\ve{v}}$ as defined in
 equation~\ref{vectorToQuat} and then calculate the quaternion product
 \begin{equation}
 \label{quatTransform}
-\tilde{\ve{v}}^\prime = \q{q}\tilde{\ve{v}}\q{q}^{-1}
+\tilde{\ve{v}}' = \q{q}\tilde{\ve{v}}\q{q}^{-1}
 \end{equation}
 
 If we expand this formula, we find that the real part of the result is always zero, and
-that the rotated vector $\ve{v}^\prime = (v_1^\prime, v_2^\prime, v_3^\prime)^T$ corresponds
-to $\tilde{\ve{v}}^\prime$ (i.e. $\ve{v}^\prime$ is contained in the three complex parts of
+that the rotated vector $\ve{v}' = (v_1', v_2', v_3')^T$ corresponds
+to $\tilde{\ve{v}}'$ (i.e.\ $\ve{v}'$ is contained in the three complex parts of
 the quaternion product).
 
 Some authors, notably Shoemake~\cite{Shoemake:85}, choose to define the product in
@@ -192,9 +192,9 @@ infinite number of revolutions around the quaternion sphere.
 We can solve this problem by scaling $\Delta\q{q}(t) = \Delta t \dot{\q{q}}(t)$
 depending on its magnitude, so that it maps to the correct point on the sphere after
 re-normalisation. We can combine this scaling and re-normalisation into one convenient
-function to perform a {\em Qu}at{\em er}nion inte{\em g}ration {\em s}tep, or `Quergs'
+function to perform a \emph{Qu}at\emph{er}nion inte\emph{g}ration \emph{s}tep, or `Quergs'
 in short\footnote{This naming follows the spirit of Shoemake~\cite{Shoemake:85}, whose
-``Slerp'' function is an `acronym' of {\em S}pherical {\em l}inear int{\em erp}olation.}:
+``Slerp'' function is an `acronym' of \emph{S}pherical \emph{l}inear int\emph{erp}olation.}:
 \begin{equation}
 \label{quergs}
 \mathrm{Quergs}(\q{q}, \Delta\q{q}) =
