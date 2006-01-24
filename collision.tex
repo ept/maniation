@@ -54,7 +54,9 @@ parallel, which is a case we will ignore for now.
 
 Note that we are not trying to simulate friction at this point. The force in the direction of the
 contact plane normal merely stops interpenetration~-- if you were to push the book over the
-horizontal table surface, it would glide along without slowing down.
+horizontal table surface, it would glide along without slowing down. We also class such gliding
+behaviour as resting contact if the relative velocity of the bodies is parallel to the contact
+plane.
 
 How do we now compute this contact force in an arbitrary system, where there may be objects stacked
 on top of each other, different forces and torques acting, and so on? Like in
@@ -103,17 +105,40 @@ that we must avoid.
 This gives us a basis for an algorithm which turns equation~\ref{constrInequality} back into what
 it actually is~-- an inequality: set up constraint functions for all contact points, and solve the
 system of linear equations for the Lagrange multiplier \ve{\lambda}. In this vector, find all
-components relating to contact constraints whose value is negative. (`Real' constraints are left
-untouched whatever their \ve{\lambda} component value is.) If there are none, calculate
-$\m{J}^T\ve{\lambda}$ and add the forces and torques to the system~-- then we are done. If there
-are negative components, completely discard the constraints to which they belong (since the bodies
-are accelerating away from each other in this point, the contact will break in the next time step),
-then repeat the solving for \ve{\lambda} with the reduced set of constraints. The process may take
-several iterations before terminating.
+components relating to contact constraints whose value is negative. (`Real' constraints which are
+not points of resting contact are left untouched whatever their \ve{\lambda} component value is.)
+If there are none, calculate $\m{J}^T\ve{\lambda}$ and add the forces and torques to the system~--
+then we are done. If there aare negative components, completely discard the constraints to which
+they belong (since the bodies are accelerating away from each other in this point, the contact
+will break in the next time step), then repeat the solving for \ve{\lambda} with the reduced set
+of constraints. The process may take several iterations before terminating, but always terminates
+because in each iteration we either reduce the number of active constraints or exit.
 
 I have not yet been successful in proving this algorithm correct, but despite extensive pondering
 I have not found any examples in which it fails either.
 
 \subsection{Colliding contact}
 
+A similar method using Lagrange multipliers can be formulated to handle colliding contact. As in
+the previous section, we can write down constraint functions \ve{c} for all points of contact.
+While points of resting contact had the property that $\dot{\ve{c}} = 0$, colliding contact is
+characterised by $\dot{\ve{c}} < 0$. (If $\dot{\ve{c}} > 0$ then the bodies are moving away from
+each other. Such a contact can be ignored for now, but we cannot fully discard it, as explained
+below.) Having a contact also implies $\ve{c} = 0$, so we need to immediately modify the bodies'
+linear and angular momenta to satisfy $\ve{c}' \ge 0$, otherwise the bodies will interpenetrate
+in the next time step.
 
+This operation is completely different from applying forces or torques to the bodies, as these
+change the momenta gradually by acceleration, not instantaneously. Rather than looking at the
+level of acceleration, which is the second derivative of state with respect to time, we now need
+to think on the level of velocity, i.e.\ the first derivative.
+
+Physically, this operation is expressed in terms of an \emph{impulse}. An impulse \ve{u} has the
+same dimensions as linear momentum \ve{p} (kg\,m/s) and is directly added to the momentum of the
+body to which it is applied: $\ve{p}' = \ve{p} + \ve{u}$. If the impulse is applied at the point
+$\ve{r}'$, and \ve{r} is the body's centre of mass, it also changes the angular momentum to
+$\ve{L}' = \ve{L} + (\ve{r}' - \ve{r})\times\ve{u}$. This behaviour is analogous to that of a
+force.
+
+A collision between two rigid bodies must conserve the total momentum of the system; this implies
+that the impulses acting on the bodies at a point of collision must be equal and opposite.
