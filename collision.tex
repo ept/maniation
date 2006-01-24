@@ -136,9 +136,65 @@ to think on the level of velocity, i.e.\ the first derivative.
 Physically, this operation is expressed in terms of an \emph{impulse}. An impulse \ve{u} has the
 same dimensions as linear momentum \ve{p} (kg\,m/s) and is directly added to the momentum of the
 body to which it is applied: $\ve{p}' = \ve{p} + \ve{u}$. If the impulse is applied at the point
-$\ve{r}'$, and \ve{r} is the body's centre of mass, it also changes the angular momentum to
-$\ve{L}' = \ve{L} + (\ve{r}' - \ve{r})\times\ve{u}$. This behaviour is analogous to that of a
+$\ve{s}$, and \ve{r} is the body's centre of mass, it also changes the angular momentum to
+$\ve{L}' = \ve{L} + (\ve{s} - \ve{r})\times\ve{u}$. This behaviour is analogous to that of a
 force.
 
-A collision between two rigid bodies must conserve the total momentum of the system; this implies
-that the impulses acting on the bodies at a point of collision must be equal and opposite.
+A collision between two rigid bodies must conserve the total momentum of the system. This implies
+that the impulses acting on the bodies at a point of collision must be equal and opposite. However,
+the collision need not necessarily conserve energy. A collision which \emph{does} conserve energy
+is called \emph{elastic} or fully elastic, and may be given for example by an ideal rubber ball
+which, when dropped, bounces up to exactly the same height as it was dropped from. At the other
+extreme, an \emph{inelastic} collision is one which reduces the energy of the system as much as
+possible~-- this energy difference is dissipated as heat. We cannot say that an inelastic
+collision reduces the energy to zero, since the absolute energy depends on the frame of reference.
+In an inelastic collision, bodies generally do not `bounce apart' again.
+
+Most collisions in real life are somewhere in between, depending on the materials of the colliding
+objects. Let us express this behaviour using a single `bounciness' scalar
+$0 \le \varepsilon \le 1$, where $\varepsilon = 0$ indicates an inelastic collision, and
+$\varepsilon = 1$ full elasticity\footnote{Values of $\varepsilon > 1$ are reserved for Science
+Fiction films.}.
+
+How do we now find the impulses we need to apply to the colliding bodies, and how do we
+simultaneously handle constraints? For now assume that we are dealing only with inelastic
+collisions, and we will include the factor $\varepsilon$ later. As previously for resting
+contact we can use a Lagrange multiplier method. However, this time we no longer have
+$\dot{\ve{c}} = \ve{0}$; in fact, $\dot{\ve{c}} = \ve{0}$ is exactly the situation we want after
+an inelastic collision: all constraints are satisfied, and points of contact are not moving apart.
+
+Start by concatenating the linear and angular momenta of all $n$ bodies into a single vector
+\ve{\Psi}, like we previously did for forces and torques (equation~\ref{PhiVector}):
+\begin{equation} \label{PsiVector}
+\ve{\Psi} = \left[\begin{array}{c}
+    \ve{p}_1 \\ \ve{L}_1 \\ \vdots \\ \ve{p}_n \\ \ve{L}_n \end{array}\right]
+\end{equation}
+
+From the definition of $\m{M}^{-1}$ (equation~\ref{massInertiaTensor}) we can deduce that
+$\dot{\ve{x}} = \m{M}^{-1}\ve{\Psi}$. What we require now is a vector $\ve{\Psi}_c$ which, when
+added to $\ve{\Psi}$, causes the constraints to be satisfied. It turns out\footnote{The argument
+is analogous to the derivation of the force vector in terms of Lagrange multipliers;
+see~\cite{BaraffWitkin:97} for details.} that this vector can be written as $\m{J}^T\ve{\lambda}$
+for some $m$-row vector \ve{\lambda}, where $m$ is the number of constraints including contact
+points. Using equation~\ref{cDotAndCDDot},
+\begin{equation}
+\dot{\ve{c}} = \m{J}\dot{\ve{x}} = \m{J}\m{M}^{-1}(\ve{\Psi} + \ve{\Psi}_c) =
+    \m{J}\m{M}^{-1}\ve{\Psi} + \m{J}\m{M}^{-1}\m{J}^T\ve{\lambda}.
+\end{equation}
+Setting this expression equal to zero gives us the equation we need to solve in order to satisfy
+all constraints:
+\begin{equation}
+-\m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} = \m{J}\m{M}^{-1}\ve{\Psi}.
+\end{equation}
+This is just a system of linear equations which we can solve for \ve{\lambda}.
+
+We now approach the fiddly part of the algorithm. Like the force and torque vector in the previous
+section, $\m{J}^T\ve{\lambda}$ may not contain the impulses that we want. There may be unwanted
+impulses which are `glueing' bodies together. If the collisions are not completely inelastic, we
+also want to increase the impulse magnitudes by a factor of $1 + \varepsilon$ to simulate the
+`bouncing apart'.
+
+%Discard c>0
+
+
+\subsection{Generalised collisions}
