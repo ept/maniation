@@ -143,10 +143,10 @@ force.
 A collision between two rigid bodies must conserve the total momentum of the system. This implies
 that the impulses acting on the bodies at a point of collision must be equal and opposite. However,
 the collision need not necessarily conserve energy. A collision which \emph{does} conserve energy
-is called \emph{elastic} or fully elastic, and may be given for example by an ideal rubber ball
-which, when dropped, bounces up to exactly the same height as it was dropped from. At the other
-extreme, an \emph{inelastic} collision is one which reduces the energy of the system as much as
-possible~-- this energy difference is dissipated as heat. We cannot say that an inelastic
+is called \emph{elastic} or \emph{fully elastic}, and may be given for example by an ideal rubber
+ball which, when dropped, bounces up to exactly the same height as it was dropped from. At the
+other extreme, an \emph{inelastic} collision is one which reduces the energy of the system as much
+as possible~-- this energy difference is dissipated as heat. We cannot say that an inelastic
 collision reduces the energy to zero, since the absolute energy depends on the frame of reference.
 In an inelastic collision, bodies generally do not `bounce apart' again.
 
@@ -183,9 +183,9 @@ We can rewrite this as $\dot{\ve{c}}' = \dot{\ve{c}} - \m{E}\dot{\ve{c}}$, where
 diagonal $m+k \times m+k$ matrix
 \begin{equation}
 \m{E} = \left[ \begin{array}{cc}
-    \begin{array}{ccc} 0 \\ & \ddots \\ && 0 \end{array} \\
+    \begin{array}{ccc} 1 \\ & \ddots \\ && 1 \end{array} \\
     \underbrace{\quad\quad\quad\quad}_m &
-    \begin{array}[t]{ccc} \varepsilon_1 \\ & \ddots \\ && \varepsilon_k \end{array}
+    \begin{array}[t]{ccc} 1+\varepsilon_1 \\ & \ddots \\ && 1+\varepsilon_k \end{array}
     \end{array} \right]
 \end{equation}
 
