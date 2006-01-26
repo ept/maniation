@@ -55,7 +55,8 @@ public class RigidBody {
         angvel = invInertia.mult(angmom);
         orientDot = (new Quaternion(angvel.mult(0.5))).mult(orient);
         forces = new Vector3D();
-        torques = angvel.cross(angmom).mult(-1.0);
+        //torques = angvel.cross(angmom).mult(-1.0); // not necessary when integrating over torques
+        torques = new Vector3D();
         upToDate = true;
     }
 
