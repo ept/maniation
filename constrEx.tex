@@ -298,19 +298,110 @@ We assume that each straight line is connected to a rigid body. The first body's
 is located at \ve{a}, its angular velocity is \ve{\omega}, \ve{s} is a vector from the centre
 of mass to an arbitrary point on the line, and \ve{u} is a unit vector pointing along the line.
 Similarly, the second body's CoM is \ve{b}, its angular velocity is \ve{\phi}, \ve{t} points at
-the line and \ve{v} points in the line's direction. We need to now distinguish two cases:
-either the lines are parallel within numerical tolerance
-($\norm{\ve{u}\times\ve{v}} \approx \ve{0}$), or they are not.
+the line and \ve{v} points in the line's direction. In this derivation we shall assume that the
+lines are not parallel ($\norm{\ve{u}\times\ve{v}} \ne \ve{0}$); the parallel case is special
+and needs to be handled separately.
 
-If the lines are parallel, their distance is % TODO two cubes on top of each other
-
-If they are not parallel, we can find a unique plane which contains one line and is parallel to
-the other. This plane has a normal vector $\ve{n} = \ve{u}\times\ve{v}$ (or
-$\ve{n} = \ve{v}\times\ve{u}$, since this is just a convention). Interestingly this normal is the
-direction in which the force or impulse acts in the event of a collision. It is not obvious that
-this is the case, but by playing around with two books or similar, it is possible to convince
-oneself. Once we have normalized \ve{n} we can use it to determine the distance in the
-non-parallel case:
+If \ve{u} and \ve{v} are not parallel, We can find a unique plane which contains one line and is
+parallel to the other. This plane has a normal vector $\ve{n} = \ve{u}\times\ve{v}$ (or
+$\ve{n} = \ve{v}\times\ve{u}$). Interestingly this normal is the direction in which the force or
+impulse acts in the event of a collision. It is not obvious that this is the case, but by playing
+around with two books or similar, it is possible to convince oneself. Then the closest distance
+between the two lines is given by
 \begin{equation}
 \ve{c} = (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot\frac{\ve{n}}{\norm{\ve{n}}}
 \end{equation}
+
+The derivation of the Jacobian matrices involves some of the most messy linear algebra in this
+project, so hold on tight. Let us first define a few auxiliary variables:
+\begin{eqnarray}
+\ve{n} & = & \ve{u}\times\ve{v} \\
+h &=& \frac{1}{\norm{\ve{n}}} = (\ve{n}\cdot\ve{n})^{-\frac{1}{2}} \\
+\ve{z} &=& \dot{\ve{n}} = \dot{\ve{u}}\times\ve{v} + \ve{u}\times\dot{\ve{v}} \nonumber\\*
+    &=& (\ve{\omega}\times\ve{u})\times\ve{v} + \ve{u}\times(\ve{\phi}\times\ve{v}) \nonumber\\*
+    &=& \dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi} \\
+\ve{y} &=& \dot{\ve{z}} = \ddot{\ve{u}}\times\ve{v} + 2\,\dot{\ve{u}}\times\dot{\ve{v}} +
+        \ve{u}\times\ddot{\ve{v}} \nonumber\\*
+    &=& (\dot{\ve{\omega}}\times\ve{u})\times\ve{v} +
+        (\ve{\omega}\times(\ve{\omega}\times\ve{u}))\times\ve{v} +
+        2\,(\ve{\omega}\times\ve{u})\times(\ve{\phi}\times\ve{v}) + \nonumber\\*&&
+        \ve{u}\times(\dot{\ve{\phi}}\times\ve{v}) +
+        \ve{u}\times(\ve{\phi}\times(\ve{\phi}\times\ve{v})) \\*
+    &=& \dual{\ve{v}}\dual{\ve{u}}\dot{\ve{\omega}} - \dual{\ve{u}}\dual{\ve{v}}\dot{\ve{\phi}} +
+        \dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}\ve{\omega} -
+        \dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}\ve{\phi} +
+        2\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}\ve{\omega} \nonumber\\
+\hat{\ve{n}} & = & h\ve{n} \\
+\dot{\hat{\ve{n}}} & = & h\ve{z} - \frac{1}{2}\ve{n}(\ve{n}\cdot\ve{n})^{-\frac{3}{2}}
+        (\ve{z}\cdot\ve{n} + \ve{n}\cdot\ve{z}) \nonumber\\*
+    &=& h\ve{z} - h^3\,(\ve{n}\cdot\ve{z})\,\ve{n} \\
+\ddot{\hat{\ve{n}}} & = & h\ve{y} - 2h^3 (\ve{n}\cdot\ve{z})\,\ve{z} -
+        h^3 (\ve{n}\cdot\ve{y})\,\ve{n}
+        -h^3 (\ve{z}\cdot\ve{z})\,\ve{n} + 3h^5 (\ve{n}\cdot\ve{z})^2\,\ve{n}
+\end{eqnarray}
+
+Now we can turn to calculating the derivatives of \ve{c}:
+\begin{eqnarray}
+\dot{\ve{c}} &=& \hat{\ve{n}}\cdot(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} -
+        \ve{\omega}\times\ve{s}) + (\ve{b}+\ve{t}-\ve{a}-\ve{s})\cdot\dot{\hat{\ve{n}}} \\*
+    &=& h\,(\ve{u}\times\ve{v})^T (\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} -
+        \ve{\omega}\times\ve{s}) + \nonumber\\*&&
+        (\ve{b}+\ve{t}-\ve{a}-\ve{s})^T \big( h\ve{z} - h^3\,(\ve{n}\cdot\ve{z})\,\ve{n} \big)
+        \nonumber\\
+    &=& h\ve{u}^T\dual{\ve{v}}\dot{\ve{b}} - h\ve{u}^T\dual{\ve{v}}\dot{\ve{a}} -
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{t}}\ve{\phi} +
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{s}}\ve{\omega} + \nonumber\\*&&
+        (\ve{b}+\ve{t}-\ve{a}-\ve{s})^T
+        \big(h\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - h\dual{\ve{u}}\dual{\ve{v}}\ve{\phi} -
+        h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})\big)
+        \nonumber\\
+    &=& h\ve{u}^T\dual{\ve{v}}\dot{\ve{b}} - h\ve{u}^T\dual{\ve{v}}\dot{\ve{a}} \nonumber\\*&&
+        +\Big( h\ve{u}^T\dual{\ve{v}}\dual{\ve{s}} + h\,(\ve{b}+\ve{t}-\ve{a}-\ve{s})^T
+        (\m{1} - h^2 \dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}) \dual{\ve{v}}\dual{\ve{u}}
+        \Big)\:\ve{\omega} \nonumber\\*&&
+        -\Big( h\ve{u}^T\dual{\ve{v}}\dual{\ve{t}} + h\,(\ve{b}+\ve{t}-\ve{a}-\ve{s})^T
+        (\m{1} - h^2 \dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}) \dual{\ve{u}}\dual{\ve{v}}
+        \Big)\:\ve{\phi} \\*
+    &=& \m{J}\dot{\ve{x}} \nonumber\\
+\ddot{\ve{c}} &=& \hat{\ve{n}}\cdot\Big(\ddot{\ve{b}} + \dot{\ve{\phi}}\times\ve{t} +
+        \ve{\phi}\times(\ve{\phi}\times\ve{t}) - \ddot{\ve{a}} - \dot{\ve{\omega}}\times\ve{s} -
+        \ve{\omega}\times(\ve{\omega}\times\ve{s})\Big) + \nonumber\\*&&
+        2\,\Big(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s}\Big)
+        \cdot\dot{\hat{\ve{n}}} +
+        \Big(\ve{b} + \ve{t} - \ve{a} - \ve{s}\Big)\cdot\ddot{\hat{\ve{n}}} \\
+    &=& h\ve{u}^T\dual{\ve{v}}\ddot{\ve{b}} - h\ve{u}^T\dual{\ve{v}}\ddot{\ve{a}} -
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{t}}\dot{\ve{\phi}} +
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{s}}\dot{\ve{\omega}} + \nonumber\\*&&
+        h\ve{u}^T\dual{\ve{v}}\dual{(\ve{\omega}\times\ve{s})}\ve{\omega} -
+        h\ve{u}^T\dual{\ve{v}}\dual{(\ve{\phi}\times\ve{t})}\ve{\phi} \nonumber\\*&&
+        +2h\,(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s})^T
+        \Big(\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi}
+        \nonumber\\*&&\quad\quad -h^2\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})\Big)
+        \nonumber\\*&& +(\ve{b} + \ve{t} - \ve{a} - \ve{s})^T \Big(
+        \nonumber\\*&&\quad\quad h\big(
+        \dual{\ve{v}}\dual{\ve{u}}\dot{\ve{\omega}} - \dual{\ve{u}}\dual{\ve{v}}\dot{\ve{\phi}} +
+        \dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}\ve{\omega} \nonumber\\*&&\quad\quad\quad\quad
+        -\dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}\ve{\phi} +
+        2\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}\ve{\omega} \big)
+        \nonumber\\*&&\quad\quad
+        -2h^3 \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \nonumber\\*&&\quad\quad
+        -h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}} \big(
+        \dual{\ve{v}}\dual{\ve{u}}\dot{\ve{\omega}} - \dual{\ve{u}}\dual{\ve{v}}\dot{\ve{\phi}} +
+        \dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}\ve{\omega} \nonumber\\*&&\quad\quad\quad\quad
+        -\dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}\ve{\phi} +
+        2\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}\ve{\omega} \big)
+        \nonumber\\*&&\quad\quad
+        -h^3 \dual{\ve{u}}\ve{v}
+        (\ve{\omega}^T\dual{\ve{u}}\dual{\ve{v}} - \ve{\phi}^T\dual{\ve{v}}\dual{\ve{u}})
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \nonumber\\*&&\quad\quad
+        +3h^5 \dual{\ve{u}}\ve{v} \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi}) \Big)
+\end{eqnarray}
