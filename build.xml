@@ -1,33 +1,45 @@
 <project name="maniation" default="compile">
 
     <!-- settings for PWF -->
-    <!--property name="realityinabox" location="../../../dev/project"/>
+    <!--property name="root" location="/home/mk428"/>
     <property name="jre" location="../../../jre1.5.0_05"/-->
 
     <!-- settings for penpen -->
-    <property name="realityinabox" location="../../dev/project"/>
+    <property name="root" location="/home/martin"/>
     <property name="jre" location="/usr/java/jdk1.5.0_04/jre"/>
 
+    <!-- derived settings -->
+    <property name="bin" location="${root}/.bin"/>
+    <property name="lib" location="${root}/.lib"/>
+    <property name="databinding" location="${root}/tools/databinding"/>
+
     <target name="init">
+        <mkdir dir="${bin}"/>
         <path id="classpath">
-            <pathelement location="${realityinabox}/build"/>
-            <pathelement location="${realityinabox}/contrib/xercesImpl.jar"/>
+            <pathelement location="${binaries}"/>
+            <pathelement location="${lib}/xerces-2_7_1/xercesImpl.jar"/>
             <pathelement location="${jre}/lib/ext/j3dcore.jar"/>
             <pathelement location="${jre}/lib/ext/j3dutils.jar"/>
             <pathelement location="${jre}/lib/ext/vecmath.jar"/>
         </path>
     </target>
     
-    <target name="generate" depends="init">
+    <!--target name="generate" depends="init">
         <java classname="Parser" fork="true" dir="${realityinabox}/build">
             <classpath refid="classpath"/>
             <arg value="-g"/>
             <arg path="scene-schema.rng"/>
         </java>
+    </target-->
+
+    <target name="databinding">
+        <javac srcdir="${databinding}/source" destdir="${bin}" listfiles="yes" source="1.5" target="1.5">
+            <classpath refid="classpath"/>
+        </javac>
     </target>
     
-    <target name="compile" depends="init">
-        <javac srcdir="." destdir="${realityinabox}/build" listfiles="yes" source="1.5" target="1.5">
+    <target name="compile" depends="init,databinding">
+        <javac srcdir="." destdir="${bin}" listfiles="yes" source="1.5" target="1.5">
             <classpath refid="classpath"/>
         </javac>
     </target>
@@ -39,7 +51,7 @@
     </target>
 
     <taskdef name="statcvs" classname="net.sf.statcvs.ant.StatCvsTask"
-        classpath="../../statcvs-0.2.2/statcvs.jar"/>
+        classpath="${lib}/statcvs-0.2.2/statcvs.jar"/>
 
     <target name="stats">
         <mkdir dir="stats"/>
