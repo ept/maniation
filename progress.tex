@@ -1,0 +1,56 @@
+\documentclass{article}
+\textwidth 12.5cm
+\textheight 23cm
+\begin{document}
+\pagestyle{empty}
+{\hfill Martin Kleppmann}
+
+{\hfill Corpus Christi College}
+
+{\hfill mk428}
+
+\vspace{1.5cm}
+\centerline{\Large\bf Rigid body simulation for 3D character animation}
+\vspace{0.5cm}
+\centerline{\large\bf Progress report}
+\vspace{0.5cm}
+\centerline{2 February 2006}
+
+\vspace{1.5cm}
+\begin{tabular}{ll}
+{\bf Project Originator:} & Martin Kleppmann\\
+{\bf Project Supervisor:} & Dr Neil Dodgson\\
+{\bf Director of Studies:} & Dr David Greaves\\
+{\bf Overseers:} & Dr Graham Titmus and Dr Markus Kuhn\\
+\end{tabular}
+\vspace{1.5cm}
+
+16 weeks into the project, good progress has been made. The problem of adapting a standard
+rigid body simulation to the articulated bodies of 3D characters turned out to be much harder than
+expected, but nevertheless the project is running only about two weeks behind schedule.
+
+The first four milestones of the project went smoothly, incurring only marginal delays. From early
+December onwards, when the core dynamics simulation was to be implemented, I suddenly found myself
+facing difficulties. This was particularly due to a lack of appropriate literature~--
+all sources I could find were either too simplified (e.g.\ reducing the problem to two
+dimensions), or overly terse and vague; other books used obscure notation which was a nightmare
+to come to terms with; also some important sources contained a large number of errors.  I ended
+up having to work out most of the mathematical background of the algorithms from first principles,
+which took considerably longer than the allotted time, and consumed most of the time originally
+reserved as a holiday in the schedule.
+
+On the positive side, such detailed exposure to the mathematical background led to some interesting
+discoveries. I have not yet had the time to conduct a very thorough literature survey, but I
+have not yet come across some of these algorithms in my references, and hence have some grounds to
+believe that these may include publishable results. The discoveries include a more accurate way of
+numerically solving differential equations involving quaternions, a simpler algorithm for computing
+contact forces between resting bodies, and a unified scheme for handling different types of
+collisions.
+
+Some adjustments were made to the original project plan. Parts of the dissertation writing process
+have been moved forward in the schedule and have already been completed. Simulating static and
+sliding friction forces has been declared an extension (previously a core requirement) because it
+is very difficult and there appears to be hardly any literature on the subject. A shift of
+emphasis favours the simulation of interactions between multiple passive bodies over muscular
+forces, because the latter are difficult to control automatically.
+\end{document}
