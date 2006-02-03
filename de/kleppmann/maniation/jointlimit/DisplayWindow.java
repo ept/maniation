@@ -41,9 +41,11 @@ public class DisplayWindow extends JFrame {
     private BranchGroup bg;
     private PointArray points;
     private int selected = -1;
+    private RotationWindow rotationWindow;
     
-    public DisplayWindow(double[][] contents, double boxsize) {
+    public DisplayWindow(double[][] contents, double boxsize, RotationWindow rotationWindow) {
         super("JointLimit");
+        this.rotationWindow = rotationWindow;
         initialize();
         if (false) buildSolid(contents, boxsize);
         buildWireframe(contents, boxsize);
@@ -69,11 +71,10 @@ public class DisplayWindow extends JFrame {
     public void setSelectedPoint(int index) {
         if (selected >= 0) points.setColor(selected, UNSELECTED);
         selected = index;
-        float[] col = new float[3];
-        points.getColor(selected, col);
         points.setColor(selected, SELECTED);
-        for (float f : col) System.out.print(f + "  ");
-        System.out.println();
+        double[] coord = new double[3];
+        points.getCoordinate(selected, coord);
+        rotationWindow.setAngles(coord[0], coord[1], coord[2]);
     }
     
     private void initialize() {
@@ -93,7 +94,7 @@ public class DisplayWindow extends JFrame {
         bg = new BranchGroup();
         scene = new TransformGroup();
         Transform3D scale = new Transform3D();
-        scale.setScale(0.3);
+        scale.setScale(0.6);
         scene.setTransform(scale);
         mouseTransform = new TransformGroup();
         mouseTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);

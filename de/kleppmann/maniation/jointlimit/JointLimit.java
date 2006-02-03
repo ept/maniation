@@ -17,13 +17,13 @@ public class JointLimit {
     private Inequalities scene;
     
     public JointLimit() {
-        Inequality sphere = new Inequality() {
-            public double getValue(double x, double y, double z) {
-                return 1.0 - x*x - y*y - z*z;
-            }
-        };
         scene = new Inequalities();
-        scene.getFunctions().add(sphere);
+        scene.getFunctions().add(new MinX(-0.8));
+        scene.getFunctions().add(new MaxX( 0.8));
+        scene.getFunctions().add(new MinY(-0.8));
+        scene.getFunctions().add(new MaxY( 0.8));
+        scene.getFunctions().add(new MinZ(-0.8));
+        scene.getFunctions().add(new MaxZ( 0.8));
     }
     
     public double[][] build() {
@@ -64,6 +64,57 @@ public class JointLimit {
     }
 
     public static void main(String[] args) {
-        new DisplayWindow((new JointLimit()).build(), (MAX_X - MIN_X)/(RESOLUTION - 1.0));
+        JointLimit j = new JointLimit();
+        double[][] contents = j.build();
+        RotationWindow rw = new RotationWindow();
+        new DisplayWindow(contents, (MAX_X - MIN_X)/(RESOLUTION - 1.0), rw);
+    }
+
+    private class MaxX implements Inequality {
+        private double a;
+        public MaxX(double a) { this.a = 0.5*a; }
+        public double getValue(double x, double y, double z) {
+            return a - Math.sin(x)*Math.cos(y)*Math.cos(z) - Math.cos(x)*Math.sin(y)*Math.sin(z);
+        }
+    }
+    
+    private class MinX implements Inequality {
+        private double a;
+        public MinX(double a) { this.a = 0.5*a; }
+        public double getValue(double x, double y, double z) {
+            return Math.sin(x)*Math.cos(y)*Math.cos(z) + Math.cos(x)*Math.sin(y)*Math.sin(z) - a;
+        }
+    }
+    
+    private class MaxY implements Inequality {
+        private double a;
+        public MaxY(double a) { this.a = 0.5*a; }
+        public double getValue(double x, double y, double z) {
+            return a - Math.cos(x)*Math.sin(y)*Math.cos(z) - Math.sin(x)*Math.cos(y)*Math.sin(z);
+        }
+    }
+    
+    private class MinY implements Inequality {
+        private double a;
+        public MinY(double a) { this.a = 0.5*a; }
+        public double getValue(double x, double y, double z) {
+            return Math.cos(x)*Math.sin(y)*Math.cos(z) + Math.sin(x)*Math.cos(y)*Math.sin(z) - a;
+        }
+    }
+    
+    private class MaxZ implements Inequality {
+        private double a;
+        public MaxZ(double a) { this.a = 0.5*a; }
+        public double getValue(double x, double y, double z) {
+            return a - Math.cos(x)*Math.cos(y)*Math.sin(z) - Math.sin(x)*Math.sin(y)*Math.cos(z);
+        }
+    }
+    
+    private class MinZ implements Inequality {
+        private double a;
+        public MinZ(double a) { this.a = 0.5*a; }
+        public double getValue(double x, double y, double z) {
+            return Math.cos(x)*Math.cos(y)*Math.sin(z) + Math.sin(x)*Math.sin(y)*Math.cos(z) - a;
+        }
     }
 }
