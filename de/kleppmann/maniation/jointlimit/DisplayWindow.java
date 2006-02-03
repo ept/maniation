@@ -9,7 +9,6 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
-import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.LineAttributes;
@@ -33,35 +32,48 @@ import com.sun.j3d.utils.universe.Viewer;
 
 public class DisplayWindow extends JFrame {
     private static final long serialVersionUID = 0;
+    
+    private static final float[] UNSELECTED = {0f, 0f, 0f}, SELECTED = {1f, 0f, 0f};
 
     private Canvas3D canvas;
     private SimpleUniverse universe;
     private TransformGroup scene, mouseTransform;
+    private BranchGroup bg;
+    private PointArray points;
+    private int selected = -1;
     
     public DisplayWindow(double[][] contents, double boxsize) {
         super("JointLimit");
         initialize();
-        BranchGroup bg = new BranchGroup();
-        scene = new TransformGroup();
-        Transform3D scale = new Transform3D();
-        scale.setScale(0.3);
-        scene.setTransform(scale);
-        mouseTransform = new TransformGroup();
-        mouseTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        mouseTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        mouseTransform.addChild(scene);
-        bg.addChild(mouseTransform);
         if (false) buildSolid(contents, boxsize);
         buildWireframe(contents, boxsize);
         buildCoordinateSystem();
-        addBackground(bg);
-        addLights(bg);
+        addBackground();
+        addLights();
         addMouse();
-        bg.addChild(new PointPicker(bg, canvas, new BoundingSphere(new Point3d(0f, 0f, 0f), 10)));
+        bg.addChild(new PointPicker(this));
         bg.compile();
         universe.addBranchGraph(bg);
         pack();
         setVisible(true);
+    }
+    
+    public BranchGroup getBranchGroup() {
+        return bg;
+    }
+    
+    public Canvas3D getCanvas3D() {
+        return canvas;
+    }
+    
+    public void setSelectedPoint(int index) {
+        if (selected >= 0) points.setColor(selected, UNSELECTED);
+        selected = index;
+        float[] col = new float[3];
+        points.getColor(selected, col);
+        points.setColor(selected, SELECTED);
+        for (float f : col) System.out.print(f + "  ");
+        System.out.println();
     }
     
     private void initialize() {
@@ -78,6 +90,16 @@ public class DisplayWindow extends JFrame {
         for (Viewer v : universe.getViewingPlatform().getViewers()) {
             v.getView().setProjectionPolicy(View.PARALLEL_PROJECTION);
         }
+        bg = new BranchGroup();
+        scene = new TransformGroup();
+        Transform3D scale = new Transform3D();
+        scale.setScale(0.3);
+        scene.setTransform(scale);
+        mouseTransform = new TransformGroup();
+        mouseTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+        mouseTransform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+        mouseTransform.addChild(scene);
+        bg.addChild(mouseTransform);
     }
     
     private void buildCoordinateSystem() {
@@ -127,10 +149,18 @@ public class DisplayWindow extends JFrame {
     }
     
     private void buildWireframe(double[][] contents, double boxsize) {
-        PointArray points = new PointArray(contents.length, PointArray.COORDINATES);
-        for (int i=0; i<contents.length; i++) points.setCoordinate(i, contents[i]);
+        points = new PointArray(contents.length, PointArray.COORDINATES | PointArray.COLOR_3);
+        points.setCapability(PointArray.ALLOW_COUNT_READ);
+        points.setCapability(PointArray.ALLOW_FORMAT_READ);
+        points.setCapability(PointArray.ALLOW_COORDINATE_READ);
+        points.setCapability(PointArray.ALLOW_COLOR_READ);
+        points.setCapability(PointArray.ALLOW_COLOR_WRITE);
+        for (int i=0; i<contents.length; i++) {
+            points.setCoordinate(i, contents[i]);
+            if (i == selected) points.setColor(i, SELECTED); else points.setColor(i, UNSELECTED);
+        }
         Appearance appearance = new Appearance();
-        appearance.setColoringAttributes(new ColoringAttributes(0f, 0f, 0f, ColoringAttributes.SHADE_FLAT));
+        //appearance.setColoringAttributes(new ColoringAttributes(0f, 0f, 0f, ColoringAttributes.SHADE_FLAT));
         appearance.setPointAttributes(new PointAttributes(4, true));
         Shape3D shape = new Shape3D(points, appearance);
         shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
@@ -199,7 +229,7 @@ public class DisplayWindow extends JFrame {
         mouseTransform.addChild(rotate);
     }
     
-    private void addLights(BranchGroup bg) {
+    private void addLights() {
         // Ambient light
         AmbientLight light1 = new AmbientLight(true, new Color3f(0.25f, 0.25f, 0.25f));
         light1.setInfluencingBounds(new BoundingSphere(new Point3d(0.0f, 0.0f, 0.0f), 10));
@@ -214,7 +244,7 @@ public class DisplayWindow extends JFrame {
         bg.addChild(light2);
     }
     
-    private void addBackground(BranchGroup bg) {
+    private void addBackground() {
         // Background colour
         javax.media.j3d.Background backgnd = new javax.media.j3d.Background();
         backgnd.setColor(new Color3f(1.0f, 1.0f, 1.0f));
