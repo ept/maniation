@@ -33,7 +33,8 @@ import com.sun.j3d.utils.universe.Viewer;
 
 public class DisplayWindow extends JFrame {
     private static final long serialVersionUID = 0;
-    
+
+    private Canvas3D canvas;
     private SimpleUniverse universe;
     private TransformGroup scene, mouseTransform;
     
@@ -56,6 +57,7 @@ public class DisplayWindow extends JFrame {
         addBackground(bg);
         addLights(bg);
         addMouse();
+        bg.addChild(new PointPicker(bg, canvas, new BoundingSphere(new Point3d(0f, 0f, 0f), 10)));
         bg.compile();
         universe.addBranchGraph(bg);
         pack();
@@ -68,7 +70,7 @@ public class DisplayWindow extends JFrame {
                 System.exit(0);
             }            
         });
-        Canvas3D canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
+        canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
         canvas.setPreferredSize(new Dimension(800, 600));
         getContentPane().add(canvas);
         universe = new SimpleUniverse(canvas);
@@ -91,7 +93,9 @@ public class DisplayWindow extends JFrame {
         axes.setCoordinate(5, za); axes.setColor(5, blue);
         Appearance axisapp = new Appearance();
         axisapp.setLineAttributes(new LineAttributes(2, LineAttributes.PATTERN_SOLID, true));
-        scene.addChild(new Shape3D(axes, axisapp));
+        Shape3D shape1 = new Shape3D(axes, axisapp);
+        shape1.setPickable(false);
+        scene.addChild(shape1);
         LineArray lines = new LineArray(count*12, LineArray.COORDINATES | LineArray.COLOR_3);
         int i = 0;
         for (int x=1; x<=count; x++) {
@@ -117,7 +121,9 @@ public class DisplayWindow extends JFrame {
         }
         Appearance lineapp = new Appearance();
         lineapp.setLineAttributes(new LineAttributes(1, LineAttributes.PATTERN_SOLID, true));
-        scene.addChild(new Shape3D(lines, lineapp));
+        Shape3D shape2 = new Shape3D(lines, lineapp);
+        shape2.setPickable(false);
+        scene.addChild(shape2);
     }
     
     private void buildWireframe(double[][] contents, double boxsize) {
@@ -126,7 +132,9 @@ public class DisplayWindow extends JFrame {
         Appearance appearance = new Appearance();
         appearance.setColoringAttributes(new ColoringAttributes(0f, 0f, 0f, ColoringAttributes.SHADE_FLAT));
         appearance.setPointAttributes(new PointAttributes(4, true));
-        scene.addChild(new Shape3D(points, appearance));
+        Shape3D shape = new Shape3D(points, appearance);
+        shape.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+        scene.addChild(shape);
     }
     
     private void buildSolid(double[][] contents, double boxsize) {
