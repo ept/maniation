@@ -15,13 +15,13 @@ function prod = qmult(q1, q2)
     prod = zeros(4, n);
 
     for i = 1:n
-        x1 = q1(1,i); y1 = q1(2,i); z1 = q1(3,i); w1 = q1(4,i);
-        x2 = q2(1,i); y2 = q2(2,i); z2 = q2(3,i); w2 = q2(4,i);
+        w1 = q1(1,i); x1 = q1(2,i); y1 = q1(3,i); z1 = q1(4,i);
+        w2 = q2(1,i); x2 = q2(2,i); y2 = q2(3,i); z2 = q2(4,i);
         prod(:,i) = [
+            w1*w2 - x1*x2 - y1*y2 - z1*z2;
             w1*x2 + w2*x1 + y1*z2 - z1*y2;
             w1*y2 + w2*y1 + z1*x2 - x1*z2;
             w1*z2 + w2*z1 + x1*y2 - y1*x2;
-            w1*w2 - x1*x2 - y1*y2 - z1*z2;
         ];
     endfor
 endfunction

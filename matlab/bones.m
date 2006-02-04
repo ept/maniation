@@ -2,7 +2,7 @@ function retval = bones(b)
 
     boneaxis=[0;1;0];
     p0=[0;0;0];
-    q0=[0;0;0;1];
+    q0=[1;0;0;0];
     
     for i=1:rows(b)
         v = b(i, 1:3)' - p0;

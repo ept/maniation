@@ -10,7 +10,7 @@ function quat = vectortoq(original, transformed, roll)
 
     rollq = qrot(original, roll);
     
-    rot = [0; 0; 0; 1];
+    rot = [1; 0; 0; 0];
     axis = cross(original, transformed);
     
     if (sumsq(axis) > 0.0000000000001)

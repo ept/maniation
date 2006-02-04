@@ -1,8 +1,8 @@
-function newstatus = rigidcube(status, time)
+function newstatus = torsion_pendulum(status, time)
     % Suggested time step: 3.0
     
     if (rows(status) == 0)
-        newstatus = [0;0;0;0;0;0;1;0;0;0;0;0;0.5];
+        newstatus = [0;0;0;1;0;0;0;0;0;0;0;0;0.5];
         return;
     endif
     orient = status(4:7);
