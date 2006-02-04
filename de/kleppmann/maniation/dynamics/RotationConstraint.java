@@ -1,5 +1,6 @@
 package de.kleppmann.maniation.dynamics;
 
+import java.util.List;
 import java.util.Map;
 
 import de.kleppmann.maniation.maths.Matrix;
@@ -11,16 +12,24 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class RotationConstraint implements Constraint {
     
+    private World world;
     private RigidBody body1, body2;
     private Vector3D normal;
     private double n1, n2, n3, pw, px, py, pz, v1, v2, v3, qw, qx, qy, qz, w1, w2, w3;
 
     // normal is given in local coordinates of body1.
     // if body1 is null, normal is in world coordinates
-    public RotationConstraint(RigidBody body1, Vector3D normal, RigidBody body2) {
-        this.body1 = body1; this.body2 = body2; this.normal = normal;
+    public RotationConstraint(World world, RigidBody body1, Vector3D normal, RigidBody body2) {
+        this.world = world; this.body1 = body1; this.body2 = body2; this.normal = normal;
     }
     
+    public List<SimulationObject> getObjects() {
+        List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
+        if (body1 != null) result.add(body1); else result.add(world);
+        result.add(body2);
+        return result;
+    }
+
     private void updateNumbers() {
         Quaternion q = body2.getOrientation();
         qw = q.getW(); qx = q.getX(); qy = q.getY(); qz = q.getZ();

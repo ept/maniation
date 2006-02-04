@@ -1,5 +1,6 @@
 package de.kleppmann.maniation.dynamics;
 
+import java.util.List;
 import java.util.Map;
 
 import de.kleppmann.maniation.maths.Matrix;
@@ -14,6 +15,13 @@ public class JointConstraint implements Constraint {
     public JointConstraint(RigidBody body1, Vector3D localPos1, RigidBody body2, Vector3D localPos2) {
         this.body1 = body1; this.localPos1 = localPos1;
         this.body2 = body2; this.localPos2 = localPos2;
+    }
+
+    public List<SimulationObject> getObjects() {
+        List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
+        result.add(body1);
+        result.add(body2);
+        return result;
     }
 
     public Vector3D getPenalty() {

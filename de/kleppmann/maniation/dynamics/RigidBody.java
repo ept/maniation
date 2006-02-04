@@ -4,62 +4,53 @@ import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.Matrix33;
 import de.kleppmann.maniation.maths.MatrixImpl;
 import de.kleppmann.maniation.maths.Quaternion;
+import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.Vector3D;
+import de.kleppmann.maniation.maths.VectorImpl;
 
-public class RigidBody {
+public abstract class RigidBody implements Body {
 
     // Primary quantities
     private Vector3D pos, mom, angmom;
-    private Quaternion orient, toPrincipalAxes; // orient transforms local to world
-    private double mass;
-    private Vector3D principalInertia;
+    private Quaternion orient; // orient transforms local to world
     private boolean upToDate = false;
     // Derived quantities
     private Vector3D vel, angvel;
     private Quaternion orientDot;
     private Vector3D forces, torques;
-    private Matrix33 inertia, invInertia;
     // Unchanging variables
     private MassInertia massInertia = new MassInertia();
     private MassInertia invMassInertia = new InverseMassInertia();
+    private State state = new State(false), stateDot = new State(true);
 
     public RigidBody() {
         pos = new Vector3D();
         mom = new Vector3D();
         angmom = new Vector3D();
         orient = new Quaternion();
-        toPrincipalAxes = new Quaternion();
-        mass = 1.0;
-        principalInertia = new Vector3D(1.0, 1.0, 1.0);
+        forces = new Vector3D();
+        torques = new Vector3D();
     }
     
-    protected void setMass(double mass) {
-        this.mass = mass;
-    }
-    
-    protected void setPrincipalInertia(Vector3D inertia) {
-        this.principalInertia = inertia;
-    }
-    
-    protected void setPrincipalAxes(Quaternion toPrincipalAxes) {
-        this.toPrincipalAxes = toPrincipalAxes;
-    }
+    protected abstract double getMass();
+    protected abstract Matrix33 getInertia();
+    protected abstract Matrix33 getInvInertia();
     
     private void deriveQuantities() {
-        vel = mom.mult(1.0/mass);
-        inertia = new Matrix33(principalInertia);
-        invInertia = inertia.inverse();
-        Matrix33 rot = toPrincipalAxes.mult(orient.getInverse()).toMatrix();
-        inertia    = rot.transpose().mult33(inertia   ).mult33(rot);
-        invInertia = rot.transpose().mult33(invInertia).mult33(rot);
-        angvel = invInertia.mult(angmom);
+        vel = mom.mult(1.0/getMass());
+        angvel = getInvInertia().mult(angmom);
         orientDot = (new Quaternion(angvel.mult(0.5))).mult(orient);
-        forces = new Vector3D();
-        //torques = angvel.cross(angmom).mult(-1.0); // not necessary when integrating over torques
-        torques = new Vector3D();
         upToDate = true;
     }
 
+    public double getEnergy() {
+        /*Vector3D gravity = new Vector3D(0, 1, 0);
+        double potential = gravity.mult(getCoMPosition());*/
+        double kinetic = 0.5*getMass()*getCoMVelocity().mult(getCoMVelocity());
+        double rotational = 0.5*getAngularVelocity().mult(getAngularMomentum());
+        return /*potential +*/ kinetic + rotational;
+    }
+    
     public Vector3D getCoMPosition() {
         return pos;
     }
@@ -84,7 +75,6 @@ public class RigidBody {
     }
     
     public Vector3D getForces() {
-        if (!upToDate) deriveQuantities();
         return forces;
     }
     
@@ -117,27 +107,30 @@ public class RigidBody {
     }
     
     public Vector3D getTorques() {
-        if (!upToDate) deriveQuantities();
         return torques;
     }
     
-    public MassInertia getMassInertia() {
+    public Matrix getMassInertia() {
         return massInertia;
     }
-    
-    public double getEnergy() {
-        Vector3D gravity = new Vector3D(0, 1, 0);
-        double potential = gravity.mult(getCoMPosition());
-        double kinetic = 0.5*mass*getCoMVelocity().mult(getCoMVelocity());
-        Vector3D omega = toPrincipalAxes.transform(
-                getOrientation().getInverse().transform(getAngularVelocity()));
-        Vector3D osq = omega.multComponents(omega);
-        double rotational = 0.5*principalInertia.mult(osq);
-        return potential + kinetic + rotational;
+
+    public Vector getState(boolean rateOfChange) {
+        if (rateOfChange) return stateDot; else return state;
+    }
+
+    public void setSimulationTime(double time) {
+        this.forces = new Vector3D();
+        this.torques = new Vector3D();
+    }
+
+    public void setState(Vector state) {
+        if (state instanceof State) {
+            ((State) state).applyState();
+        } else throw new IllegalArgumentException();
     }
     
     
-    public class MassInertia extends MatrixImpl {
+    private class MassInertia extends MatrixImpl {
         private MassInertia() {
             super(null);
         }
@@ -150,11 +143,11 @@ public class RigidBody {
 
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
-                if (row == column) return mass;
+                if (row == column) return getMass();
                 return 0.0;
             }
             if (!upToDate) deriveQuantities();
-            return inertia.getComponent(row - 3, column - 3);
+            return getInertia().getComponent(row - 3, column - 3);
         }
 
         public Matrix inverse() {
@@ -166,15 +159,130 @@ public class RigidBody {
     private class InverseMassInertia extends MassInertia {
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
-                if (row == column) return 1.0/mass;
+                if (row == column) return 1.0/getMass();
                 return 0.0;
             }
             if (!upToDate) deriveQuantities();
-            return invInertia.getComponent(row - 3, column - 3);
+            return getInvInertia().getComponent(row - 3, column - 3);
         }
 
         public Matrix inverse() {
             return massInertia;
+        }
+    }
+    
+    
+    private class State extends VectorImpl {
+        private boolean rateOfChange;
+
+        State(boolean rateOfChange) {
+            super(null);
+            this.rateOfChange = rateOfChange;
+        }
+
+        public int getDimension() {
+            return 13;
+        }
+
+        public double getComponent(int index) {
+            if (!rateOfChange) {
+                if (index < 3)  return getCoMPosition().getComponent(index);
+                if (index == 3) return getOrientation().getW();
+                if (index == 4) return getOrientation().getX();
+                if (index == 5) return getOrientation().getY();
+                if (index == 6) return getOrientation().getZ();
+                if (index < 10) return getLinearMomentum().getComponent(index - 7);
+                return getAngularMomentum().getComponent(index - 10);
+            } else {
+                if (index < 3)  return getCoMVelocity().getComponent(index);
+                if (index == 3) return getRateOfRotation().getW();
+                if (index == 4) return getRateOfRotation().getX();
+                if (index == 5) return getRateOfRotation().getY();
+                if (index == 6) return getRateOfRotation().getZ();
+                if (index < 10) return getForces().getComponent(index - 7);
+                return getTorques().getComponent(index - 10);
+            }
+        }
+
+        public Vector add(Vector v) {
+            if (v instanceof State) {
+                return new StateSum(this, (State) v, false);
+            } else throw new IllegalArgumentException();
+        }
+
+        public Vector subtract(Vector v) {
+            if (v instanceof State) {
+                return new StateSum(this, (State) v, true);
+            } else throw new IllegalArgumentException();
+        }
+
+        public Vector mult(double scalar) {
+            return new StateScaled(this, scalar);
+        }
+        
+        void applyState() {
+            if (rateOfChange) throw new UnsupportedOperationException();
+            setCoMPosition(new Vector3D(getComponent(0), getComponent(1), getComponent(2)));
+            setOrientation(new Quaternion(getComponent(3), getComponent(4),
+                    getComponent(5), getComponent(6)));
+            setLinearMomentum(new Vector3D(getComponent(7), getComponent(8), getComponent(9)));
+            setAngularMomentum(new Vector3D(getComponent(10), getComponent(11), getComponent(12)));
+        }
+    }
+    
+    
+    private class StateScaled extends State {
+        private State originalState;
+        private double factor;
+        
+        StateScaled(State originalState, double factor) {
+            super(true); // scaling only makes sense for a derivative
+            this.originalState = originalState;
+            this.factor = factor;
+        }
+        
+        public double getComponent(int index) {
+            return factor*originalState.getComponent(index);
+        }
+
+        public Vector mult(double scalar) {
+            return new StateScaled(originalState, factor*scalar);
+        }
+    }
+    
+    
+    private class StateSum extends State {
+        double[] values;
+        
+        StateSum(State s1, State s2, boolean difference) {
+            super(s1.rateOfChange && s2.rateOfChange);
+            if (s1.rateOfChange && !s2.rateOfChange) {
+                State tmp = s1; s1 = s2; s2 = tmp;
+            }
+            values = new double[13];
+            for (int i=0; i<values.length; i++) {
+                if (!difference) values[i] = s1.getComponent(i) + s2.getComponent(i);
+                else values[i] = s1.getComponent(i) - s2.getComponent(i);
+            }
+            if (!s1.rateOfChange && s2.rateOfChange) {
+                Quaternion q1 = new Quaternion(s1.getComponent(3), s1.getComponent(4),
+                        s1.getComponent(5), s1.getComponent(6));
+                Quaternion q2;
+                if (!difference)
+                    q2 = new Quaternion(s2.getComponent(3), s2.getComponent(4),
+                            s2.getComponent(5), s2.getComponent(6)); else
+                    q2 = new Quaternion(-s2.getComponent(3), -s2.getComponent(4),
+                            -s2.getComponent(5), -s2.getComponent(6));
+                Quaternion q = q1.quergs(q2);
+                values[3] = q.getW();
+                values[4] = q.getX();
+                values[5] = q.getY();
+                values[6] = q.getZ();
+            }
+        }
+
+        public double getComponent(int index) {
+            return values[index];
         }
     }
 }
