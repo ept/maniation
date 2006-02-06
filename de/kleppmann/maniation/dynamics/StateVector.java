@@ -6,28 +6,28 @@ import de.kleppmann.maniation.maths.Vector;
 
 public class StateVector implements Vector {
 
-    private SimulationObject[] objects;
+    private Body[] bodies;
     private boolean rateOfChange;
     private int[] stateOffsets = {0};
     
-    public StateVector(SimulationObject[] objects, boolean rateOfChange) {
-        this.objects = objects;
+    public StateVector(Body[] bodies, boolean rateOfChange) {
+        this.bodies = bodies;
         this.rateOfChange = rateOfChange;
         updateObjects();
     }
     
     private void updateObjects() {
         int i=0, j=0;
-        stateOffsets = new int[objects.length + 1];
-        for (SimulationObject obj : objects) {
+        stateOffsets = new int[bodies.length + 1];
+        for (Body body : bodies) {
             stateOffsets[i] = j;
-            i++; j += obj.getState(false).getDimension();
+            i++; j += body.getState(false).getDimension();
         }
         stateOffsets[i] = j;
     }
     
     Vector getSlice(int index) {
-        return objects[index].getState(rateOfChange);
+        return bodies[index].getState(rateOfChange);
     }
     
     public int getDimension() {
@@ -68,7 +68,7 @@ public class StateVector implements Vector {
     }
     
     public void apply() {
-        for (int i=0; i<objects.length; i++) objects[i].setState(getSlice(i));
+        for (int i=0; i<bodies.length; i++) bodies[i].setState(getSlice(i));
     }
     
     public String toString() {
@@ -87,8 +87,8 @@ public class StateVector implements Vector {
         private Vector[] slices;
         
         public StateVectorModified(Operation op, StateVector op1, StateVector op2, double factor) {
-            super(op1.objects, op1.rateOfChange && op2.rateOfChange);
-            this.slices = new Vector[op1.objects.length];
+            super(op1.bodies, op1.rateOfChange && op2.rateOfChange);
+            this.slices = new Vector[op1.bodies.length];
             for (int i=0; i<slices.length; i++) {
                 if (op == Operation.ADD) slices[i] = op1.getSlice(i).add(op2.getSlice(i)); else
                 if (op == Operation.SUBTRACT) slices[i] = op1.getSlice(i).subtract(op2.getSlice(i)); else

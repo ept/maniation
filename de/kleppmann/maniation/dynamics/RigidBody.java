@@ -15,10 +15,13 @@ public abstract class RigidBody implements Body {
     private Quaternion orient; // orient transforms local to world
     private boolean upToDate = false;
     // Derived quantities
-    private Vector3D vel, angvel;
+    private Vector3D vel, angvel, accel, angaccel;
     private Quaternion orientDot;
+    // Variable by simulation
     private Vector3D forces, torques;
     // Unchanging variables
+    private AccelerationVector accelerationVector = new AccelerationVector();
+    private VelocityVector velocityVector = new VelocityVector();
     private MassInertia massInertia = new MassInertia();
     private MassInertia invMassInertia = new InverseMassInertia();
     private State state = new State(false), stateDot = new State(true);
@@ -37,9 +40,12 @@ public abstract class RigidBody implements Body {
     protected abstract Matrix33 getInvInertia();
     
     private void deriveQuantities() {
+        if (upToDate) return;
         vel = mom.mult(1.0/getMass());
         angvel = getInvInertia().mult(angmom);
         orientDot = (new Quaternion(angvel.mult(0.5))).mult(orient);
+        accel = forces.mult(1.0/getMass());
+        angaccel = getInvInertia().mult(torques).subtract(angvel.cross(angmom));
         upToDate = true;
     }
 
@@ -61,7 +67,7 @@ public abstract class RigidBody implements Body {
     }
     
     public Vector3D getCoMVelocity() {
-        if (!upToDate) deriveQuantities();
+        deriveQuantities();
         return vel;
     }
     
@@ -88,12 +94,12 @@ public abstract class RigidBody implements Body {
     }
     
     public Quaternion getRateOfRotation() {
-        if (!upToDate) deriveQuantities();
+        deriveQuantities();
         return orientDot;
     }
     
     public Vector3D getAngularVelocity() {
-        if (!upToDate) deriveQuantities();
+        deriveQuantities();
         return angvel;
     }
     
@@ -128,6 +134,65 @@ public abstract class RigidBody implements Body {
             ((State) state).applyState();
         } else throw new IllegalArgumentException();
     }
+
+    public void applyForce(Vector forceTorque) {
+        forces = forces.add(new Vector3D(forceTorque.getComponent(0), forceTorque.getComponent(1),
+                forceTorque.getComponent(2)));
+        torques = torques.add(new Vector3D(forceTorque.getComponent(3), forceTorque.getComponent(4),
+                forceTorque.getComponent(5)));
+    }
+
+    public Vector getAccelerations() {
+        return accelerationVector;
+    }
+
+    public Vector getVelocities() {
+        return velocityVector;
+    }
+
+    public void handleInteraction(Interaction action) {
+        if (action instanceof InteractionForce) {
+            forces = forces.add(((InteractionForce) action).getForceOn(this));
+            torques = torques.add(((InteractionForce) action).getTorqueOn(this));
+        }
+    }
+
+    public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
+        if (allowReverse) partner.interaction(this, result, false);
+    }
+    
+    
+    private class AccelerationVector extends VectorImpl {
+        public AccelerationVector() {
+            super(null);
+        }
+        
+        public int getDimension() {
+            return 6;
+        }
+
+        public double getComponent(int index) {
+            deriveQuantities();
+            if (index < 3) return accel.getComponent(index);
+            return angaccel.getComponent(index - 3);
+        }
+    }
+
+
+    private class VelocityVector extends VectorImpl {
+        public VelocityVector() {
+            super(null);
+        }
+        
+        public int getDimension() {
+            return 6;
+        }
+
+        public double getComponent(int index) {
+            if (index < 3) return getCoMVelocity().getComponent(index);
+            return getAngularVelocity().getComponent(index - 3);
+        }
+    }
     
     
     private class MassInertia extends MatrixImpl {
@@ -146,7 +211,6 @@ public abstract class RigidBody implements Body {
                 if (row == column) return getMass();
                 return 0.0;
             }
-            if (!upToDate) deriveQuantities();
             return getInertia().getComponent(row - 3, column - 3);
         }
 
@@ -162,7 +226,6 @@ public abstract class RigidBody implements Body {
                 if (row == column) return 1.0/getMass();
                 return 0.0;
             }
-            if (!upToDate) deriveQuantities();
             return getInvInertia().getComponent(row - 3, column - 3);
         }
 
