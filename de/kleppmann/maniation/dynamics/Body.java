@@ -12,4 +12,5 @@ public interface Body extends SimulationObject {
     Matrix getMassInertia();
     void applyForce(Vector forceTorque);
     void applyImpulse(Vector impulse);
+    double getEnergy();
 }

@@ -23,7 +23,7 @@ public class Simulation {
     
     private World world = new World();
     private List<Body> bodies = new java.util.ArrayList<Body>();
-    private StateVector state = new StateVector(null, false), stateDot = new StateVector(null, true);
+    private StateVector state, stateDot;
     private List<String> log = new java.util.ArrayList<String>();
     
     public void addBody(Body body) {
@@ -34,12 +34,23 @@ public class Simulation {
         stateDot = new StateVector(array, true);
     }
     
+    public World getWorld() {
+        return world;
+    }
+    
     private void setTime(double time) {
         for (Body body : bodies) body.setSimulationTime(time);
     }
     
+    public double totalEnergy() {
+        double result = 0.0;
+        for (Body b : bodies) result += b.getEnergy();
+        return result;
+    }
+    
     public void run(double time) {
-        ODESolver solver = new RungeKutta(new DifferentialEquation(), 0.1);
+        ODESolver solver = new RungeKutta(new DifferentialEquation(), 0.02);
+        log.add(state.toString());
         solver.solve(0.0, time);
         try {
             FileWriter writer = new FileWriter("/home/martin/graphics/maniation/matlab/javadata");
@@ -60,11 +71,11 @@ public class Simulation {
         for (int i=bodies.size()-1; i>=0; i--) {
             Body b = bodies.get(i);
             b.interaction(world, il, true);
-            for (int j=bodies.size(); j>i; j--) b.interaction(bodies.get(j), il, true);
+            for (int j=bodies.size()-1; j>i; j--) b.interaction(bodies.get(j), il, true);
         }
         il.applyNonConstraints();
         // Compute collision impulses
-        constraintImpulses(il, time, allowBacktrack);
+        //constraintImpulses(il, time, allowBacktrack);
         // Compute resting contact forces
         constraintForces(il);
     }
@@ -130,6 +141,7 @@ public class Simulation {
     }
     
     private void constraintForces(InteractionList il) {
+        il.classifyConstraints();
         Vector lambda;
         Set<Constraint> constrs = new java.util.HashSet<Constraint>();
         Set<Constraint> contacts = new java.util.HashSet<Constraint>();
@@ -142,7 +154,7 @@ public class Simulation {
             // Set up Lagrange multiplier equation and solve it
             Vector term1 = il.getJacobianDot().mult(il.getVelocity());
             Vector term2 = il.getJacobian().mult(il.getAcceleration());
-            Vector rhs = term1.add(term2).add(il.getPenalty()).add(il.getPenaltyDot()).mult(-1.0);
+            Vector rhs = term1.add(term2)/*.add(il.getPenalty()).add(il.getPenaltyDot())*/.mult(-1.0);
             Matrix[] lhs = new Matrix[3];
             lhs[0] = il.getJacobian();
             lhs[1] = il.getMassInertia().inverse();
@@ -193,6 +205,7 @@ public class Simulation {
 
         public void timeStepCompleted(double time, Vector state) {
             log.add(state.toString());
+            System.out.println("Total energy: " + totalEnergy());
         }
     }
 }

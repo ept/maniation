@@ -1,44 +1,81 @@
 package de.kleppmann.maniation;
 
-import de.kleppmann.maniation.dynamics.ConstrainedRigidBodies;
+import java.util.List;
+import java.util.Map;
+
+import de.kleppmann.maniation.dynamics.Body;
+import de.kleppmann.maniation.dynamics.Cylinder;
+import de.kleppmann.maniation.dynamics.Interaction;
+import de.kleppmann.maniation.dynamics.InteractionForce;
+import de.kleppmann.maniation.dynamics.InteractionList;
 import de.kleppmann.maniation.dynamics.JointConstraint;
 import de.kleppmann.maniation.dynamics.NailConstraint;
-import de.kleppmann.maniation.dynamics.RigidBody;
 import de.kleppmann.maniation.dynamics.RotationConstraint;
+import de.kleppmann.maniation.dynamics.Simulation;
+import de.kleppmann.maniation.dynamics.SimulationObject;
+import de.kleppmann.maniation.dynamics.World;
+import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.Vector3D;
+import de.kleppmann.maniation.maths.VectorImpl;
 
-public class Centrifuge extends RigidBody {
+public class Centrifuge extends Cylinder {
 
-    private boolean sphere;
+    private Map<SimulationObject,Interaction[]> interactions;
+    private static final double[] torque = {0.0, 0.0, 0.0, 0.0, 0.0, 0.01};
+    private static final Vector torqueVector = new VectorImpl(torque);
     
-    public Centrifuge(boolean sphere) {
-        super();
-        this.sphere = sphere;
+    private Centrifuge(boolean sphere) {
+        super(0.5, 1.0, 1.0);
         if (sphere) setCoMPosition(new Vector3D(0, 0.7, 2.2));
         else setCoMPosition(new Vector3D(0, 0, 0));
     }
 
-    public Vector3D getForces() {
-        return super.getForces().add(new Vector3D(0, 0, -1));
-    }
-    
-    public Vector3D getTorques() {
-        Vector3D result = super.getTorques();
-        if (sphere) return result;
-        return result.add(new Vector3D(0, 0, 0.01));
+    public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
+        super.interaction(partner, result, allowReverse);
+        Interaction[] ia = interactions.get(partner);
+        if (ia != null) for (Interaction i : ia) result.addInteraction(i);
     }
 
-    public static void setup(ConstrainedRigidBodies system) {
+
+    public static void setup(Simulation sim) {
         Centrifuge cylinder = new Centrifuge(false);
         Centrifuge sphere = new Centrifuge(true);
-        system.addBody(cylinder); system.addBody(sphere);
-        system.addConstraint(new NailConstraint(cylinder,
-                new Vector3D(0, 0, 0), new Vector3D(0, 0, 0)));
-        system.addConstraint(new RotationConstraint(null, new Vector3D(1,0,0), cylinder));
-        system.addConstraint(new RotationConstraint(null, new Vector3D(0,1,0), cylinder));
-        system.addConstraint(new JointConstraint(cylinder, new Vector3D(0, 0.7, 3),
-                    sphere, new Vector3D(0, 0, 0.8)));
-        system.addConstraint(new RotationConstraint(cylinder, new Vector3D(0,1,0), sphere));
-        system.addConstraint(new RotationConstraint(cylinder, new Vector3D(0,0,1), sphere));
+        sim.addBody(cylinder); sim.addBody(sphere);
+        cylinder.interactions = new java.util.HashMap<SimulationObject,Interaction[]>();
+        sphere.interactions = new java.util.HashMap<SimulationObject,Interaction[]>();
+        Interaction[] cyl = {
+            new NailConstraint(sim.getWorld(), cylinder, new Vector3D(0, 0, 0), new Vector3D(0, 0, 0)),
+            new RotationConstraint(sim.getWorld(), null, new Vector3D(1,0,0), cylinder),
+            new RotationConstraint(sim.getWorld(), null, new Vector3D(0,1,0), cylinder),
+            new AcceleratingTorque(sim.getWorld(), cylinder)
+        };
+        cylinder.interactions.put(sim.getWorld(), cyl);
+        Interaction[] sph = {
+            new JointConstraint(cylinder, new Vector3D(0, 0.7, 3), sphere, new Vector3D(0, 0, 0.8)),
+            new RotationConstraint(sim.getWorld(), cylinder, new Vector3D(0,1,0), sphere),
+            new RotationConstraint(sim.getWorld(), cylinder, new Vector3D(0,0,1), sphere)
+        };
+        cylinder.interactions.put(sphere, sph);
+        sphere.interactions.put(cylinder, sph);
+    }
+    
+    
+    private static class AcceleratingTorque implements InteractionForce {
+        private World world;
+        private Body body;
+        
+        public AcceleratingTorque(World world, Body body) {
+            this.world = world; this.body = body;
+        }
+        
+        public Vector getForceTorque(Body b) {
+            return torqueVector;
+        }
+        
+        public List<SimulationObject> getObjects() {
+            List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
+            result.add(world); result.add(body);
+            return result;
+        }
     }
 }

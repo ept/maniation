@@ -14,10 +14,19 @@ public class Cylinder extends RigidBody {
     private Matrix33 inertia, invInertia;
     private boolean upToDate = false;
     
-    public Cylinder() {
+    /**
+     * Rigid body implementation of a cylinder whose axis (when not rotated) is
+     * parallel to the Z axis, and centre of mass at the origin. Collisions are
+     * not handled.
+     * @param radius Radius of the cylinder.
+     * @param length Length of the cylinder.
+     * @param mass Mass of the cylinder.
+     */
+    public Cylinder(double radius, double length, double mass) {
+        this.mass = mass;
         toPrincipalAxes = new Quaternion();
-        mass = 1.0;
-        principalInertia = new Vector3D(1.0, 1.0, 1.0);
+        double inert = (length*length + 3.0*radius*radius)*mass/12.0;
+        principalInertia = new Vector3D(inert, inert, 0.5*mass*radius*radius);
     }
     
     private void updateInertia() {

@@ -3,6 +3,7 @@ package de.kleppmann.maniation.dynamics;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.SparseMatrix;
@@ -12,11 +13,11 @@ import de.kleppmann.maniation.maths.SparseMatrix.Slice;
 
 public class InteractionList {
     
-    private List<Constraint> constraints = new java.util.ArrayList<Constraint>();
-    private List<Interaction> other = new java.util.ArrayList<Interaction>();
+    private Set<Constraint> constraints = new java.util.HashSet<Constraint>();
+    private Set<Interaction> other = new java.util.HashSet<Interaction>();
     private Vector veloc, accel, penalty, penaltyDot;
     private SparseMatrix massInertia, jacobian, jacobianDot;
-    private List<Constraint> equalities, colliding, resting;
+    private Set<Constraint> equalities, colliding, resting;
     private Map<Body,Integer> bodyOffsets;
     private Map<Constraint,Integer> constrOffsets;
     
@@ -31,9 +32,9 @@ public class InteractionList {
     }
     
     public void classifyConstraints() {
-        equalities = new java.util.ArrayList<Constraint>();
-        colliding = new java.util.ArrayList<Constraint>();
-        resting = new java.util.ArrayList<Constraint>();
+        equalities = new java.util.HashSet<Constraint>();
+        colliding = new java.util.HashSet<Constraint>();
+        resting = new java.util.HashSet<Constraint>();
         for (Constraint c : constraints) {
             // If it's an inequality, is the contact colliding, resting or separating?
             if (c.isInequality()) {
@@ -139,9 +140,9 @@ public class InteractionList {
     public SparseMatrix getMassInertia() { return massInertia; }
     public SparseMatrix getJacobian() { return jacobian; }
     public SparseMatrix getJacobianDot() { return jacobianDot; }
-    public List<Constraint> getEqualityConstraints() { return equalities; }
-    public List<Constraint> getCollidingContacts() { return colliding; }
-    public List<Constraint> getRestingContacts() { return resting; }
+    public Set<Constraint> getEqualityConstraints() { return equalities; }
+    public Set<Constraint> getCollidingContacts() { return colliding; }
+    public Set<Constraint> getRestingContacts() { return resting; }
     
     public int getBodyOffset(Body b) {
         return bodyOffsets.get(b);

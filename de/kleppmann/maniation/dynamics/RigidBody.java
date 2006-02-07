@@ -50,11 +50,11 @@ public abstract class RigidBody implements Body {
     }
 
     public double getEnergy() {
-        /*Vector3D gravity = new Vector3D(0, 1, 0);
-        double potential = gravity.mult(getCoMPosition());*/
+        deriveQuantities();
+        double potential = -getMass()*World.GRAVITY.mult(getCoMPosition());
         double kinetic = 0.5*getMass()*getCoMVelocity().mult(getCoMVelocity());
         double rotational = 0.5*getAngularVelocity().mult(getAngularMomentum());
-        return /*potential +*/ kinetic + rotational;
+        return potential + kinetic + rotational;
     }
     
     public Vector3D getCoMPosition() {
@@ -158,10 +158,8 @@ public abstract class RigidBody implements Body {
     }
 
     public void handleInteraction(Interaction action) {
-        if (action instanceof InteractionForce) {
-            forces = forces.add(((InteractionForce) action).getForceOn(this));
-            torques = torques.add(((InteractionForce) action).getTorqueOn(this));
-        }
+        if (action instanceof InteractionForce)
+            applyForce(((InteractionForce) action).getForceTorque(this));
     }
 
     public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
