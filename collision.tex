@@ -54,7 +54,7 @@ parallel, which is a case we will ignore for now.
 
 Note that we are not trying to simulate friction at this point. The force in the direction of the
 contact plane normal merely stops interpenetration~-- if you were to push the book over the
-horizontal table surface, it would glide along without slowing down. We also class such gliding
+horizontal table surface, it would glide along without slowing down. We also classify such gliding
 behaviour as resting contact if the relative velocity of the bodies is parallel to the contact
 plane.
 
@@ -84,7 +84,7 @@ Let us take a much simpler approach and pretend for now that equation~\ref{const
 contained an equals sign. Then this is a constraint like any other, which we can satisfy by using
 the Lagrange multiplier method of section~\ref{constraints}. Moreover, if there are multiple
 points of resting contact in the system, and also `real' constraints like joints between bodies,
-we can solve all of these simultaneously without thinking twice.
+we can solve all of these simultaneously without having to think twice.
 
 So that the function \ve{c} can be used in the Lagrange multiplier method, we need to derive the
 Jacobian matrices \m{J} and $\dot{\m{J}}$ as we did for joints. This is easy to do for a
@@ -108,7 +108,7 @@ system of linear equations for the Lagrange multiplier \ve{\lambda}. In this vec
 components relating to contact constraints whose value is negative. (`Real' constraints which are
 not points of resting contact are left untouched whatever their \ve{\lambda} component value is.)
 If there are none, calculate $\m{J}^T\ve{\lambda}$ and add the forces and torques to the system~--
-then we are done. If there aare negative components, completely discard the constraints to which
+then we are done. If there are negative components, completely discard the constraints to which
 they belong (since the bodies are accelerating away from each other in this point, the contact
 will break in the next time step), then repeat the solving for \ve{\lambda} with the reduced set
 of constraints. The process may take several iterations before terminating, but always terminates
