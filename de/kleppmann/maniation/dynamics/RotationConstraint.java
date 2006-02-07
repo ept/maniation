@@ -30,6 +30,14 @@ public class RotationConstraint implements Constraint {
         return result;
     }
 
+    public int getDimension() {
+        return 1;
+    }
+
+    public boolean isInequality() {
+        return false;
+    }
+
     private void updateNumbers() {
         Quaternion q = body2.getOrientation();
         qw = q.getW(); qx = q.getX(); qy = q.getY(); qz = q.getZ();
@@ -76,7 +84,7 @@ public class RotationConstraint implements Constraint {
         return new VectorImpl(arr);
     }
 
-    public Map<RigidBody, Matrix> getJacobian() {
+    public Map<Body, Matrix> getJacobian() {
         updateNumbers();
         double[][] m1 = {{0, 0, 0,
             0.5*(n1*(px*qx + pw*qw - pz*qz - py*qy) +
@@ -88,7 +96,7 @@ public class RotationConstraint implements Constraint {
             0.5*(n1*(px*qz - pw*qy + pz*qx - py*qw) +
                  n2*(py*qz + pz*qy + pw*qx + px*qw) +
                  n3*(pz*qz - py*qy - px*qx + pw*qw)) }};
-        Map<RigidBody, Matrix> result = new java.util.HashMap<RigidBody, Matrix>();
+        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
         if (body1 != null) result.put(body1, new MatrixImpl(m1));
         double[][] m2 = {{0, 0, 0, -m1[0][3], -m1[0][4], -m1[0][5]}};
         result.put(body2, new MatrixImpl(m2));
@@ -96,7 +104,7 @@ public class RotationConstraint implements Constraint {
     }
 
 
-    public Map<RigidBody, Matrix> getJacobianDot() {
+    public Map<Body, Matrix> getJacobianDot() {
         updateNumbers();
         double x1 = n1*w1 + n2*w2 + n3*w3;
         double x2 = py*w3 - pz*w2;
@@ -116,7 +124,7 @@ public class RotationConstraint implements Constraint {
         double x16 = n1*v1 + n2*v2 + n3*v3;
         double x17 = n1*x5 + n2*x6 + n3*x7;
         double x18 = n1*(qy*v3 - qz*v2) + n2*(qz*v1 - qx*v3) + n3*(qx*v2 - qy*v1);
-        Map<RigidBody, Matrix> result = new java.util.HashMap<RigidBody, Matrix>();
+        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
         if (body1 != null) {
             double[][] m1 = {{0, 0, 0,
                 0.5 *(qw*x1*px - x8*px) +

@@ -142,6 +142,13 @@ public abstract class RigidBody implements Body {
                 forceTorque.getComponent(5)));
     }
 
+    public void applyImpulse(Vector impulse) {
+        mom = mom.add(new Vector3D(impulse.getComponent(0), impulse.getComponent(1),
+                impulse.getComponent(2)));
+        angmom = angmom.add(new Vector3D(impulse.getComponent(3), impulse.getComponent(4),
+                impulse.getComponent(5)));
+    }
+
     public Vector getAccelerations() {
         return accelerationVector;
     }

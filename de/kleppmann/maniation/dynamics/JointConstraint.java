@@ -24,6 +24,14 @@ public class JointConstraint implements Constraint {
         return result;
     }
 
+    public int getDimension() {
+        return 3;
+    }
+
+    public boolean isInequality() {
+        return false;
+    }
+
     public Vector3D getPenalty() {
         Vector3D s = body1.getOrientation().transform(localPos1);
         Vector3D t = body2.getOrientation().transform(localPos2);
@@ -37,7 +45,7 @@ public class JointConstraint implements Constraint {
             subtract(body2.getCoMVelocity()).subtract(body2.getAngularVelocity().cross(t));
     }
 
-    public Map<RigidBody, Matrix> getJacobian() {
+    public Map<Body, Matrix> getJacobian() {
         Vector3D s = body1.getOrientation().transform(localPos1);
         Vector3D t = body2.getOrientation().transform(localPos2);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
@@ -50,13 +58,13 @@ public class JointConstraint implements Constraint {
                 {-1,  0,   0,   0,  -t3,  t2},
                 {0,   -1,  0,   t3,  0,  -t1},
                 {0,   0,   -1, -t2,  t1,  0 }};
-        Map<RigidBody, Matrix> result = new java.util.HashMap<RigidBody, Matrix>();
+        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
         result.put(body1, new MatrixImpl(j1));
         result.put(body2, new MatrixImpl(j2));
         return result;
     }
 
-    public Map<RigidBody, Matrix> getJacobianDot() {
+    public Map<Body, Matrix> getJacobianDot() {
         Vector3D s = body1.getOrientation().transform(localPos1);
         Vector3D t = body2.getOrientation().transform(localPos2);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
@@ -75,7 +83,7 @@ public class JointConstraint implements Constraint {
                 {0, 0, 0,   0,              w2*t1-w1*t2,    w3*t1-w1*t3},
                 {0, 0, 0,   w1*t2-w2*t1,    0,              w3*t2-w2*t3},
                 {0, 0, 0,   w1*t3-w3*t1,    w2*t3-w3*t2,    0          }};
-        Map<RigidBody, Matrix> result = new java.util.HashMap<RigidBody, Matrix>();
+        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
         result.put(body1, new MatrixImpl(jdot1));
         result.put(body2, new MatrixImpl(jdot2));
         return result;

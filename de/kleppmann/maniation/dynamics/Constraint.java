@@ -10,4 +10,5 @@ public interface Constraint extends Interaction {
     Map<Body,Matrix> getJacobian();
     Map<Body,Matrix> getJacobianDot();
     boolean isInequality();
+    int getDimension();
 }

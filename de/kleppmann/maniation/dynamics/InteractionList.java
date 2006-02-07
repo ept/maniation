@@ -1,8 +1,8 @@
 package de.kleppmann.maniation.dynamics;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.SparseMatrix;
@@ -16,27 +16,58 @@ public class InteractionList {
     private List<Interaction> other = new java.util.ArrayList<Interaction>();
     private Vector veloc, accel, penalty, penaltyDot;
     private SparseMatrix massInertia, jacobian, jacobianDot;
-    private List<Constraint> collisions;
+    private List<Constraint> equalities, colliding, resting;
     private Map<Body,Integer> bodyOffsets;
+    private Map<Constraint,Integer> constrOffsets;
     
     public void addInteraction(Interaction ia) {
         if (ia instanceof Constraint) constraints.add((Constraint) ia);
         else other.add(ia);
     }
     
-    private void calcBodyOffsets() {
-        Set<Body> bodies = new java.util.HashSet<Body>();
-        for (Interaction i : constraints)
-            for (SimulationObject obj : i.getObjects())
-                if (obj instanceof Body) bodies.add((Body) obj);
-        int i = 0;
-        bodyOffsets = new java.util.HashMap<Body,Integer>();
-        for (Body b : bodies) {
-            bodyOffsets.put(b, i);
-            i += b.getVelocities().getDimension();
+    public void applyNonConstraints() {
+        for (Interaction i : other)
+            for (SimulationObject obj : i.getObjects()) obj.handleInteraction(i);
+    }
+    
+    public void classifyConstraints() {
+        equalities = new java.util.ArrayList<Constraint>();
+        colliding = new java.util.ArrayList<Constraint>();
+        resting = new java.util.ArrayList<Constraint>();
+        for (Constraint c : constraints) {
+            // If it's an inequality, is the contact colliding, resting or separating?
+            if (c.isInequality()) {
+                boolean isColliding = false, isSeparating = true;
+                for (int i=0; i<c.getDimension(); i++) {
+                    double component = c.getPenaltyDot().getComponent(i);
+                    if (component < -Simulation.RESTING_TOLERANCE) isColliding = true;
+                    if (component <  Simulation.RESTING_TOLERANCE) isSeparating = false;
+                }
+                if (isColliding) colliding.add(c); else
+                if (!isSeparating) resting.add(c); 
+            } else equalities.add(c);
         }
-        double[] v = new double[i], a = new double[i];
-        SparseMatrix.Slice[] mass = new SparseMatrix.Slice[bodies.size()];
+    }
+    
+    public void compileConstraints(Collection<Constraint> constraintList) {
+        // Put all bodies mentioned by the constraints in some order, and assign each
+        // an offset into the velocity/acceleration/force vectors.
+        int bodyOffset = 0, bodyCount = 0;
+        bodyOffsets = new java.util.HashMap<Body,Integer>();
+        for (Constraint constr : constraintList)
+            for (SimulationObject obj : constr.getObjects())
+                if (obj instanceof Body) {
+                    Body b = (Body) obj;
+                    if (bodyOffsets.get(b) == null) {
+                        bodyOffsets.put(b, bodyOffset);
+                        bodyOffset += b.getVelocities().getDimension();
+                        bodyCount++;
+                    }
+                }
+        // Assemble the velocity and acceleration vectors, and the mass/inertia matrix
+        // containing all bodies.
+        double[] v = new double[bodyOffset], a = new double[bodyOffset];
+        SparseMatrix.Slice[] mass = new SparseMatrix.Slice[bodyCount];
         int j = 0;
         for (Map.Entry<Body,Integer> entry : bodyOffsets.entrySet()) {
             int offset = entry.getValue();
@@ -47,54 +78,37 @@ public class InteractionList {
         }
         veloc = new VectorImpl(v); accel = new VectorImpl(a);
         massInertia = new SparseMatrix(v.length, v.length, mass);
-    }
-    
-    public void assemble() {
-        for (Interaction i : other)
-            for (SimulationObject obj : i.getObjects()) obj.handleInteraction(i);
-        calcBodyOffsets();
-        int constr = 0;
-        for (Constraint c : constraints) constr += c.getPenalty().getDimension();
-        List<JacobianSlice> j = new java.util.ArrayList<JacobianSlice>();
-        List<JacobianSlice> jdot = new java.util.ArrayList<JacobianSlice>();
-        double[] p = new double[constr], pdot = new double[constr];
-        int offset = 0;
-        collisions = new java.util.ArrayList<Constraint>();
-        for (Constraint c : constraints) {
+        // Assign each constraint to some offset in the constraint vector
+        int constrOffset = 0;
+        constrOffsets = new java.util.HashMap<Constraint,Integer>();
+        for (Constraint c : constraintList) {
+            if (constrOffsets.get(c) == null) {
+                constrOffsets.put(c, constrOffset);
+                constrOffset += c.getDimension();                
+            }
+        }
+        List<JacobianSlice> jSlices = new java.util.ArrayList<JacobianSlice>();
+        List<JacobianSlice> jdotSlices = new java.util.ArrayList<JacobianSlice>();
+        double[] p = new double[constrOffset], pdot = new double[constrOffset];
+        // Build the Jacobian matrices and the penalty vectors
+        for (Map.Entry<Constraint,Integer> entry : constrOffsets.entrySet()) {
+            Constraint c = entry.getKey();
+            int offset = entry.getValue();
             c.getPenalty().toDoubleArray(p, offset);
             c.getPenaltyDot().toDoubleArray(pdot, offset);
-            if (isColliding(c)) collisions.add(c);
             for (Body b : c.getJacobian().keySet())
-                j.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), false));
+                jSlices.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), false));
             for (Body b : c.getJacobianDot().keySet())
-                jdot.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), true));
-            offset += c.getPenalty().getDimension();
+                jdotSlices.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), true));
         }
+        // Create the matrix and vector objects
         penalty = new VectorImpl(p);
         penaltyDot = new VectorImpl(pdot);
-        jacobian = new SparseMatrix(constr, veloc.getDimension(),
-                j.toArray(new SparseMatrix.Slice[j.size()]));
-        jacobianDot = new SparseMatrix(constr, veloc.getDimension(),
-                jdot.toArray(new SparseMatrix.Slice[jdot.size()]));
+        jacobian = new SparseMatrix(constrOffset, veloc.getDimension(),
+                jSlices.toArray(new SparseMatrix.Slice[jSlices.size()]));
+        jacobianDot = new SparseMatrix(constrOffset, veloc.getDimension(),
+                jdotSlices.toArray(new SparseMatrix.Slice[jdotSlices.size()]));
     }
-    
-    private boolean isColliding(Constraint constr) {
-        if (!constr.isInequality()) return false;
-        Vector cd = constr.getPenaltyDot();
-        for (int i=0; i<cd.getDimension(); i++)
-            if (cd.getComponent(i) < -1e-4) return true;
-        return false;
-    }
-    
-    public Vector getVelocity() { return veloc; }
-    public Vector getAcceleration() { return accel; }
-    public Vector getPenalty() { return penalty; }
-    public Vector getPenaltyDot() { return penaltyDot; }
-    public SparseMatrix getMassInertia() { return massInertia; }
-    public SparseMatrix getJacobian() { return jacobian; }
-    public SparseMatrix getJacobianDot() { return jacobianDot; }
-    public List<Constraint> getConstraints() { return constraints; }
-    public List<Constraint> getCollisions() { return collisions; }
 
     public void applyForces(Vector force) {
         for (Map.Entry<Body,Integer> entry : bodyOffsets.entrySet()) {
@@ -107,6 +121,36 @@ public class InteractionList {
         }
     }
     
+    public void applyImpulses(Vector impulse) {
+        for (Map.Entry<Body,Integer> entry : bodyOffsets.entrySet()) {
+            Body body = entry.getKey();
+            int offset = entry.getValue();
+            int length = body.getVelocities().getDimension();
+            double[] v = new double[length];
+            for (int i=0; i<length; i++) v[i] = impulse.getComponent(i+offset);
+            body.applyImpulse(new VectorImpl(v));
+        }
+    }
+    
+    public Vector getVelocity() { return veloc; }
+    public Vector getAcceleration() { return accel; }
+    public Vector getPenalty() { return penalty; }
+    public Vector getPenaltyDot() { return penaltyDot; }
+    public SparseMatrix getMassInertia() { return massInertia; }
+    public SparseMatrix getJacobian() { return jacobian; }
+    public SparseMatrix getJacobianDot() { return jacobianDot; }
+    public List<Constraint> getEqualityConstraints() { return equalities; }
+    public List<Constraint> getCollidingContacts() { return colliding; }
+    public List<Constraint> getRestingContacts() { return resting; }
+    
+    public int getBodyOffset(Body b) {
+        return bodyOffsets.get(b);
+    }
+    
+    public int getConstraintOffset(Constraint c) {
+        return constrOffsets.get(c);
+    }
+
 
     private class JacobianSlice implements Slice {
 
