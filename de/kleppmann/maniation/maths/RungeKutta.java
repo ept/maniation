@@ -3,7 +3,7 @@ package de.kleppmann.maniation.maths;
 public class RungeKutta implements ODESolver {
     
     private ODE ode;
-    private double time = 0.0;
+    private double time;
     private double h, hmin = 1e-10, eps = 1e-6;
     private Vector status;
 
@@ -34,6 +34,7 @@ public class RungeKutta implements ODESolver {
     }
 
     public void solve(double startTime, double finishTime) {
+        time = startTime;
         while (time + hmin < finishTime) {
             if (time + h > finishTime) h = finishTime - time;
             try {
