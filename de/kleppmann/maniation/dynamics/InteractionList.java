@@ -17,7 +17,8 @@ public class InteractionList {
     private Set<Interaction> other = new java.util.HashSet<Interaction>();
     private Vector veloc, accel, penalty, penaltyDot;
     private SparseMatrix massInertia, jacobian, jacobianDot;
-    private Set<Constraint> equalities, colliding, resting;
+    private Set<Constraint> equalities;
+    private Set<InequalityConstraint> colliding, resting;
     private Map<Body,Integer> bodyOffsets;
     private Map<Constraint,Integer> constrOffsets;
     
@@ -33,19 +34,19 @@ public class InteractionList {
     
     public void classifyConstraints() {
         equalities = new java.util.HashSet<Constraint>();
-        colliding = new java.util.HashSet<Constraint>();
-        resting = new java.util.HashSet<Constraint>();
+        colliding = new java.util.HashSet<InequalityConstraint>();
+        resting = new java.util.HashSet<InequalityConstraint>();
         for (Constraint c : constraints) {
             // If it's an inequality, is the contact colliding, resting or separating?
-            if (c.isInequality()) {
+            if ((c instanceof InequalityConstraint) && (((InequalityConstraint) c).isInequality())) {
                 boolean isColliding = false, isSeparating = true;
                 for (int i=0; i<c.getDimension(); i++) {
                     double component = c.getPenaltyDot().getComponent(i);
                     if (component < -Simulation.RESTING_TOLERANCE) isColliding = true;
                     if (component <  Simulation.RESTING_TOLERANCE) isSeparating = false;
                 }
-                if (isColliding) colliding.add(c); else
-                if (!isSeparating) resting.add(c); 
+                if (isColliding) colliding.add((InequalityConstraint) c); else
+                if (!isSeparating) resting.add((InequalityConstraint) c); 
             } else equalities.add(c);
         }
     }
@@ -141,8 +142,8 @@ public class InteractionList {
     public SparseMatrix getJacobian() { return jacobian; }
     public SparseMatrix getJacobianDot() { return jacobianDot; }
     public Set<Constraint> getEqualityConstraints() { return equalities; }
-    public Set<Constraint> getCollidingContacts() { return colliding; }
-    public Set<Constraint> getRestingContacts() { return resting; }
+    public Set<InequalityConstraint> getCollidingContacts() { return colliding; }
+    public Set<InequalityConstraint> getRestingContacts() { return resting; }
     
     public int getBodyOffset(Body b) {
         return bodyOffsets.get(b);

@@ -28,10 +28,6 @@ public class JointConstraint implements Constraint {
         return 3;
     }
 
-    public boolean isInequality() {
-        return false;
-    }
-
     public Vector3D getPenalty() {
         Vector3D s = body1.getOrientation().transform(localPos1);
         Vector3D t = body2.getOrientation().transform(localPos2);

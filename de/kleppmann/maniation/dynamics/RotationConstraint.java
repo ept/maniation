@@ -34,10 +34,6 @@ public class RotationConstraint implements Constraint {
         return 1;
     }
 
-    public boolean isInequality() {
-        return false;
-    }
-
     private void updateNumbers() {
         Quaternion q = body2.getOrientation();
         qw = q.getW(); qx = q.getX(); qy = q.getY(); qz = q.getZ();

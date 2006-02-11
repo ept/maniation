@@ -28,10 +28,6 @@ public class NailConstraint implements Constraint {
         return 3;
     }
 
-    public boolean isInequality() {
-        return false;
-    }
-
     public Vector3D getPenalty() {
         Vector3D s = body.getOrientation().transform(localPoint);
         return body.getCoMPosition().add(s).subtract(target);
