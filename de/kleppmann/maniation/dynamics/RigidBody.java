@@ -127,6 +127,7 @@ public abstract class RigidBody implements Body {
     public void setSimulationTime(double time) {
         this.forces = new Vector3D();
         this.torques = new Vector3D();
+        upToDate = false;
     }
 
     public void setState(Vector state) {
@@ -140,13 +141,14 @@ public abstract class RigidBody implements Body {
                 forceTorque.getComponent(2)));
         torques = torques.add(new Vector3D(forceTorque.getComponent(3), forceTorque.getComponent(4),
                 forceTorque.getComponent(5)));
+        upToDate = false;
     }
 
     public void applyImpulse(Vector impulse) {
-        mom = mom.add(new Vector3D(impulse.getComponent(0), impulse.getComponent(1),
-                impulse.getComponent(2)));
-        angmom = angmom.add(new Vector3D(impulse.getComponent(3), impulse.getComponent(4),
-                impulse.getComponent(5)));
+        setLinearMomentum(getLinearMomentum().add(new Vector3D(impulse.getComponent(0),
+                impulse.getComponent(1), impulse.getComponent(2))));
+        setAngularMomentum(getAngularMomentum().add(new Vector3D(impulse.getComponent(3),
+                impulse.getComponent(4), impulse.getComponent(5))));
     }
 
     public Vector getAccelerations() {

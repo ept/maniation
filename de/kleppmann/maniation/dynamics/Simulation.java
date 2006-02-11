@@ -19,7 +19,7 @@ public class Simulation {
     
     public static final double RESTING_TOLERANCE = 1e-4;
     public static final double PENETRATION_TOLERANCE = 1e-4;
-    public static final double ELASTICITY = 0.9;
+    public static final double ELASTICITY = 1.0;
     
     private World world = new World();
     private List<Body> bodies = new java.util.ArrayList<Body>();
@@ -49,7 +49,7 @@ public class Simulation {
     }
     
     public void run(double time) {
-        ODESolver solver = new RungeKutta(new DifferentialEquation(), 0.02);
+        ODESolver solver = new RungeKutta(new DifferentialEquation(), 0.01);
         log.add(state.toString());
         solver.solve(0.0, time);
         try {
@@ -65,25 +65,20 @@ public class Simulation {
         }
     }
     
-    private void interactions(double time, boolean allowBacktrack) throws ODEBacktrackException {
-        // Determine all interactions between bodies
+    private InteractionList getInteractions() {
         InteractionList il = new InteractionList();
         for (int i=bodies.size()-1; i>=0; i--) {
             Body b = bodies.get(i);
             b.interaction(world, il, true);
             for (int j=bodies.size()-1; j>i; j--) b.interaction(bodies.get(j), il, true);
         }
-        il.applyNonConstraints();
-        // Compute collision impulses
-        //constraintImpulses(il, time, allowBacktrack);
-        // Compute resting contact forces
-        constraintForces(il);
+        return il;
     }
     
-    private void checkPenetration(InteractionList il, double time, boolean allowBacktrack)
+    private void checkPenetration(InteractionList il, double time)
             throws ODEBacktrackException {
         // Check for colliding contacts and abort this simulation step if necessary
-        if ((il.getCollidingContacts().size() > 0) && allowBacktrack) {
+        if (il.getCollidingContacts().size() > 0) {
             double penetrationTime = 0.0; boolean penetrated = false;
             for (Constraint c : il.getCollidingContacts()) {
                 for (int i=0; i<c.getDimension(); i++) {
@@ -95,17 +90,16 @@ public class Simulation {
                     }
                 }
             }
-            if (penetrated) throw new ODEBacktrackException(time - penetrationTime);
+            if (penetrated) throw new ODEBacktrackException(time, time - penetrationTime);
         }
     }
     
-    private void constraintImpulses(InteractionList il, double time, boolean allowBacktrack)
-            throws ODEBacktrackException {
+    private void constraintImpulses(InteractionList il, double time) {
         while (true) {
             // Repeat until there are no more colliding contacts
             il.classifyConstraints();
-            checkPenetration(il, time, allowBacktrack);
             if (il.getCollidingContacts().size() == 0) break;
+            System.out.print("*");
             // Set up elasticity vector (conceptually a diagonal matrix)
             Set<Constraint> constrs = new java.util.HashSet<Constraint>();
             constrs.addAll(il.getEqualityConstraints());
@@ -163,16 +157,19 @@ public class Simulation {
             // Determine all Lagrange multipliers which are negative at resting contacts,
             // and remove them from the active set of constraints
             lambdaNegative = false;
+            Set<Constraint> glue = new java.util.HashSet<Constraint>();
             for (Constraint c : contacts) {
                 int offset = il.getConstraintOffset(c);
                 boolean thisNegative = false;
                 for (int i=0; i<c.getDimension(); i++)
                     if (lambda.getComponent(offset+i) < 0.0) thisNegative = true;
                 if (thisNegative) {
-                    constrs.remove(c); contacts.remove(c);
+                    glue.add(c);
                     lambdaNegative = true;
                 }
             }
+            constrs.removeAll(glue);
+            contacts.removeAll(glue);
         } while (lambdaNegative);
         // Compute constraint forces from Lagrange multipliers, and apply them to the system
         Vector constForce;
@@ -190,13 +187,28 @@ public class Simulation {
     
     
     private class DifferentialEquation implements ODE {
-        public Vector derivative(double time, Vector state, boolean allowBacktrack)
+        public Vector derivative(double time, Vector state)
                 throws ODEBacktrackException {
             if (!(state instanceof StateVector)) throw new IllegalArgumentException();
             setTime(time);
             ((StateVector) state).apply();
-            interactions(time, allowBacktrack);
+            InteractionList il = getInteractions();
+            // Check if penetration has occurred -- may throw ODEBacktrackException
+            il.classifyConstraints();
+            checkPenetration(il, time);
+            // Compute constraint/resting contact forces
+            il.applyNonConstraints();
+            constraintForces(il);
             return stateDot;
+        }
+
+        public Vector impulse(double time, Vector state) {
+            if (!(state instanceof StateVector)) throw new IllegalArgumentException();
+            setTime(time);
+            ((StateVector) state).apply();
+            InteractionList il = getInteractions();
+            constraintImpulses(il, time);
+            return Simulation.this.state;
         }
 
         public Vector getInitial() {
@@ -205,7 +217,7 @@ public class Simulation {
 
         public void timeStepCompleted(double time, Vector state) {
             log.add(state.toString());
-            System.out.println("Total energy: " + totalEnergy());
+            //System.out.println("Total energy: " + totalEnergy());
         }
     }
 }
