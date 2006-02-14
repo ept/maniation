@@ -296,11 +296,12 @@ where it can handle the collision situation in which two edges collide.
 
 We assume that each straight line is connected to a rigid body. The first body's centre of mass
 is located at \ve{a}, its angular velocity is \ve{\omega}, \ve{s} is a vector from the centre
-of mass to an arbitrary point on the line, and \ve{u} is a unit vector pointing along the line.
-Similarly, the second body's CoM is \ve{b}, its angular velocity is \ve{\phi}, \ve{t} points at
-the line and \ve{v} points in the line's direction. In this derivation we shall assume that the
-lines are not parallel ($\norm{\ve{u}\times\ve{v}} \ne \ve{0}$); the parallel case is special
-and needs to be handled separately.
+of mass to an arbitrary point on the line, and \ve{u} is a vector pointing along the line (unit
+magnitude is not required). Similarly, the second body's CoM is \ve{b}, its angular velocity is
+\ve{\phi}, \ve{t} points at the line and \ve{v} points in the line's direction. In this
+derivation we shall assume that the lines are not parallel
+($\norm{\ve{u}\times\ve{v}} \ne \ve{0}$); the parallel case is special and needs to be handled
+separately.
 
 If \ve{u} and \ve{v} are not parallel, We can find a unique plane which contains one line and is
 parallel to the other. This plane has a normal vector $\ve{n} = \ve{u}\times\ve{v}$ (or
