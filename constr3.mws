@@ -1,0 +1,96 @@
+{VERSION 3 0 "IBM INTEL NT" "3.0" }
+{USTYLETAB {CSTYLE "Maple Input" -1 0 "Courier" 0 1 255 0 0 1 0 1 0 0 
+1 0 0 0 0 }{CSTYLE "2D Math" -1 2 "Times" 0 1 0 0 0 0 0 0 2 0 0 0 0 0 
+0 }{CSTYLE "2D Output" 2 20 "" 0 1 0 0 255 1 0 0 0 0 0 0 0 0 0 }
+{PSTYLE "Normal" -1 0 1 {CSTYLE "" -1 -1 "" 0 1 0 0 0 0 0 0 0 0 0 0 0 
+0 0 }0 0 0 -1 -1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "Text Output" -1 2 1 
+{CSTYLE "" -1 -1 "Courier" 1 10 0 0 255 1 0 0 0 0 0 1 3 0 3 }1 0 0 -1 
+-1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "Warning" 2 7 1 {CSTYLE "" -1 -1 "" 0 
+1 0 0 255 1 0 0 0 0 0 0 1 0 0 }0 0 0 -1 -1 -1 0 0 0 0 0 0 -1 0 }
+{PSTYLE "Maple Output" 0 11 1 {CSTYLE "" -1 -1 "" 0 1 0 0 0 0 0 0 0 0 
+0 0 0 0 0 }3 3 0 -1 -1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "" 11 12 1 
+{CSTYLE "" -1 -1 "" 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 }1 0 0 -1 -1 -1 0 0 
+0 0 0 0 -1 0 }}
+{SECT 0 {EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 70 "restart; with(linalg
+); with(linalg,crossprod); with(linalg,transpose);" }}{PARA 7 "" 1 "" 
+{TEXT -1 32 "Warning, new definition for norm" }}{PARA 7 "" 1 "" 
+{TEXT -1 33 "Warning, new definition for trace" }}{PARA 12 "" 1 "" 
+{XPPMATH 20 "6#7^r%.BlockDiagonalG%,GramSchmidtG%,JordanBlockG%)LUdeco
+mpG%)QRdecompG%*WronskianG%'addcolG%'addrowG%$adjG%(adjointG%&angleG%(
+augmentG%(backsubG%%bandG%&basisG%'bezoutG%,blockmatrixG%(charmatG%)ch
+arpolyG%)choleskyG%$colG%'coldimG%)colspaceG%(colspanG%*companionG%'co
+ncatG%%condG%)copyintoG%*crossprodG%%curlG%)definiteG%(delcolsG%(delro
+wsG%$detG%%diagG%(divergeG%(dotprodG%*eigenvalsG%,eigenvaluesG%-eigenv
+ectorsG%+eigenvectsG%,entermatrixG%&equalG%,exponentialG%'extendG%,ffg
+ausselimG%*fibonacciG%+forwardsubG%*frobeniusG%*gausselimG%*gaussjordG
+%(geneqnsG%*genmatrixG%%gradG%)hadamardG%(hermiteG%(hessianG%(hilbertG
+%+htransposeG%)ihermiteG%*indexfuncG%*innerprodG%)intbasisG%(inverseG%
+'ismithG%*issimilarG%'iszeroG%)jacobianG%'jordanG%'kernelG%*laplacianG
+%*leastsqrsG%)linsolveG%'mataddG%'matrixG%&minorG%(minpolyG%'mulcolG%'
+mulrowG%)multiplyG%%normG%*normalizeG%*nullspaceG%'orthogG%*permanentG
+%&pivotG%*potentialG%+randmatrixG%+randvectorG%%rankG%(ratformG%$rowG%
+'rowdimG%)rowspaceG%(rowspanG%%rrefG%*scalarmulG%-singularvalsG%&smith
+G%,stackmatrixG%*submatrixG%*subvectorG%)sumbasisG%(swapcolG%(swaprowG
+%*sylvesterG%)toeplitzG%&traceG%*transposeG%,vandermondeG%*vecpotentG%
+(vectdimG%'vectorG%*wronskianG" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#7#%*
+crossprodG" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#7#%*transposeG" }}}
+{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 226 "dual := (a) -> matrix(3,3,[
+0,-a[3,1],a[2,1],a[3,1],0,-a[1,1],-a[2,1],a[1,1],0]);\ntr := (a) -> tr
+anspose(a);\ncross := (a,b) -> matrix(3,1,[a[2,1]*b[3,1]-a[3,1]*b[2,1]
+, a[3,1]*b[1,1]-a[1,1]*b[3,1], a[1,1]*b[2,1]-a[2,1]*b[1,1]]);" }}
+{PARA 11 "" 1 "" {XPPMATH 20 "6#>%%dualGR6#%\"aG6\"6$%)operatorG%&arro
+wGF(-%'matrixG6%\"\"$F/7+\"\"!,$&9$6$F/\"\"\"!\"\"&F46$\"\"#F6F3F1,$&F
+46$F6F6F7,$F8F7F<F1F(F(F(" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%#trG%*t
+ransposeG" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%&crossGR6$%\"aG%\"bG6\"
+6$%)operatorG%&arrowGF)-%'matrixG6%\"\"$\"\"\"7%,&*&&9$6$\"\"#F1F1&9%6
+$F0F1F1F1*&&F6F;F1&F:F7F1!\"\",&*&F=\"\"\"&F:6$F1F1F1F1*&&F6FDF1F9FBF?
+,&*&FFFBF>FBF1*&F5FBFCFBF?F)F)F)" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 345 "a := matrix(3,1,[a1,a2,a3]); ad := matrix(3,1,[ad1,a
+d2,ad3]);\nb := matrix(3,1,[b1,b2,b3]); bd := matrix(3,1,[bd1,bd2,bd3]
+);\ns := matrix(3,1,[s1,s2,s3]);\nt := matrix(3,1,[t1,t2,t3]);\nu := m
+atrix(3,1,[u1,u2,u3]);\nv := matrix(3,1,[v1,v2,v3]);\np := matrix(3,1,
+[p1,p2,p3]);\nw := matrix(3,1,[w1,w2,w3]);\neye := linalg[matrix](3,3,
+[1,0,0,0,1,0,0,0,1]);" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"aG-%'matr
+ixG6#7%7#%#a1G7#%#a2G7#%#a3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%#adG
+-%'matrixG6#7%7#%$ad1G7#%$ad2G7#%$ad3G" }}{PARA 11 "" 1 "" {XPPMATH 
+20 "6#>%\"bG-%'matrixG6#7%7#%#b1G7#%#b2G7#%#b3G" }}{PARA 11 "" 1 "" 
+{XPPMATH 20 "6#>%#bdG-%'matrixG6#7%7#%$bd1G7#%$bd2G7#%$bd3G" }}{PARA 
+11 "" 1 "" {XPPMATH 20 "6#>%\"sG-%'matrixG6#7%7#%#s1G7#%#s2G7#%#s3G" }
+}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"tG-%'matrixG6#7%7#%#t1G7#%#t2G7#%
+#t3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"uG-%'matrixG6#7%7#%#u1G7#%
+#u2G7#%#u3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"vG-%'matrixG6#7%7#%
+#v1G7#%#v2G7#%#v3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"pG-%'matrixG
+6#7%7#%#p1G7#%#p2G7#%#p3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"wG-%'
+matrixG6#7%7#%#w1G7#%#w2G7#%#w3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%
+$eyeG-%'matrixG6#7%7%\"\"\"\"\"!F+7%F+F*F+7%F+F+F*" }}}{EXCHG {PARA 0 
+"> " 0 "" {MPLTEXT 1 0 33 "adot := evalm(-h*tr(u)&*dual(v)):" }}}
+{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 120 "omega := evalm(h*tr(u)&*dua
+l(v)&*dual(s) + h*tr(b+t-a-s) &* (eye - h^2*dual(u)&*v&*tr(u)&*dual(v)
+) &* dual(v)&*dual(u)):" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 120 
+"phi := evalm(-( h*tr(u)&*dual(v)&*dual(t) + h*tr(b+t-a-s) &* (eye - h
+^2*dual(u)&*v&*tr(u)&*dual(v))&*dual(u)&*dual(v))):" }}}{EXCHG {PARA 
+0 "> " 0 "" {MPLTEXT 1 0 623 "domega := evalm(h*tr(u)&*dual(v)&*dual(c
+ross(w,s)) +\n2*h*tr(bd + cross(p,t) - ad - cross(w,s)) &* (eye - h^2*
+dual(u)&*v&*tr(u)&*dual(v)) &* dual(v)&*dual(u)\n+tr(b+t-a-s) &* (\nh*
+dual(v)&*dual(cross(w,u))\n+2*h*dual(cross(p,v))&*dual(u)\n-h^3*dual(u
+)&*v&*tr(u)&*dual(v)&*dual(v)&*dual(cross(w,u))\n-2*h^3*dual(u)&*v&*tr
+(u)&*dual(v)&*dual(cross(p,v))&*dual(u)\n-2*h^3*(dual(v)&*dual(u)&*w -
+ dual(u)&*dual(v)&*p) &*tr(u)&*dual(v)&*dual(v)&*dual(u)\n-h^3*dual(u)
+&*v &* (tr(w)&*dual(u)&*dual(v) - tr(p)&*dual(v)&*dual(u)\n-3*h^2*tr(u
+)&*dual(v) &* (dual(v)&*dual(u)&*w - dual(u)&*dual(v)&*p) &* tr(u)&*du
+al(v) ) &* dual(v)&*dual(u) ) ):" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 534 "dphi := evalm(-( h*tr(u)&*dual(v)&*dual(cross(p,t))
+\n+2*h*tr(bd + cross(p,t) - ad - cross(w,s)) &* (eye - h^2*dual(u)&*v&
+*tr(u)&*dual(v)) &* dual(u)&*dual(v)\n+tr(b+t-a-s) &* (\nh*dual(u)&*du
+al(cross(p,v))\n-h^3*dual(u)&*v&*tr(u)&*dual(v)&*dual(u)&*dual(cross(p
+,v))\n-2*h^3*(dual(v)&*dual(u)&*w - dual(u)&*dual(v)&*p) &* tr(u)&*dua
+l(v)&*dual(u)&*dual(v)\n-h^3*dual(u)&*v &* (\ntr(w)&*dual(u)&*dual(v) \+
+- tr(p)&*dual(v)&*dual(u)\n-3*h^2*tr(u)&*dual(v) &* (dual(v)&*dual(u)&
+*w - dual(u)&*dual(v)&*p) &* tr(u)&*dual(v) ) &* dual(u)&*dual(v) )) )
+:" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 30 "with(codegen): makepro
+c(adot);" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#R6\"6#%%adotGF$F$C'>8$-%&a
+rrayG6$;\"\"\"F.;F.\"\"$>&F)6$F.F.,$*&%\"hGF.,&*&%#u2GF.%#v3GF.F.*&%#u
+3GF.%#v2GF.!\"\"F.F>>&F)6$F.\"\"#,$*&F6\"\"\",&*&%#u1GF.F:FEF>*&F<FE%#
+v1GF.F.F.F>>&F)6$F.F0,$*&F6FE,&*&FHFEF=FEF.*&F9FEFJFEF>F.F>F)F$F$F$" }
+}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 0 "" }}}}{MARK "0 0 0" 0 }
+{VIEWOPTS 1 1 0 1 1 1803 }
