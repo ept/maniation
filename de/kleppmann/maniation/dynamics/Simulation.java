@@ -2,6 +2,7 @@ package de.kleppmann.maniation.dynamics;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Set;
 
@@ -17,9 +18,10 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Simulation {
     
-    public static final double RESTING_TOLERANCE = 1e-4;
-    public static final double PENETRATION_TOLERANCE = 1e-4;
+    public static final double RESTING_TOLERANCE = 1e-5;
+    public static final double PENETRATION_TOLERANCE = 1e-5;
     public static final double ELASTICITY = 1.0;
+    public static final double FRAMES_PER_SECOND = 25.0;
     
     private World world = new World();
     private List<Body> bodies = new java.util.ArrayList<Body>();
@@ -50,14 +52,15 @@ public class Simulation {
     
     public void run(double time) {
         ODESolver solver = new RungeKutta(new DifferentialEquation(), 0.01);
-        log.add(state.toString());
+        log.clear();
+        log.add("0.0 " + state.toString());
         solver.solve(0.0, time);
         try {
             FileWriter writer = new FileWriter("/home/martin/graphics/maniation/matlab/javadata");
             writer.write("# name: data\n");
             writer.write("# type: matrix\n");
             writer.write("# rows: " + log.size() + "\n");
-            writer.write("# columns: " + state.getDimension() + "\n");
+            writer.write("# columns: " + (state.getDimension() + 1) + "\n");
             for (String line : log) writer.write(line + "\n");
             writer.close();
         } catch (IOException e) {
@@ -187,6 +190,11 @@ public class Simulation {
     
     
     private class DifferentialEquation implements ODE {
+        
+        Vector lastCompleted = null;
+        double lastCompletedTime, lastAddedTime = -1e20;
+        int lastAddedFrame;
+        
         public Vector derivative(double time, Vector state)
                 throws ODEBacktrackException {
             if (!(state instanceof StateVector)) throw new IllegalArgumentException();
@@ -216,7 +224,28 @@ public class Simulation {
         }
 
         public void timeStepCompleted(double time, Vector state) {
-            log.add(state.toString());
+            if (time - lastAddedTime < 1.0/FRAMES_PER_SECOND) {
+                lastCompleted = state;
+                lastCompletedTime = time;
+                return;
+            }
+            DecimalFormat format = new DecimalFormat("######0.000000000000000");
+            if (lastCompleted != null) {
+                while (lastAddedTime + 1.0/FRAMES_PER_SECOND < time) {
+                    lastAddedFrame++;
+                    lastAddedTime = 1.0*lastAddedFrame/FRAMES_PER_SECOND;
+                    double dt = time - lastCompletedTime;
+                    Vector interpolated = lastCompleted.mult((time - lastAddedTime) / dt).add(
+                            state.mult((lastAddedTime - lastCompletedTime) / dt));
+                    log.add(format.format(lastAddedTime) + " " + interpolated.toString());
+                }
+            } else {
+                lastAddedFrame = (int) Math.floor(time*FRAMES_PER_SECOND);
+                lastAddedTime = 1.0*lastAddedFrame/FRAMES_PER_SECOND;
+                log.add(format.format(lastAddedTime) + " " + state.toString());
+            }
+            lastCompleted = state;
+            lastCompletedTime = time;
             //System.out.println("Total energy: " + totalEnergy());
         }
     }
