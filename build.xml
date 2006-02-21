@@ -1,12 +1,12 @@
 <project name="maniation" default="compile">
 
     <!-- settings for PWF -->
-    <property name="root" location="/home/mk428/martin"/>
-    <property name="jre" location="/home/mk428/jre1.5.0_05"/>
+    <!--property name="root" location="/home/mk428/martin"/>
+    <property name="jre" location="/home/mk428/jre1.5.0_05"/-->
 
     <!-- settings for penpen -->
-    <!--property name="root" location="/home/martin"/>
-    <property name="jre" location="/usr/java/jdk1.5.0_04/jre"/-->
+    <property name="root" location="/home/martin"/>
+    <property name="jre" location="/usr/java/jdk1.5.0_04/jre"/>
 
     <!-- derived settings -->
     <property name="bin" location="${root}/.bin"/>
@@ -47,6 +47,17 @@
     <target name="run" depends="init,compile">
         <java classname="de.kleppmann.maniation.jointlimit.JointLimit" fork="true" jvm="${jre}/bin/java">
             <classpath refid="classpath"/>
+        </java>
+    </target>
+
+    <target name="profile" depends="init,compile">
+        <java classname="de.kleppmann.maniation.TestDynamics" fork="true" jvm="${jre}/bin/java">
+            <jvmarg value="-Xruntracer:enabled=true"/>
+            <env key="LD_LIBRARY_PATH" path="${lib}/ejp/lib:${LD_LIBRARY_PATH}"/>
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${lib}/ejp/lib/tracerapi.jar"/>
+            </classpath>
         </java>
     </target>
 
