@@ -17,10 +17,10 @@ public class MultiPendulum extends Cylinder {
     private Map<SimulationObject,Constraint> constraints;
 
     private MultiPendulum(int segment) {
-        super(0.05, 2.0, 1.0);
+        super(new Vector3D(0, 0, 1), 0.05, 2.0, 1.0);
         if (segment == 0) {
             setCoMPosition(new Vector3D(0.5*Math.sqrt(2.0), 0.0, -0.5*Math.sqrt(2.0)));
-            setOrientation(Quaternion.getYRotation(-Math.PI/4.0));
+            setOrientation(Quaternion.fromYRotation(-Math.PI/4.0));
         } else {
             setCoMPosition(new Vector3D(Math.sqrt(2.0), 0.0, 1.0 - Math.sqrt(2.0) - 2.0*segment));
         }

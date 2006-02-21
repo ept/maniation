@@ -25,7 +25,7 @@ public class Centrifuge extends Cylinder {
     private static final Vector torqueVector = new VectorImpl(torque);
     
     private Centrifuge(boolean sphere) {
-        super(0.5, 1.0, 1.0);
+        super(new Vector3D(0, 0, 1), 0.5, 1.0, 1.0);
         if (sphere) setCoMPosition(new Vector3D(0, 0.7, 2.2));
         else setCoMPosition(new Vector3D(0, 0, 0));
     }

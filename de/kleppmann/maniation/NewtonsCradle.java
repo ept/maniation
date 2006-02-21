@@ -44,7 +44,7 @@ public class NewtonsCradle {
         private Constraint nail, collPrev, collNext;
 
         public Ball(World world, int number) {
-            super(0.01, 0.02, 0.03);
+            super(new Vector3D(0, 0, 1), 0.01, 0.02, 0.03);
             this.number = number;
             setCoMPosition(new Vector3D(0.02*(number - 2), 0.0, 0.02));
             if (number < 2) {

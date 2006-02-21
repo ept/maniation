@@ -15,9 +15,9 @@ public class Gyroscope extends Cylinder {
     private Constraint nail;
     
     public Gyroscope(World world) {
-        super(4.0, 0.2, 1.0);
+        super(new Vector3D(0, 0, 1), 4.0, 0.2, 1.0);
         this.world = world;
-        setOrientation(Quaternion.getYRotation(0.2));
+        setOrientation(Quaternion.fromYRotation(0.2));
         setAngularMomentum(getOrientation().transform(new Vector3D(0, 0, 5)));
         setCoMPosition(getOrientation().transform(new Vector3D(0, 0, 1)));
         nail = new NailConstraint(world, this, getCoMPosition().mult(-1), new Vector3D(0, 0, 0));
