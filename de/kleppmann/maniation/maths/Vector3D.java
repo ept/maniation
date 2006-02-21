@@ -31,6 +31,11 @@ public class Vector3D implements Vector {
         magCalc = true;
         return mag;
     }
+    
+    public Vector3D normalize() {
+        if (Math.abs(magnitude() - 1.0) < 1e-10) return this;
+        return mult(1.0/magnitude());
+    }
 
     public int getDimension() {
         return 3;
