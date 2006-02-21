@@ -156,15 +156,48 @@ public class Quaternion {
         return new EulerAngles(EulerAngles.Convention.ROLL_PITCH_YAW, rotX, rotY, rotZ);
     }
     
-    public static Quaternion getXRotation(double angle) {
+    public static Quaternion fromXRotation(double angle) {
         return new Quaternion(Math.cos(angle/2.0), Math.sin(angle/2.0), 0.0, 0.0);
     }
     
-    public static Quaternion getYRotation(double angle) {
+    public static Quaternion fromYRotation(double angle) {
         return new Quaternion(Math.cos(angle/2.0), 0.0, Math.sin(angle/2.0), 0.0);
     }
     
-    public static Quaternion getZRotation(double angle) {
+    public static Quaternion fromZRotation(double angle) {
         return new Quaternion(Math.cos(angle/2.0), 0.0, 0.0, Math.sin(angle/2.0));
+    }
+    
+    public static Quaternion fromAxisRotation(Vector3D axis, double angle) {
+        axis = axis.normalize();
+        double s = Math.sin(angle/2.0);
+        return new Quaternion(Math.cos(angle/2.0), s*axis.getComponent(0),
+                s*axis.getComponent(1), s*axis.getComponent(2));
+    }
+    
+    public static Quaternion fromDirectionRoll(Vector3D original, Vector3D transformed, double roll) {
+        Quaternion rot;
+        original = original.normalize();
+        transformed = transformed.normalize();
+        double dotprod = original.mult(transformed);
+        double angle = Math.acos(dotprod);
+        Vector3D axis = original.cross(transformed);
+        if (axis.magnitude() > 1e-10) {
+            // Usual case: rotate about axis perpendicular to the two vectors
+            rot = fromAxisRotation(axis, angle);
+        } else {
+            if (dotprod < 0) {
+                // `original' and `transformed' point in opposite directions.
+                // Find an arbitrary vector orthogonal to `original'
+                do {
+                    axis = original.cross(new Vector3D(Math.random(), Math.random(), Math.random()));
+                } while (axis.magnitude() < 1e-6);
+                rot = fromAxisRotation(axis, Math.PI);
+            } else {
+                // No rotation
+                rot = new Quaternion();
+            }
+        }
+        return rot.mult(fromAxisRotation(original, roll));
     }
 }
