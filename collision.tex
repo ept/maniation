@@ -8,7 +8,7 @@ worms.
 
 Let us distinguish two cases of contact between bodies: resting contact and colliding contact.
 A book lying on your desk is in resting contact with the surface: their relative velocity is zero,
-but the desk excerts a force on the book to prevent it from penetrating into the surface.
+but the desk exerts a force on the book to prevent it from penetrating into the surface.
 Colliding contact is given for example between the ground and a ball bouncing off it. In real
 life, the ball stays in contact with the ground for a finite length of time, during which it is
 deformed and experiences a finite force accelerating it upwards. In our simulation, however, we
@@ -44,7 +44,7 @@ may for example have four vertex/face contacts, each of the four corners of its 
 touching the face of the desk surface. You may visualize edge/edge contacts by holding the book
 such that its spine is touching the front edge of your desk.
 
-In both cases, for the bodies not to interpenetrate, they must excert equal and opposite forces on
+In both cases, for the bodies not to interpenetrate, they must exert equal and opposite forces on
 each other. This force must exactly balance the outside force, otherwise they would accelerate
 apart. Also in both cases the direction of the force is perpendicular to the plane of contact. In
 the vertex/face case, this plane is just the plane of the face polygon. In the edge/edge case, the
@@ -68,7 +68,7 @@ are in resting contact we also have $\dot{\ve{c}} = \ve{0}$, because the bodies 
 relative to each other along the plane's normal~-- though they may be moving perpendicular to it,
 like in the case of the sliding book. The function becomes interesting when we consider its second
 derivative, $\ddot{\ve{c}}$. If positive values of \ve{c} represent legal states (in which the
-bodies are touching or separate), we can enforce the nonpenetration constraint by satisfying
+bodies are touching or separate), we can enforce the non-penetration constraint by satisfying
 \begin{equation} \label{constrInequality}
 \ddot{\ve{c}} \ge \ve{0}.
 \end{equation}
