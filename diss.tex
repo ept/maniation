@@ -1,4 +1,4 @@
-\documentclass{report}
+\documentclass[twoside]{report}
 \usepackage{bm}
 \usepackage{ifthen}
 \bibliographystyle{plain}
@@ -22,7 +22,33 @@
 \newcommand{\qi}{\mbox{$\mathrm{i}$}}       % Quaternion i component
 \newcommand{\qj}{\mbox{$\mathrm{j}$}}       % Quaternion j component
 \newcommand{\qk}{\mbox{$\mathrm{k}$}}       % Quaternion k component
+\newcommand{\zerobox}[1]{%
+    \setbox0 = \hbox{\parbox[t][\height][b]{20cm}{#1}}%
+    \dp0 = 0pt
+    \ht0 = 0pt
+    \noindent
+    \makebox[0pt][l]{\box0}%
+    \ignorespaces
+}
+\newcounter{flickframe}
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\newcommand{\flickbook}{%
+    \fancyhf{}
+    \fancyfoot[RO]{\stepcounter{flickframe}
+        \zerobox{\rule{2cm}{1.5cm}\\Frame \arabic{flickframe}}}
+    \fancyfoot[LE]{y}
+}
+\flickbook
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\slshape\leftmark}
+\fancypagestyle{plain}{%
+    \flickbook
+    \fancyfoot[CO,CE]{\thepage}
+}
+\renewcommand{\headrulewidth}{0pt}
 \begin{document}
+\chapter{Preparation}
 \input{simulation}
 \input{quaternions}
 \input{constraints}
