@@ -21,7 +21,7 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 import de.kleppmann.maniation.geometry.AnimateObject;
 import de.kleppmann.maniation.geometry.AnimateSkeleton;
 import de.kleppmann.maniation.geometry.GeometryBehaviour;
-import de.kleppmann.maniation.geometry.MeshDeformation;
+import de.kleppmann.maniation.geometry.ArticulatedMesh;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Scene;
 
@@ -72,8 +72,8 @@ public class SceneWindow extends JFrame {
         for (Mesh m : scene.getMeshes()) {
             AnimateObject obj;
             if (AnimateSkeleton.DRAW_SKELETON) obj = new AnimateSkeleton(m.getSkeleton());
-            else obj = new MeshDeformation(m);
-            sceneAsJava3D.addChild(obj.getShape3D());
+            else obj = new ArticulatedMesh(m, null);
+            sceneAsJava3D.addChild(obj.getJava3D());
             behaviour.addObject(obj);
         }
     }
