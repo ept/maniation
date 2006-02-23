@@ -5,11 +5,22 @@
     ns="http://kleppmann.de/maniation/scene">
 <start>
     <element name="scene">
+        <zeroOrMore><ref name="body"/></zeroOrMore>
         <zeroOrMore><ref name="material"/></zeroOrMore>
         <zeroOrMore><ref name="skeleton"/></zeroOrMore>
         <zeroOrMore><ref name="mesh"/></zeroOrMore>
     </element>
 </start>
+
+<define name="body">
+    <element name="body">
+        <attribute name="name"><text/></attribute>
+        <attribute name="mesh-id"><data type="NMTOKEN" hint:keyref="mesh"/></attribute>
+        <attribute name="mobile"><data type="boolean"/></attribute>
+        <element name="location"><ref name="vector"/></element>
+        <element name="orientation"><ref name="quaternion"/></element>
+    </element>
+</define>
 
 <define name="material">
     <element name="material">

@@ -16,6 +16,7 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
     private java.util.List<de.kleppmann.maniation.scene.Material> materials = new java.util.ArrayList<de.kleppmann.maniation.scene.Material>();
     private java.util.List<de.kleppmann.maniation.scene.Skeleton> skeletons = new java.util.ArrayList<de.kleppmann.maniation.scene.Skeleton>();
     private java.util.List<de.kleppmann.maniation.scene.Mesh> meshes = new java.util.ArrayList<de.kleppmann.maniation.scene.Mesh>();
+    private java.util.List<de.kleppmann.maniation.scene.Body> bodies = new java.util.ArrayList<de.kleppmann.maniation.scene.Body>();
     
     public java.util.List<de.kleppmann.maniation.scene.Material> getMaterials() {
         return materials;
@@ -27,6 +28,10 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
     
     public java.util.List<de.kleppmann.maniation.scene.Mesh> getMeshes() {
         return meshes;
+    }
+    
+    public java.util.List<de.kleppmann.maniation.scene.Body> getBodies() {
+        return bodies;
     }
     
     public de.realityinabox.databinding.libs.Document getDocument() {
@@ -96,6 +101,7 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
             _i += materials.size();
             _i += skeletons.size();
             _i += meshes.size();
+            _i += bodies.size();
             return _i;
         }
         
@@ -107,6 +113,8 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
                 index -= skeletons.size();
                 if ((index >= 0) && (index < meshes.size())) return (XMLChild) meshes.get(index);
                 index -= meshes.size();
+                if ((index >= 0) && (index < bodies.size())) return (XMLChild) bodies.get(index);
+                index -= bodies.size();
             } catch (ClassCastException e) {
                 assert(false);
             }
@@ -138,6 +146,12 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
                     return _result;
                 }
                 index -= meshes.size();
+                if ((index >= 0) && (index < bodies.size())) {
+                    _result = (de.kleppmann.maniation.scene.XMLChild) bodies.get(index);
+                    bodies.set(index, (de.kleppmann.maniation.scene.BodyImpl) element);
+                    return _result;
+                }
+                index -= bodies.size();
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
@@ -163,6 +177,12 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
                     return;
                 }
             }
+            if (element instanceof de.kleppmann.maniation.scene.MeshImpl) {
+                if (((de.kleppmann.maniation.scene.MeshImpl) element).getTagName().equals(_handler._bodyChild)) {
+                    bodies.add((de.kleppmann.maniation.scene.BodyImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
@@ -176,6 +196,8 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
                 index -= skeletons.size();
                 if ((index >= 0) && (index < meshes.size())) return (XMLChild) meshes.remove(index);
                 index -= meshes.size();
+                if ((index >= 0) && (index < bodies.size())) return (XMLChild) bodies.remove(index);
+                index -= bodies.size();
             } catch (ClassCastException e) {
                 assert(false);
             }
@@ -189,6 +211,7 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
         javax.xml.namespace.QName _materialChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "material");
         javax.xml.namespace.QName _skeletonChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "skeleton");
         javax.xml.namespace.QName _meshChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "mesh");
+        javax.xml.namespace.QName _bodyChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "body");
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
             de.kleppmann.maniation.scene.XMLElement _el = null;
@@ -198,6 +221,8 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
                 _el = new de.kleppmann.maniation.scene.SkeletonImpl(_document, SceneImpl.this);
             if (namespaceURI.equals(_meshChild.getNamespaceURI()) && localName.equals(_meshChild.getLocalPart()))
                 _el = new de.kleppmann.maniation.scene.MeshImpl(_document, SceneImpl.this);
+            if (namespaceURI.equals(_bodyChild.getNamespaceURI()) && localName.equals(_bodyChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.BodyImpl(_document, SceneImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));
