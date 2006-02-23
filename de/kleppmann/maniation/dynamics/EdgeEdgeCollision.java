@@ -383,17 +383,17 @@ public class EdgeEdgeCollision implements InequalityConstraint {
         return jacB1.mult(body1.getVelocities()).add(jacB2.mult(body2.getVelocities()));
     }
 
-    public Map<Body, Matrix> getJacobian() {
+    public Map<GeneralizedBody, Matrix> getJacobian() {
         generateJacobian();
-        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
+        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
         result.put(body1, jacB1);
         result.put(body2, jacB2);
         return result;
     }
 
-    public Map<Body, Matrix> getJacobianDot() {
+    public Map<GeneralizedBody, Matrix> getJacobianDot() {
         generateJacobianDot();
-        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
+        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
         result.put(body1, jDotB1);
         result.put(body2, jDotB2);
         return result;

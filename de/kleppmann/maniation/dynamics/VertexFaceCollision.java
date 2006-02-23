@@ -67,18 +67,18 @@ public class VertexFaceCollision implements InequalityConstraint {
         return new VectorImpl(v);
     }
 
-    public Map<Body, Matrix> getJacobian() {
+    public Map<GeneralizedBody, Matrix> getJacobian() {
         update();
         double x1 = a1 - b1 - t1, x2 = a2 - b2 - t2, x3 = a3 - b3 - t3;
         double[][] jf = {{ -n1, -n2, -n3, x2*n3 - x3*n2, x3*n1 - x1*n3, x1*n2 - x2*n1 }};
         double[][] jv = {{  n1,  n2,  n3, t2*n3 - t3*n2, t3*n1 - t1*n3, t1*n2 - t2*n1 }};
-        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
+        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
         result.put(faceBody, new MatrixImpl(jf));
         result.put(vertexBody, new MatrixImpl(jv));
         return result;
     }
 
-    public Map<Body, Matrix> getJacobianDot() {
+    public Map<GeneralizedBody, Matrix> getJacobianDot() {
         double t6 = ad2-bd2-p3*t1+p1*t3;
         double t11 = ad3-bd3-p1*t2+p2*t1;
         double t14 = a2-b2-t2;
@@ -96,7 +96,7 @@ public class VertexFaceCollision implements InequalityConstraint {
         double t10 = -p3*t1+p1*t3;
         double t16 = p2*t3-p3*t2;
         double[][] jv = {{ 0, 0, 0, -t7*n2-n3*t10, t7*n1-n3*t16, n1*t10+n2*t16 }};
-        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
+        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
         result.put(faceBody, new MatrixImpl(jf));
         result.put(vertexBody, new MatrixImpl(jv));
         return result;

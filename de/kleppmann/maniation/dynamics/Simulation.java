@@ -21,16 +21,16 @@ public class Simulation {
     public static final double RESTING_TOLERANCE = 1e-5;
     public static final double PENETRATION_TOLERANCE = 1e-5;
     public static final double ELASTICITY = 1.0;
-    public static final double FRAMES_PER_SECOND = 25.0;
+    public static final double FRAMES_PER_SECOND = 100.0;
     
     private World world = new World();
-    private List<Body> bodies = new java.util.ArrayList<Body>();
+    private List<GeneralizedBody> bodies = new java.util.ArrayList<GeneralizedBody>();
     private StateVector state, stateDot;
     private List<String> log = new java.util.ArrayList<String>();
     
-    public void addBody(Body body) {
+    public void addBody(GeneralizedBody body) {
         bodies.add(body);
-        Body[] array = new Body[bodies.size()];
+        GeneralizedBody[] array = new GeneralizedBody[bodies.size()];
         array = bodies.toArray(array);
         state = new StateVector(array, false);
         stateDot = new StateVector(array, true);
@@ -41,12 +41,12 @@ public class Simulation {
     }
     
     private void setTime(double time) {
-        for (Body body : bodies) body.setSimulationTime(time);
+        for (GeneralizedBody body : bodies) body.setSimulationTime(time);
     }
     
     public double totalEnergy() {
         double result = 0.0;
-        for (Body b : bodies) result += b.getEnergy();
+        for (GeneralizedBody b : bodies) result += b.getEnergy();
         return result;
     }
     
@@ -71,7 +71,7 @@ public class Simulation {
     private InteractionList getInteractions() {
         InteractionList il = new InteractionList();
         for (int i=bodies.size()-1; i>=0; i--) {
-            Body b = bodies.get(i);
+            GeneralizedBody b = bodies.get(i);
             b.interaction(world, il, true);
             for (int j=bodies.size()-1; j>i; j--) b.interaction(bodies.get(j), il, true);
         }

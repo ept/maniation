@@ -7,7 +7,7 @@ import de.kleppmann.maniation.maths.Vector;
 public interface Constraint extends Interaction {
     Vector getPenalty();
     Vector getPenaltyDot();
-    Map<Body,Matrix> getJacobian();
-    Map<Body,Matrix> getJacobianDot();
+    Map<GeneralizedBody,Matrix> getJacobian();
+    Map<GeneralizedBody,Matrix> getJacobianDot();
     int getDimension();
 }

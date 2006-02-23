@@ -19,7 +19,7 @@ public class InteractionList {
     private SparseMatrix massInertia, jacobian, jacobianDot;
     private Set<Constraint> equalities;
     private Set<InequalityConstraint> colliding, resting;
-    private Map<Body,Integer> bodyOffsets;
+    private Map<GeneralizedBody,Integer> bodyOffsets;
     private Map<Constraint,Integer> constrOffsets;
     
     public void addInteraction(Interaction ia) {
@@ -55,11 +55,11 @@ public class InteractionList {
         // Put all bodies mentioned by the constraints in some order, and assign each
         // an offset into the velocity/acceleration/force vectors.
         int bodyOffset = 0, bodyCount = 0;
-        bodyOffsets = new java.util.HashMap<Body,Integer>();
+        bodyOffsets = new java.util.HashMap<GeneralizedBody,Integer>();
         for (Constraint constr : constraintList)
             for (SimulationObject obj : constr.getObjects())
-                if (obj instanceof Body) {
-                    Body b = (Body) obj;
+                if (obj instanceof GeneralizedBody) {
+                    GeneralizedBody b = (GeneralizedBody) obj;
                     if (bodyOffsets.get(b) == null) {
                         bodyOffsets.put(b, bodyOffset);
                         bodyOffset += b.getVelocities().getDimension();
@@ -71,7 +71,7 @@ public class InteractionList {
         double[] v = new double[bodyOffset], a = new double[bodyOffset];
         SparseMatrix.Slice[] mass = new SparseMatrix.Slice[bodyCount];
         int j = 0;
-        for (Map.Entry<Body,Integer> entry : bodyOffsets.entrySet()) {
+        for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
             int offset = entry.getValue();
             entry.getKey().getVelocities().toDoubleArray(v, offset);
             entry.getKey().getAccelerations().toDoubleArray(a, offset);
@@ -98,9 +98,9 @@ public class InteractionList {
             int offset = entry.getValue();
             c.getPenalty().toDoubleArray(p, offset);
             c.getPenaltyDot().toDoubleArray(pdot, offset);
-            for (Body b : c.getJacobian().keySet())
+            for (GeneralizedBody b : c.getJacobian().keySet())
                 jSlices.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), false));
-            for (Body b : c.getJacobianDot().keySet())
+            for (GeneralizedBody b : c.getJacobianDot().keySet())
                 jdotSlices.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), true));
         }
         // Create the matrix and vector objects
@@ -113,8 +113,8 @@ public class InteractionList {
     }
 
     public void applyForces(Vector force) {
-        for (Map.Entry<Body,Integer> entry : bodyOffsets.entrySet()) {
-            Body body = entry.getKey();
+        for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
+            GeneralizedBody body = entry.getKey();
             int offset = entry.getValue();
             int length = body.getVelocities().getDimension();
             double[] v = new double[length];
@@ -124,8 +124,8 @@ public class InteractionList {
     }
     
     public void applyImpulses(Vector impulse) {
-        for (Map.Entry<Body,Integer> entry : bodyOffsets.entrySet()) {
-            Body body = entry.getKey();
+        for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
+            GeneralizedBody body = entry.getKey();
             int offset = entry.getValue();
             int length = body.getVelocities().getDimension();
             double[] v = new double[length];
@@ -145,7 +145,7 @@ public class InteractionList {
     public Set<InequalityConstraint> getCollidingContacts() { return colliding; }
     public Set<InequalityConstraint> getRestingContacts() { return resting; }
     
-    public int getBodyOffset(Body b) {
+    public int getBodyOffset(GeneralizedBody b) {
         return bodyOffsets.get(b);
     }
     
@@ -157,12 +157,12 @@ public class InteractionList {
     private class JacobianSlice implements Slice {
 
         private Constraint constr;
-        private Body body;
+        private GeneralizedBody body;
         private int constrOffset, bodyOffset;
         private boolean dot;
         
         public JacobianSlice(Constraint constr, int constrOffset,
-                Body body, int bodyOffset, boolean dot) {
+                GeneralizedBody body, int bodyOffset, boolean dot) {
             this.constr = constr;
             this.constrOffset = constrOffset;
             this.body = body;

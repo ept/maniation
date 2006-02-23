@@ -6,11 +6,11 @@ import de.kleppmann.maniation.maths.Vector;
 
 public class StateVector implements Vector {
 
-    private Body[] bodies;
+    private GeneralizedBody[] bodies;
     private boolean rateOfChange;
     private int[] stateOffsets = {0};
     
-    public StateVector(Body[] bodies, boolean rateOfChange) {
+    public StateVector(GeneralizedBody[] bodies, boolean rateOfChange) {
         this.bodies = bodies;
         this.rateOfChange = rateOfChange;
         updateObjects();
@@ -19,7 +19,7 @@ public class StateVector implements Vector {
     private void updateObjects() {
         int i=0, j=0;
         stateOffsets = new int[bodies.length + 1];
-        for (Body body : bodies) {
+        for (GeneralizedBody body : bodies) {
             stateOffsets[i] = j;
             i++; j += body.getState(false).getDimension();
         }

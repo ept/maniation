@@ -5,19 +5,19 @@ import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.VectorImpl;
 
-public class CompoundBody implements Body {
+public class CompoundBody implements GeneralizedBody {
     
-    private Body[] bodies;
+    private GeneralizedBody[] bodies;
     private int dimensions, stateSize;
     private AccelerationVector accelerationVector;
     private VelocityVector velocityVector;
     private SparseMatrix massInertia;
     private StateVector state, stateDot;
     
-    public CompoundBody(Body[] bodies) {
+    public CompoundBody(GeneralizedBody[] bodies) {
         this.bodies = bodies;
         dimensions = 0; stateSize = 0;
-        for (Body b : bodies) {
+        for (GeneralizedBody b : bodies) {
             dimensions += b.getVelocities().getDimension();
             stateSize += b.getState(false).getDimension();
         }
@@ -25,7 +25,7 @@ public class CompoundBody implements Body {
         velocityVector = new VelocityVector();
         SparseMatrix.Slice[] slices = new SparseMatrix.Slice[bodies.length];
         int i = 0, offset = 0;
-        for (Body b : bodies) {
+        for (GeneralizedBody b : bodies) {
             slices[i] = new SparseMatrix.SliceImpl(b.getMassInertia(), offset, offset);
             i++; offset += b.getVelocities().getDimension();
         }
@@ -48,7 +48,7 @@ public class CompoundBody implements Body {
 
     public void applyForce(Vector forceTorque) {
         int offset = 0;
-        for (Body b : bodies) {
+        for (GeneralizedBody b : bodies) {
             int size = b.getVelocities().getDimension();
             double[] vec = new double[size];
             for (int i=0; i<size; i++) vec[i] = forceTorque.getComponent(offset+i);
@@ -59,7 +59,7 @@ public class CompoundBody implements Body {
 
     public void applyImpulse(Vector impulse) {
         int offset = 0;
-        for (Body b : bodies) {
+        for (GeneralizedBody b : bodies) {
             int size = b.getVelocities().getDimension();
             double[] vec = new double[size];
             for (int i=0; i<size; i++) vec[i] = impulse.getComponent(offset+i);
@@ -70,12 +70,12 @@ public class CompoundBody implements Body {
 
     public double getEnergy() {
         double sum = 0;
-        for (Body b : bodies) sum += b.getEnergy();
+        for (GeneralizedBody b : bodies) sum += b.getEnergy();
         return sum;
     }
 
     public void setSimulationTime(double time) {
-        for (Body b : bodies) b.setSimulationTime(time);
+        for (GeneralizedBody b : bodies) b.setSimulationTime(time);
     }
 
     public Vector getState(boolean rateOfChange) {
@@ -89,7 +89,7 @@ public class CompoundBody implements Body {
     }
 
     public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
-        for (Body b : bodies) b.interaction(partner, result, true);
+        for (GeneralizedBody b : bodies) b.interaction(partner, result, true);
     }
 
     public void handleInteraction(Interaction action) {
@@ -109,7 +109,7 @@ public class CompoundBody implements Body {
 
         public double getComponent(int index) {
             int offset = 0;
-            for (Body b : bodies) {
+            for (GeneralizedBody b : bodies) {
                 if (offset + b.getAccelerations().getDimension() > index) {
                     return b.getAccelerations().getComponent(index - offset);
                 }
@@ -131,7 +131,7 @@ public class CompoundBody implements Body {
 
         public double getComponent(int index) {
             int offset = 0;
-            for (Body b : bodies) {
+            for (GeneralizedBody b : bodies) {
                 if (offset + b.getVelocities().getDimension() > index) {
                     return b.getVelocities().getComponent(index - offset);
                 }

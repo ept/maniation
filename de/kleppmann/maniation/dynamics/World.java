@@ -14,15 +14,15 @@ public class World implements SimulationObject {
     public void handleInteraction(Interaction action) {}
 
     public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
-        if (partner instanceof Body) result.addInteraction(new Gravity((Body) partner));
+        if (partner instanceof GeneralizedBody) result.addInteraction(new Gravity((GeneralizedBody) partner));
     }
     
     
     private class Gravity implements InteractionForce {
-        private Body body;
+        private GeneralizedBody body;
         private Vector forceTorque;
         
-        public Gravity(Body b) {
+        public Gravity(GeneralizedBody b) {
             this.body = b;
             double[] gv = new double[body.getVelocities().getDimension()];
             for (int i=0; i<gv.length; i++)
@@ -30,7 +30,7 @@ public class World implements SimulationObject {
             forceTorque = body.getMassInertia().mult(new VectorImpl(gv));
         }
 
-        public Vector getForceTorque(Body b) {
+        public Vector getForceTorque(GeneralizedBody b) {
             if (b == body) return forceTorque;
             return null;
         }

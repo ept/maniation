@@ -38,7 +38,7 @@ public class NailConstraint implements Constraint {
         return body.getCoMVelocity().add(body.getAngularVelocity().cross(s));
     }
 
-    public Map<Body, Matrix> getJacobian() {
+    public Map<GeneralizedBody, Matrix> getJacobian() {
         Vector3D s = body.getOrientation().transform(localPoint);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
         double[][] j = {
@@ -46,12 +46,12 @@ public class NailConstraint implements Constraint {
                 {0,   1,   0,  -s3,  0,   s1},
                 {0,   0,   1,   s2, -s1,  0}};     
         Matrix mat = new MatrixImpl(j);
-        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
+        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
         result.put(body, mat);
         return result;
     }
 
-    public Map<Body, Matrix> getJacobianDot() {
+    public Map<GeneralizedBody, Matrix> getJacobianDot() {
         Vector3D s = body.getOrientation().transform(localPoint);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
         double w1 = body.getAngularVelocity().getComponent(0);
@@ -62,7 +62,7 @@ public class NailConstraint implements Constraint {
                 {0, 0, 0,   w2*s1-w1*s2,    0,              w2*s3-w3*s2},
                 {0, 0, 0,   w3*s1-w1*s3,    w3*s2-w2*s3,    0          }};
         Matrix mat = new MatrixImpl(jdot);
-        Map<Body, Matrix> result = new java.util.HashMap<Body, Matrix>();
+        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
         result.put(body, mat);
         return result;
     }

@@ -9,8 +9,8 @@ public class ArticulatedBody extends CompoundBody {
         // TODO Auto-generated constructor stub
     }
     
-    private static Body[] bodiesFromMesh(Mesh mesh) {
-        Body[] result = new Body[mesh.getSkeleton().getBones().size()];
+    private static GeneralizedBody[] bodiesFromMesh(Mesh mesh) {
+        GeneralizedBody[] result = new GeneralizedBody[mesh.getSkeleton().getBones().size()];
         return result;
     }
     
