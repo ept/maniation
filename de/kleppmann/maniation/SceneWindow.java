@@ -71,7 +71,7 @@ public class SceneWindow extends JFrame {
         bg.addChild(behaviour);
         for (Mesh m : scene.getMeshes()) {
             AnimateObject obj;
-            if (AnimateSkeleton.DRAW_SKELETON) obj = new AnimateSkeleton(m.getSkeleton());
+            if (AnimateSkeleton.DRAW_SKELETON) obj = new AnimateSkeleton(m.getSkeleton(), null);
             else obj = new ArticulatedMesh(m, null);
             sceneAsJava3D.addChild(obj.getJava3D());
             behaviour.addObject(obj);

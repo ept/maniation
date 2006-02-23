@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryUpdater;
 
-import de.kleppmann.maniation.dynamics.Body;
+import de.kleppmann.maniation.dynamics.ArticulatedBody;
 import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.scene.Bone;
 import de.kleppmann.maniation.scene.Deform;
@@ -23,9 +23,9 @@ public class ArticulatedMesh extends AnimateMesh {
     private AnimateSkeleton skeleton;
     private MyUpdater myUpdater;
 
-    public ArticulatedMesh(Mesh mesh, Body body) {
+    public ArticulatedMesh(Mesh mesh, ArticulatedBody body) {
         super(mesh, body);
-        this.skeleton = new AnimateSkeleton(mesh.getSkeleton());
+        this.skeleton = new AnimateSkeleton(mesh.getSkeleton(), body);
         compile();
     }
     

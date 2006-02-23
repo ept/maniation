@@ -6,6 +6,7 @@ import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.Shape3D;
 
+import de.kleppmann.maniation.dynamics.ArticulatedBody;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Bone;
@@ -18,16 +19,17 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     
     public static final boolean DRAW_SKELETON = false;
     
-    private int frame = 0;
     private Skeleton skeleton;
+    private ArticulatedBody body;
     private double[] coordinates;
     private LineArray lines;
     private Shape3D shape;
     private java.util.Map<Bone,Pair<Vector3D,Quaternion>> skeletonRest, skeletonCurrent;
     private java.util.Map<Bone,Vector3D> boneEnds;
 
-    public AnimateSkeleton(Skeleton skeleton) {
+    public AnimateSkeleton(Skeleton skeleton, ArticulatedBody body) {
         this.skeleton = skeleton;
+        this.body = body;
         if (DRAW_SKELETON) buildJava3D();
     }
 
@@ -131,7 +133,7 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
         baseRest = baseRest.add(orientRest.transform(local));
         baseCurrent = baseCurrent.add(orientCurrent.transform(local));
         orientRest = orientRest.mult(b.getOrientation().getValue());
-        orientCurrent = orientCurrent.mult(b.getOrientation().getValue().mult(b.getRotationAt(frame/30.0)));
+        orientCurrent = orientCurrent.mult(b.getOrientation().getValue());
         skeletonRest.put(b, new Pair<Vector3D,Quaternion>(baseRest, orientRest));
         skeletonCurrent.put(b, new Pair<Vector3D,Quaternion>(baseCurrent, orientCurrent));
         boneEnds.put(b.getParentBone(), local);
@@ -143,7 +145,6 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     }
 
     public void updateData(Geometry geometry) {
-        frame++;
         updateBones();
         if (DRAW_SKELETON) updateSkeleton();
     }
