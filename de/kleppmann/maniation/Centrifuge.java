@@ -3,7 +3,7 @@ package de.kleppmann.maniation;
 import java.util.List;
 import java.util.Map;
 
-import de.kleppmann.maniation.dynamics.Body;
+import de.kleppmann.maniation.dynamics.GeneralizedBody;
 import de.kleppmann.maniation.dynamics.Cylinder;
 import de.kleppmann.maniation.dynamics.Interaction;
 import de.kleppmann.maniation.dynamics.InteractionForce;
@@ -62,13 +62,13 @@ public class Centrifuge extends Cylinder {
     
     private static class AcceleratingTorque implements InteractionForce {
         private World world;
-        private Body body;
+        private GeneralizedBody body;
         
-        public AcceleratingTorque(World world, Body body) {
+        public AcceleratingTorque(World world, GeneralizedBody body) {
             this.world = world; this.body = body;
         }
         
-        public Vector getForceTorque(Body b) {
+        public Vector getForceTorque(GeneralizedBody b) {
             return torqueVector;
         }
         

@@ -3,7 +3,7 @@ package de.kleppmann.maniation;
 import java.util.List;
 import java.util.Map;
 
-import de.kleppmann.maniation.dynamics.Body;
+import de.kleppmann.maniation.dynamics.GeneralizedBody;
 import de.kleppmann.maniation.dynamics.Constraint;
 import de.kleppmann.maniation.dynamics.Cylinder;
 import de.kleppmann.maniation.dynamics.InequalityConstraint;
@@ -47,7 +47,7 @@ public class NewtonsCradle {
             super(new Vector3D(0, 0, 1), 0.01, 0.02, 0.03);
             this.number = number;
             setCoMPosition(new Vector3D(0.02*(number - 2), 0.0, 0.02));
-            if (number < 2) {
+            if (number < 1) {
                 setLinearMomentum(new Vector3D(0.012, 0, 0));
                 setAngularMomentum(new Vector3D(0, -8.75e-6, 0));
             }
@@ -111,21 +111,21 @@ public class NewtonsCradle {
             return 1;
         }
 
-        public Map<Body, Matrix> getJacobian() {
+        public Map<GeneralizedBody, Matrix> getJacobian() {
             update();
             double[][] m1 = {{2*(x1-x2), 2*(y1-y2), 2*(z1-z2)}};
             double[][] m2 = {{2*(x2-x1), 2*(y2-y1), 2*(z2-z1)}};
-            Map<Body, Matrix> map = new java.util.HashMap<Body,Matrix>();
+            Map<GeneralizedBody, Matrix> map = new java.util.HashMap<GeneralizedBody,Matrix>();
             map.put(ball1, new MatrixImpl(m1));
             map.put(ball2, new MatrixImpl(m2));
             return map;
         }
 
-        public Map<Body, Matrix> getJacobianDot() {
+        public Map<GeneralizedBody, Matrix> getJacobianDot() {
             update();
             double[][] m1 = {{2*(xd1-xd2), 2*(yd1-yd2), 2*(zd1-zd2)}};
             double[][] m2 = {{2*(xd2-xd1), 2*(yd2-yd1), 2*(zd2-zd1)}};
-            Map<Body, Matrix> map = new java.util.HashMap<Body,Matrix>();
+            Map<GeneralizedBody, Matrix> map = new java.util.HashMap<GeneralizedBody,Matrix>();
             map.put(ball1, new MatrixImpl(m1));
             map.put(ball2, new MatrixImpl(m2));
             return map;
