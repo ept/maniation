@@ -19,6 +19,7 @@
         <attribute name="mobile"><data type="boolean"/></attribute>
         <element name="location"><ref name="vector"/></element>
         <element name="orientation"><ref name="quaternion"/></element>
+        <element name="axis"><ref name="vector"/></element>
     </element>
 </define>
 

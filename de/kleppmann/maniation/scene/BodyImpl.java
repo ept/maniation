@@ -20,6 +20,7 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
     private boolean mobile;
     private de.kleppmann.maniation.scene.Vector location;
     private de.kleppmann.maniation.scene.Quaternion orientation;
+    private de.kleppmann.maniation.scene.Vector axis;
 
     public String getName() {
         return name;
@@ -62,6 +63,14 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
 
     public void setOrientation(Quaternion orientation) {
         this.orientation = orientation;
+    }
+
+    public Vector getAxis() {
+        return axis;
+    }
+
+    public void setAxis(Vector axis) {
+        this.axis = axis;
     }
 
     public de.realityinabox.databinding.libs.Document getDocument() {
@@ -167,6 +176,10 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
                     if (index == 0) return (XMLChild) getOrientation();
                     index--;
                 }
+                if (getAxis() != null) {
+                    if (index == 0) return (XMLChild) getAxis();
+                    index--;
+                }
             } catch (ClassCastException e) {
                 assert(false);
             }
@@ -196,6 +209,14 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
                     }
                     index--;
                 }
+                if (getAxis() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getAxis();
+                        setAxis((de.kleppmann.maniation.scene.VectorImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
                 throw new java.lang.IllegalArgumentException();
             } catch (java.lang.ClassCastException e) {
                 throw new java.lang.IllegalArgumentException(e);
@@ -215,6 +236,12 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
                     return;
                 }
             }
+            if (element instanceof de.kleppmann.maniation.scene.VectorImpl) {
+                if (((de.kleppmann.maniation.scene.VectorImpl) element).getTagName().equals(_handler._axisChild)) {
+                    setAxis((de.kleppmann.maniation.scene.VectorImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.XMLElement)
                 throw new java.lang.IllegalArgumentException("XML element '" + 
                     ((de.kleppmann.maniation.scene.XMLElement) element).getTagName().getLocalPart() + "' is unknown");
@@ -230,6 +257,7 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
         
         javax.xml.namespace.QName _locationChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "location");
         javax.xml.namespace.QName _orientationChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "orientation");
+        javax.xml.namespace.QName _axisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "axis");
 
         
         public void startElement(java.lang.String namespaceURI, java.lang.String localName, java.lang.String qName, org.xml.sax.Attributes atts) throws org.xml.sax.SAXException {
@@ -238,6 +266,8 @@ public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann
                 _el = new de.kleppmann.maniation.scene.VectorImpl(_document, BodyImpl.this);
             if (namespaceURI.equals(_orientationChild.getNamespaceURI()) && localName.equals(_orientationChild.getLocalPart()))
                 _el = new de.kleppmann.maniation.scene.QuaternionImpl(_document, BodyImpl.this);
+            if (namespaceURI.equals(_axisChild.getNamespaceURI()) && localName.equals(_axisChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.VectorImpl(_document, BodyImpl.this);
             getDocument().getParseStack().push(_el);
             if (_el == null) return;
             _el.setTagName(new javax.xml.namespace.QName(namespaceURI, localName));

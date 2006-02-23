@@ -11,4 +11,6 @@ public interface Body {
     void setLocation(de.kleppmann.maniation.scene.Vector location);
     de.kleppmann.maniation.scene.Quaternion getOrientation();
     void setOrientation(de.kleppmann.maniation.scene.Quaternion orientation);
+    de.kleppmann.maniation.scene.Vector getAxis();
+    void setAxis(de.kleppmann.maniation.scene.Vector axis);
 }
