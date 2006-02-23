@@ -7,7 +7,7 @@ public class ConjugateGradient {
     private Vector b;
     private double tolerance = 1e-6;
     private int maxIter;
-    private Vector diagInv;
+    //private Vector diagInv;
     private Method method = Method.SIMPLE;
     
     public enum Method { SIMPLE, PRECONDITION, MAGNITUDE, MAXIMUM };
@@ -39,11 +39,11 @@ public class ConjugateGradient {
             this.b = new VectorImpl(bnew);
         } else this.b = b;
         // Other stuff
-        calcDiagonal();
+        //calcDiagonal();
         maxIter = 100*size;
     }
     
-    private void calcDiagonal() {
+    /*private void calcDiagonal() {
         // Get the diagonal of the product of all matrices a
         double[] diag = new double[size];
         if (alist.length == 1) {
@@ -70,13 +70,13 @@ public class ConjugateGradient {
             if ((diag[i] < 1e-16) && (diag[i] > -1e-16)) diag[i] = 1.0;
             else diag[i] = 1.0/diag[i];
         diagInv = new VectorImpl(diag);
-    }
+    }*/
 
     public Vector solve() {
         //System.out.println("*** Conjugate gradient solver started");
         int iter = 0;
         double ak, bk, bkDen = 1.0, bkNum, bNorm, xNorm, zm1Norm, zNorm, err;
-        Vector x = new VectorImpl(size), r = b, rr = b, z = b.multComponents(diagInv);
+        Vector x = new VectorImpl(size), r = b, rr = b, z = b/*.multComponents(diagInv)*/;
         Vector zz = z, p = z, pp = z;
         if (this.method == Method.SIMPLE) bNorm = zNorm = norm(b); else bNorm = zNorm = norm(z);
         if (Math.abs(bNorm) < 1e-15) return x;
@@ -84,7 +84,7 @@ public class ConjugateGradient {
             iter++;
             bkNum = z.mult(rr);
             if (iter > 1) {
-                zz = rr.multComponents(diagInv);
+                zz = rr/*.multComponents(diagInv)*/;
                 bk = bkNum / bkDen;
                 p = p.mult(bk).add(z);
                 pp = pp.mult(bk).add(zz);
@@ -99,7 +99,7 @@ public class ConjugateGradient {
             x = x.add(p.mult(ak));
             r = r.subtract(z.mult(ak));
             rr = rr.subtract(zz.mult(ak));
-            z = r.multComponents(diagInv);
+            z = r/*.multComponents(diagInv)*/;
             if (this.method == Method.SIMPLE) err = norm(r)/bNorm; else
             if (this.method == Method.PRECONDITION) err = norm(z)/bNorm;
             else {
@@ -114,6 +114,7 @@ public class ConjugateGradient {
             //System.out.println("Iteration " + iter + ": error " + err);
             if (err <= tolerance) break;
         }
+        //System.out.print("(" + iter + ")");
         return x;
     }
     
