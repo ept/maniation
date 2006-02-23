@@ -20,6 +20,9 @@ public class MeshBody extends Cylinder {
         return new MeshBody(info);
     }
     
+    public Vector3D getLocation() {
+        return getCoMPosition().add(info.com);
+    }
     
     private static class MeshInfo {
 

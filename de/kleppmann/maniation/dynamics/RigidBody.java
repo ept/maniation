@@ -57,6 +57,10 @@ public abstract class RigidBody implements Body {
         return potential + kinetic + rotational;
     }
     
+    public Vector3D getLocation() {
+        return pos;
+    }
+
     public Vector3D getCoMPosition() {
         return pos;
     }
