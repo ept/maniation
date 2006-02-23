@@ -1,9 +1,8 @@
 package de.kleppmann.maniation.geometry;
 
-import javax.media.j3d.Shape3D;
-
+import javax.media.j3d.Node;
 
 public interface AnimateObject {
     void processStimulus();
-    Shape3D getShape3D();
+    Node getJava3D();
 }

@@ -31,7 +31,7 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
         if (DRAW_SKELETON) buildJava3D();
     }
 
-    public Shape3D getShape3D() {
+    public Shape3D getJava3D() {
         return shape;
     }
     
