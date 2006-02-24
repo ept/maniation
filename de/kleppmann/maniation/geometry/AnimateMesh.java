@@ -3,61 +3,87 @@ package de.kleppmann.maniation.geometry;
 import java.util.Map;
 
 import javax.media.j3d.Appearance;
+import javax.media.j3d.Geometry;
+import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.Node;
 import javax.media.j3d.Shape3D;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-import javax.vecmath.Vector3d;
 
-import de.kleppmann.maniation.dynamics.Body;
-import de.kleppmann.maniation.maths.Matrix33;
+import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
+import de.kleppmann.maniation.scene.Body;
 import de.kleppmann.maniation.scene.Face;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Vertex;
 
 public class AnimateMesh implements AnimateObject {
 
-    Mesh mesh;
-    Body body;
+    Body sceneBody;
     double[] coordinates;
     float[] normals;
     MeshVertex[] vertices;
     MeshTriangle[] triangles;
     Map<Vertex, MeshVertex> vertexMap;
     IndexedTriangleArray geometry;
-    TransformGroup trans;
+    private Shape3D shape;
+    private MyUpdater myUpdater = new MyUpdater();
+    private CollisionVolume volume;
 
-    public AnimateMesh(Mesh mesh, Body body) {
-        this.mesh = mesh;
+    public AnimateMesh(Body sceneBody) {
+        this.sceneBody = sceneBody;
         buildArrays();
         buildJava3D();
+        volume = new CollisionVolume(triangles);
     }
     
-    private Transform3D currentTransform() {
-        Transform3D result = new Transform3D();
-        Vector3D pos = body.getLocation();
-        result.setTranslation(new Vector3d(pos.getComponent(0), pos.getComponent(1),
-                pos.getComponent(2)));
-        Matrix33 rot = body.getOrientation().toMatrix();
-        double[] rotm = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
-        for (int i=0; i<12; i++)
-            if (i % 4 < 3) rotm[i] = rot.getComponent(i / 4, i % 4);
-        result.mul(new Transform3D(rotm));
-        return result;
+    public Body getSceneBody() {
+        return sceneBody;
+    }
+    
+    public CollisionVolume getCollisionVolume() {
+        return volume;
+    }
+    
+    public Vector3D getLocation() {
+        return new Vector3D(sceneBody.getLocation().getX(), 
+                sceneBody.getLocation().getY(), sceneBody.getLocation().getZ());
+    }
+    
+    public void setLocation(Vector3D location) {
+        sceneBody.getLocation().setX(location.getComponent(0));
+        sceneBody.getLocation().setY(location.getComponent(1));
+        sceneBody.getLocation().setZ(location.getComponent(2));
+    }
+    
+    public Quaternion getOrientation() {
+        return new Quaternion(sceneBody.getOrientation().getW(), sceneBody.getOrientation().getX(), 
+                sceneBody.getOrientation().getY(), sceneBody.getOrientation().getZ());
+    }
+    
+    public void setOrientation(Quaternion orientation) {
+        sceneBody.getOrientation().setW(orientation.getW());
+        sceneBody.getOrientation().setX(orientation.getX());
+        sceneBody.getOrientation().setY(orientation.getY());
+        sceneBody.getOrientation().setZ(orientation.getZ());
+    }
+    
+    private void updateVertex(Vertex vert, int offset, Quaternion orient, Vector3D loc) {
+        Vector3D pos = new Vector3D(vert.getPosition().getX(),
+                vert.getPosition().getY(), vert.getPosition().getZ());
+        pos = orient.transform(pos).add(loc);
+        pos.toDoubleArray(coordinates, offset);
     }
     
     private void buildArrays() {
+        Mesh mesh = sceneBody.getMesh();
         coordinates = new double[3*mesh.getVertices().size()];
         normals = new float[3*mesh.getVertices().size()];
         vertices = new MeshVertex[mesh.getVertices().size()];
         vertexMap = new java.util.HashMap<Vertex, MeshVertex>();
         int i = 0;
+        Quaternion orient = getOrientation(); Vector3D loc = getLocation();
         for (Vertex v : mesh.getVertices()) {
-            coordinates[3*i+0] = v.getPosition().getX();
-            coordinates[3*i+1] = v.getPosition().getY();
-            coordinates[3*i+2] = v.getPosition().getZ();
+            updateVertex(v, 3*i, orient, loc);
             normals[3*i+0] = (float) v.getNormal().getX();
             normals[3*i+1] = (float) v.getNormal().getY();
             normals[3*i+2] = (float) v.getNormal().getZ();
@@ -77,12 +103,12 @@ public class AnimateMesh implements AnimateObject {
     }
     
     private void buildJava3D() {
-        geometry = new IndexedTriangleArray(mesh.getVertices().size(),
+        geometry = new IndexedTriangleArray(sceneBody.getMesh().getVertices().size(),
                 IndexedTriangleArray.COORDINATES |
                 IndexedTriangleArray.NORMALS |
                 IndexedTriangleArray.BY_REFERENCE |
                 IndexedTriangleArray.USE_COORD_INDEX_ONLY,
-                3*mesh.getFaces().size());
+                3*sceneBody.getMesh().getFaces().size());
         geometry.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_READ);
         geometry.setCapability(IndexedTriangleArray.ALLOW_REF_DATA_WRITE);
         geometry.setCapability(IndexedTriangleArray.ALLOW_COUNT_READ);
@@ -94,20 +120,29 @@ public class AnimateMesh implements AnimateObject {
                 geometry.setCoordinateIndex(3*i+j, tri.vertices[j].index);
         }
         Appearance appearance = new Appearance();
-        appearance.setMaterial(mesh.getMaterial().getJava3D());
-        Shape3D shape = new Shape3D(geometry, appearance);
-        trans = new TransformGroup(currentTransform());
-        trans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-        trans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-        trans.addChild(shape);
+        appearance.setMaterial(sceneBody.getMesh().getMaterial().getJava3D());
+        shape = new Shape3D(geometry, appearance);
     }
 
 
     public void processStimulus() {
-        trans.setTransform(currentTransform());
+        geometry.updateData(myUpdater);
     }
 
     public Node getJava3D() {
-        return trans;
+        return shape;
+    }
+
+    
+    private class MyUpdater implements GeometryUpdater {
+        public void updateData(Geometry geometry) {
+            Quaternion orient = getOrientation(); Vector3D loc = getLocation();
+            int coordIndex = 0;
+            for (Vertex vert : sceneBody.getMesh().getVertices()) {
+                updateVertex(vert, coordIndex, orient, loc);
+                coordIndex += 3;
+            }
+            volume.updateBBox();
+        }
     }
 }
