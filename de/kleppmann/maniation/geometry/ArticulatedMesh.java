@@ -6,8 +6,8 @@ import java.util.Set;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryUpdater;
 
-import de.kleppmann.maniation.dynamics.ArticulatedBody;
 import de.kleppmann.maniation.maths.Vector;
+import de.kleppmann.maniation.scene.Body;
 import de.kleppmann.maniation.scene.Bone;
 import de.kleppmann.maniation.scene.Deform;
 import de.kleppmann.maniation.scene.Face;
@@ -23,13 +23,14 @@ public class ArticulatedMesh extends AnimateMesh {
     private AnimateSkeleton skeleton;
     private MyUpdater myUpdater;
 
-    public ArticulatedMesh(Mesh mesh, ArticulatedBody body) {
-        super(mesh, body);
-        this.skeleton = new AnimateSkeleton(mesh.getSkeleton(), body);
+    public ArticulatedMesh(Body sceneBody) {
+        super(sceneBody);
+        this.skeleton = new AnimateSkeleton(sceneBody.getMesh().getSkeleton());
         compile();
     }
     
     private void compile() {
+        Mesh mesh = sceneBody.getMesh();
         // Associate each vertex with the bone which affects it most
         vertexBoneMap = new java.util.HashMap<MeshVertex, Bone>();
         int vertexIndex = 0;
@@ -115,7 +116,7 @@ public class ArticulatedMesh extends AnimateMesh {
         public void updateData(Geometry geometry) {
             skeleton.updateData(geometry);
             int coordIndex = 0;
-            for (Vertex vert : mesh.getVertices()) {
+            for (Vertex vert : sceneBody.getMesh().getVertices()) {
                 Vector deformed = skeleton.currentVertexPosition(vert);
                 deformed.toDoubleArray(coordinates, 3*coordIndex);
                 coordIndex++;
