@@ -22,7 +22,7 @@ import de.kleppmann.maniation.geometry.AnimateObject;
 import de.kleppmann.maniation.geometry.AnimateSkeleton;
 import de.kleppmann.maniation.geometry.GeometryBehaviour;
 import de.kleppmann.maniation.geometry.ArticulatedMesh;
-import de.kleppmann.maniation.scene.Mesh;
+import de.kleppmann.maniation.scene.Body;
 import de.kleppmann.maniation.scene.Scene;
 
 public class SceneWindow extends JFrame {
@@ -69,10 +69,10 @@ public class SceneWindow extends JFrame {
         bg.addChild(tg);
         GeometryBehaviour behaviour = new GeometryBehaviour();
         bg.addChild(behaviour);
-        for (Mesh m : scene.getMeshes()) {
+        for (Body body : scene.getBodies()) {
             AnimateObject obj;
-            if (AnimateSkeleton.DRAW_SKELETON) obj = new AnimateSkeleton(m.getSkeleton(), null);
-            else obj = new ArticulatedMesh(m, null);
+            if (AnimateSkeleton.DRAW_SKELETON) obj = new AnimateSkeleton(body.getMesh().getSkeleton());
+            else obj = new ArticulatedMesh(body);
             sceneAsJava3D.addChild(obj.getJava3D());
             behaviour.addObject(obj);
         }
