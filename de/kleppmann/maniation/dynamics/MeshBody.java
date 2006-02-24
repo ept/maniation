@@ -2,26 +2,57 @@ package de.kleppmann.maniation.dynamics;
 
 import java.util.List;
 
+import de.kleppmann.maniation.geometry.AnimateMesh;
+import de.kleppmann.maniation.geometry.Collision;
+import de.kleppmann.maniation.geometry.CollisionVolume;
+import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Vertex;
 
-public class MeshBody extends Cylinder {
+public class MeshBody extends Cylinder implements Collideable {
     
+    private AnimateMesh mesh;
     private MeshInfo info;
     
-    private MeshBody(MeshInfo info) {
+    private MeshBody(AnimateMesh mesh, MeshInfo info) {
         super(info.axis, info.radius, info.length, info.mass);
         setCoMPosition(info.com);
         this.info = info;
     }
     
-    public static MeshBody newMeshBody(de.kleppmann.maniation.scene.Body sceneBody) {
-        MeshInfo info = new MeshInfo(sceneBody);
-        return new MeshBody(info);
+    public static MeshBody newMeshBody(AnimateMesh mesh) {
+        MeshInfo info = new MeshInfo(mesh);
+        return new MeshBody(mesh, info);
+    }
+    
+    protected void setCoMPosition(Vector3D pos) {
+        super.setCoMPosition(pos);
+        mesh.setLocation(getLocation());
+    }
+    
+    protected void setOrientation(Quaternion orient) {
+        super.setOrientation(orient);
+        mesh.setOrientation(getOrientation());
     }
     
     public Vector3D getLocation() {
-        return getCoMPosition().subtract(info.com);
+        return getCoMPosition().subtract(getOrientation().transform(info.com));
+    }
+    
+    protected void setLocation(Vector3D location) {
+        setCoMPosition(location.add(getOrientation().transform(info.com)));
+    }
+
+    public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
+        if (partner instanceof Collideable) {
+            Collision collision = new Collision();
+            getCollisionVolume().intersect(((Collideable) partner).getCollisionVolume(), collision);
+            result.processCollision(collision);
+        } else super.interaction(partner, result, allowReverse);
+    }
+
+    public CollisionVolume getCollisionVolume() {
+        return mesh.getCollisionVolume();
     }
     
     
@@ -30,14 +61,14 @@ public class MeshBody extends Cylinder {
         double radius, length, mass;
         Vector3D axis, com;
         
-        MeshInfo(de.kleppmann.maniation.scene.Body sceneBody) {
+        MeshInfo(AnimateMesh mesh) {
+            de.kleppmann.maniation.scene.Vector vaxis = mesh.getSceneBody().getAxis();
+            axis = new Vector3D(vaxis.getX(), vaxis.getY(), vaxis.getZ());
             axis = axis.normalize();
-            this.axis = new Vector3D(sceneBody.getAxis().getX(), sceneBody.getAxis().getY(),
-                    sceneBody.getAxis().getZ());;
             List<Vector3D> points = new java.util.ArrayList<Vector3D>();
             // Approximate location of the centre of mass by averaging all vertex positions
             com = new Vector3D();
-            for (Vertex vert : sceneBody.getMesh().getVertices()) {
+            for (Vertex vert : mesh.getSceneBody().getMesh().getVertices()) {
                 Vector3D pos = new Vector3D(vert.getPosition().getX(), vert.getPosition().getY(),
                         vert.getPosition().getZ());
                 points.add(pos);
@@ -59,7 +90,7 @@ public class MeshBody extends Cylinder {
             }
             length = lmax - lmin;
             // Calculate mass based on volume and density
-            mass = sceneBody.getMesh().getMaterial().getDensity()*Math.PI*radius*radius*length;
+            mass = mesh.getSceneBody().getMesh().getMaterial().getDensity()*Math.PI*radius*radius*length;
         }
     }
 }
