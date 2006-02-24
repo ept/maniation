@@ -6,7 +6,6 @@ import javax.media.j3d.GeometryUpdater;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.Shape3D;
 
-import de.kleppmann.maniation.dynamics.ArticulatedBody;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Bone;
@@ -20,16 +19,14 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     public static final boolean DRAW_SKELETON = false;
     
     private Skeleton skeleton;
-    private ArticulatedBody body;
     private double[] coordinates;
     private LineArray lines;
     private Shape3D shape;
     private java.util.Map<Bone,Pair<Vector3D,Quaternion>> skeletonRest, skeletonCurrent;
     private java.util.Map<Bone,Vector3D> boneEnds;
 
-    public AnimateSkeleton(Skeleton skeleton, ArticulatedBody body) {
+    public AnimateSkeleton(Skeleton skeleton) {
         this.skeleton = skeleton;
-        this.body = body;
         if (DRAW_SKELETON) buildJava3D();
     }
 
