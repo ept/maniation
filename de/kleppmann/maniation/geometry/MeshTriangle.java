@@ -1,5 +1,9 @@
 package de.kleppmann.maniation.geometry;
 
+import java.util.List;
+
+import de.kleppmann.maniation.maths.Vector3D;
+
 
 /**
  * A triangle in a mesh in which the vertex positions may change, but
@@ -55,23 +59,39 @@ public class MeshTriangle {
         if ((d1 - a1)*n1 + (d2 - a2)*n2 + (d3 - a3)*n3 >= 0.0) i++;
         if ((e1 - a1)*n1 + (e2 - a2)*n2 + (e3 - a3)*n3 >= 0.0) i++;
         if ((f1 - a1)*n1 + (f2 - a2)*n2 + (f3 - a3)*n3 >= 0.0) i++;
-        if ((i == 0) || (i == 3)) {
-            // Yes. Now, do all points of this triangle lie on the
-            // same side of the plane of the other triangle?
-            i = 0;
-            if ((a1 - d1)*m1 + (a2 - d2)*m2 + (a3 - d3)*m3 >= 0.0) i++;
-            if ((b1 - d1)*m1 + (b2 - d2)*m2 + (b3 - d3)*m3 >= 0.0) i++;
-            if ((c1 - d1)*m1 + (c2 - d2)*m2 + (c3 - d3)*m3 >= 0.0) i++;
-            if ((i == 0) || (i == 3)) return; // Yes again --> we're done
-        }
+        if ((i == 0) || (i == 3)) return; // Yes --> no intersection
+        // Yes. Now, do all points of this triangle lie on the
+        // same side of the plane of the other triangle?
+        i = 0;
+        if ((a1 - d1)*m1 + (a2 - d2)*m2 + (a3 - d3)*m3 >= 0.0) i++;
+        if ((b1 - d1)*m1 + (b2 - d2)*m2 + (b3 - d3)*m3 >= 0.0) i++;
+        if ((c1 - d1)*m1 + (c2 - d2)*m2 + (c3 - d3)*m3 >= 0.0) i++;
+        if ((i == 0) || (i == 3)) return; // Yes --> no intersection
         // Intersect edges of def with triangle abc
-        if (lineAgainstTriangle(d1, d2, d3, e1, e2, e3)) result.addIntersection();
-        if (lineAgainstTriangle(e1, e2, e3, f1, f2, f3)) result.addIntersection();
-        if (lineAgainstTriangle(f1, f2, f3, d1, d2, d3)) result.addIntersection();
+        Vector3D p1 = lineAgainstTriangle(d1, d2, d3, e1, e2, e3);
+        Vector3D p2 = lineAgainstTriangle(e1, e2, e3, f1, f2, f3);
+        Vector3D p3 = lineAgainstTriangle(f1, f2, f3, d1, d2, d3);
         // Intersect edges of abc with triangle def
-        if (other.lineAgainstTriangle(a1, a2, a3, b1, b2, b3)) result.addIntersection();
-        if (other.lineAgainstTriangle(b1, b2, b3, c1, c2, c3)) result.addIntersection();
-        if (other.lineAgainstTriangle(c1, c2, c3, a1, a2, a3)) result.addIntersection();        
+        Vector3D p4 = other.lineAgainstTriangle(a1, a2, a3, b1, b2, b3);
+        Vector3D p5 = other.lineAgainstTriangle(b1, b2, b3, c1, c2, c3);
+        Vector3D p6 = other.lineAgainstTriangle(c1, c2, c3, a1, a2, a3);
+        if ((p1 == null) && (p2 == null) && (p3 == null) && (p4 == null) &&
+                (p5 == null) && (p6 == null)) return; // no intersection
+        // Search for the pair of intersection points with the greatest distance
+        List<Vector3D> points = new java.util.ArrayList<Vector3D>();
+        if (p1 != null) points.add(p1); if (p2 != null) points.add(p2);
+        if (p3 != null) points.add(p3); if (p4 != null) points.add(p4);
+        if (p5 != null) points.add(p5); if (p6 != null) points.add(p6);
+        if (points.size() == 1) points.add(points.get(0));
+        Vector3D a = null, b = null; double max = -1e20;
+        for (i=0; i<points.size()-1; i++)
+            for (int j=i+1; j<points.size(); j++) {
+                double d = points.get(j).subtract(points.get(i)).magnitude();
+                if (d > max) {
+                    a = points.get(i); b = points.get(j); max = d;
+                }
+            }
+        result.addIntersection(a, b, this, other);
     }
     
     private void updateNumbers(MeshTriangle other) {
@@ -117,15 +137,15 @@ public class MeshTriangle {
      * Checks whether a straight line, specified by its two endpoints, intersects
      * this triangle (abc).
      * (p1, p2, p3) is the beginning and (q1, q2, q3) the endpoint of the line.
-     * @return true on intersection.
+     * @return Point vector of the intersection point if they intersect, null otherwise.
      */
-    private boolean lineAgainstTriangle(double p1, double p2, double p3,
+    private Vector3D lineAgainstTriangle(double p1, double p2, double p3,
             double q1, double q2, double q3) {
         // Intersect line with plane
         double t = (q1 - p1)*n1 + (q2 - p2)*n2 + (q3 - p3)*n3;
-        if ((t < 1e-10) && (t > -1e-10)) return false;
+        if ((t < 1e-10) && (t > -1e-10)) return null;
         t = ((a1 - p1)*n1 + (a2 - p2)*n2 + (a3 - p3)*n3) / t;
-        if ((t > 1.0) || (t < 0.0)) return false;
+        if ((t > 1.0) || (t < 0.0)) return null;
         // We now know that the intersection lies between p and q.
         // r is the point of intersection with the plane:
         double r1 = p1 + t*(q1 - p1), r2 = p2 + t*(q2 - p2), r3 = p3 + t*(q3 - p3);
@@ -136,6 +156,7 @@ public class MeshTriangle {
         // Now check that r is in the triangle.
         double x = ((r1 - a1)*v1 + (r2 - a2)*v2 + (r3 - a3)*v3) / (ac1*v1 + ac2*v2 + ac3*v3);
         double y = ((r1 - a1)*w1 + (r2 - a2)*w2 + (r3 - a3)*w3) / (ab1*w1 + ab2*w2 + ab3*w3);
-        return (x >= 0.0) && (y >= 0.0) && (x + y <= 1.0);
+        if ((x < 0.0) || (y < 0.0) || (x + y > 1.0)) return null;
+        return new Vector3D(r1, r2, r3);
     }
 }

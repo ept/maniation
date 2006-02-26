@@ -1,39 +1,28 @@
 package de.kleppmann.maniation.geometry;
 
 import java.util.List;
-
+import de.kleppmann.maniation.maths.Vector3D;
 
 public class Collision {
 
     List<CollisionPoint> intersections = new java.util.ArrayList<CollisionPoint>();
-    boolean colliding = false;
-    int collisions = 0;
     
-    public void addIntersection() {
-        colliding = true;
-        collisions++;
-    }
-    
-    public void addIntersection(double x, double y, double z,
-                double normx, double normy, double normz) {
-        intersections.add(new CollisionPoint(x, y, z, normx, normy, normz));
+    public void addIntersection(Vector3D lineFrom, Vector3D lineTo, MeshTriangle tri1, MeshTriangle tri2) {
+        intersections.add(new CollisionPoint(lineFrom, lineTo, tri1, tri2));
     }
     
     public boolean isColliding() {
-        return colliding;
+        return intersections.size() > 0;
     }
     
+    
     private class CollisionPoint {
-        double x, y, z, normx, normy, normz;
+        Vector3D lineFrom, lineTo;
+        MeshTriangle tri1, tri2;
         
-        CollisionPoint(double x, double y, double z,
-                double normx, double normy, double normz) {
-            this.x = x; this.y = y; this.z = z;
-            double mag = Math.sqrt(normx*normx + normy*normy + normz*normz);
-            this.normx = normx / mag;
-            this.normy = normy / mag;
-            this.normz = normz / mag;
+        CollisionPoint(Vector3D lineFrom, Vector3D lineTo, MeshTriangle tri1, MeshTriangle tri2) {
+            this.lineFrom = lineFrom; this.lineTo = lineTo;
+            this.tri1 = tri1; this.tri2 = tri2;
         }
     }
-
 }
