@@ -45,16 +45,16 @@ public class MeshBody extends Cylinder implements Collideable {
 
     public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
         if (partner instanceof Collideable) {
-            Collision collision = new Collision();
-            getCollisionVolume().intersect(((Collideable) partner).getCollisionVolume(), collision);
-            result.processCollision(collision);
+            ((Collideable) partner).collideWith(this, mesh.getCollisionVolume(), result);
         } else super.interaction(partner, result, allowReverse);
     }
 
-    public CollisionVolume getCollisionVolume() {
-        return mesh.getCollisionVolume();
+    public void collideWith(RigidBody body, CollisionVolume volume, InteractionList result) {
+        Collision collision = new Collision();
+        mesh.getCollisionVolume().intersect(volume, collision);
+        result.processCollision(collision);
     }
-    
+
     
     private static class MeshInfo {
 
