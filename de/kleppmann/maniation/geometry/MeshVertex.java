@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.geometry;
 
+import de.kleppmann.maniation.maths.Vector3D;
+
 
 public class MeshVertex {
     
@@ -19,6 +21,10 @@ public class MeshVertex {
 
     public double getComponent(Component c) {
         return coordinates[3*index + c.offset];
+    }
+    
+    public Vector3D getPosition() {
+        return new Vector3D(coordinates[3*index], coordinates[3*index+1], coordinates[3*index+2]);
     }
     
     public double max3(MeshVertex other1, MeshVertex other2, Component c) {

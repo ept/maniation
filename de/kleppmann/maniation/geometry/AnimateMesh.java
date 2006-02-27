@@ -9,6 +9,7 @@ import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.Node;
 import javax.media.j3d.Shape3D;
 
+import de.kleppmann.maniation.dynamics.RigidBody;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Body;
@@ -28,16 +29,26 @@ public class AnimateMesh implements AnimateObject {
     private Shape3D shape;
     private MyUpdater myUpdater = new MyUpdater();
     private CollisionVolume volume;
+    private RigidBody dynamicBody;
 
     public AnimateMesh(Body sceneBody) {
         this.sceneBody = sceneBody;
-        buildArrays();
-        buildJava3D();
-        volume = new CollisionVolume(triangles);
+        // need to call setDynamicBody before object is operational!
     }
     
     public Body getSceneBody() {
         return sceneBody;
+    }
+    
+    public RigidBody getDynamicBody() {
+        return dynamicBody;
+    }
+    
+    public void setDynamicBody(RigidBody dynamicBody) {
+        this.dynamicBody = dynamicBody;
+        buildArrays();
+        buildJava3D();
+        volume = new CollisionVolume(triangles);
     }
     
     public CollisionVolume getCollisionVolume() {
@@ -94,7 +105,7 @@ public class AnimateMesh implements AnimateObject {
         triangles = new MeshTriangle[mesh.getFaces().size()];
         i = 0;
         for (Face face : mesh.getFaces()) {
-            triangles[i] = new MeshTriangle(
+            triangles[i] = new MeshTriangle(dynamicBody,
                     vertexMap.get(face.getVertices().get(0)),
                     vertexMap.get(face.getVertices().get(1)),
                     vertexMap.get(face.getVertices().get(2)));
