@@ -11,18 +11,26 @@ import de.kleppmann.maniation.scene.Vertex;
 
 public class MeshBody extends Cylinder implements Collideable {
     
+    private World world;
     private AnimateMesh mesh;
     private MeshInfo info;
+    private Vector3D initialCoMPosition;
+    private Quaternion initialOrientation;
     
-    private MeshBody(AnimateMesh mesh, MeshInfo info) {
+    private MeshBody(World world, AnimateMesh mesh, MeshInfo info) {
         super(info.axis, info.radius, info.length, info.mass);
-        setCoMPosition(info.com);
+        this.world = world;
+        this.mesh = mesh;
         this.info = info;
+        setLocation(mesh.getLocation());
+        setOrientation(mesh.getOrientation());
+        this.initialCoMPosition = getCoMPosition();
+        this.initialOrientation = getOrientation();
     }
     
-    public static MeshBody newMeshBody(AnimateMesh mesh) {
+    public static MeshBody newMeshBody(World world, AnimateMesh mesh) {
         MeshInfo info = new MeshInfo(mesh);
-        return new MeshBody(mesh, info);
+        return new MeshBody(world, mesh, info);
     }
     
     protected void setCoMPosition(Vector3D pos) {
@@ -32,7 +40,7 @@ public class MeshBody extends Cylinder implements Collideable {
     
     protected void setOrientation(Quaternion orient) {
         super.setOrientation(orient);
-        mesh.setOrientation(getOrientation());
+        mesh.setOrientation(orient);
     }
     
     public Vector3D getLocation() {
@@ -47,6 +55,13 @@ public class MeshBody extends Cylinder implements Collideable {
         if (partner instanceof Collideable) {
             ((Collideable) partner).collideWith(this, mesh.getCollisionVolume(), result);
         } else super.interaction(partner, result, allowReverse);
+        if (!mesh.getSceneBody().isMobile() && (partner == world)) {
+            Vector3D v1 = initialOrientation.transform(new Vector3D(1,0,0)).add(initialCoMPosition);
+            Vector3D v2 = initialOrientation.transform(new Vector3D(0,1,0)).add(initialCoMPosition);
+            result.addInteraction(new NailConstraint(world, this, new Vector3D(0,0,0), initialCoMPosition));
+            result.addInteraction(new NailConstraint(world, this, new Vector3D(1,0,0), v1));
+            result.addInteraction(new NailConstraint(world, this, new Vector3D(0,1,0), v2));
+        }
     }
 
     public void collideWith(RigidBody body, CollisionVolume volume, InteractionList result) {
