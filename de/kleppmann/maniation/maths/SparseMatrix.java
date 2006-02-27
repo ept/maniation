@@ -34,8 +34,8 @@ public class SparseMatrix implements Matrix {
     }
 
     public SparseMatrix(int rows, int columns, Slice[] slices) {
-        this.rows = Math.max(rows, 1);
-        this.columns = Math.max(columns, 1);
+        this.rows = rows;
+        this.columns = columns;
         this.root = new SliceTree();
         List<Slice> sList = new java.util.ArrayList<Slice>();
         for (Slice s : slices) {
@@ -51,10 +51,10 @@ public class SparseMatrix implements Matrix {
             }
         }
         this.slices = sList.toArray(new Slice[sList.size()]);
-        this.transpose = new SparseMatrix(true, rows, columns, slices);
+        this.transpose = new SparseMatrix(true, rows, columns, this.slices);
         this.transpose.transpose = this;
         try {
-            this.inverse = new SparseMatrix(1, rows, columns, slices);
+            this.inverse = new SparseMatrix(1, rows, columns, this.slices);
             this.inverse.inverse = this;
         } catch (UnsupportedOperationException e) {
             this.inverse = null;
