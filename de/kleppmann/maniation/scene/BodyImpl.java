@@ -1,6 +1,6 @@
 package de.kleppmann.maniation.scene;
 
-public class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann.maniation.scene.XMLElement {
+class BodyImpl implements de.kleppmann.maniation.scene.Body, de.kleppmann.maniation.scene.XMLElement {
 
     private javax.xml.namespace.QName _tagName = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "body");
     private de.realityinabox.databinding.libs.AttributeMap _attributes = new de.realityinabox.databinding.libs.AttributeMap(new de.kleppmann.maniation.scene.BodyImpl.MyAttributes());
