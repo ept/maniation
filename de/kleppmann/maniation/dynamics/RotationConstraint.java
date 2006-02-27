@@ -20,7 +20,10 @@ public class RotationConstraint implements Constraint {
     // normal is given in local coordinates of body1.
     // if body1 is null, normal is in world coordinates
     public RotationConstraint(World world, RigidBody body1, Vector3D normal, RigidBody body2) {
-        this.world = world; this.body1 = body1; this.body2 = body2; this.normal = normal;
+        this.world = world;
+        this.body1 = body1;
+        this.body2 = body2;
+        this.normal = normal.normalize();
     }
     
     public List<SimulationObject> getObjects() {

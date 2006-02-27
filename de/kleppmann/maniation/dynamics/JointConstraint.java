@@ -12,6 +12,7 @@ public class JointConstraint implements Constraint {
     private RigidBody body1, body2;
     private Vector3D localPos1, localPos2;
 
+    // All vectors are in local coordinates of the respective body.
     public JointConstraint(RigidBody body1, Vector3D localPos1, RigidBody body2, Vector3D localPos2) {
         this.body1 = body1; this.localPos1 = localPos1;
         this.body2 = body2; this.localPos2 = localPos2;

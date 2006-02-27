@@ -17,14 +17,15 @@ public class EdgeEdgeCollision implements InequalityConstraint {
             s1, s2, s3, t1, t2, t3, u1, u2, u3, v1, v2, v3, h;
     private Matrix jacB1, jacB2, jDotB1, jDotB2;
     
+    // All vectors are in world coordinates!
     public EdgeEdgeCollision(RigidBody body1, Vector3D point1, Vector3D direction1,
             RigidBody body2, Vector3D point2, Vector3D direction2) {
         this.body1 = body1;
         this.point1 = point1;
-        this.direction1 = direction1;
+        this.direction1 = direction1.normalize();
         this.body2 = body2;
         this.point2 = point2;
-        this.direction2 = direction2;
+        this.direction2 = direction2.normalize();
     }
     
     private void update() {
@@ -46,12 +47,12 @@ public class EdgeEdgeCollision implements InequalityConstraint {
         p1 = body2.getAngularVelocity().getComponent(0);
         p2 = body2.getAngularVelocity().getComponent(1);
         p3 = body2.getAngularVelocity().getComponent(2);
-        s1 = point1.getComponent(0);
-        s2 = point1.getComponent(1);
-        s3 = point1.getComponent(2);
-        t1 = point2.getComponent(0);
-        t2 = point2.getComponent(1);
-        t3 = point2.getComponent(2);
+        s1 = point1.getComponent(0) - a1;
+        s2 = point1.getComponent(1) - a2;
+        s3 = point1.getComponent(2) - a3;
+        t1 = point2.getComponent(0) - b1;
+        t2 = point2.getComponent(1) - b2;
+        t3 = point2.getComponent(2) - b3;
         u1 = direction1.getComponent(0);
         u2 = direction1.getComponent(1);
         u3 = direction1.getComponent(2);
@@ -370,11 +371,8 @@ public class EdgeEdgeCollision implements InequalityConstraint {
     }
 
     public Vector getPenalty() {
-        update();
-        double[] v = {
-                body2.getCoMPosition().add(point2).subtract(body1.getCoMPosition()).subtract(point1)
-                    .mult(direction1.cross(direction2))*h
-        };
+        Vector3D normal = direction1.cross(direction2).normalize();
+        double[] v = {point2.subtract(point1).mult(normal)};
         return new VectorImpl(v);
     }
 

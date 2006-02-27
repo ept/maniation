@@ -12,21 +12,22 @@ import de.kleppmann.maniation.maths.VectorImpl;
 public class VertexFaceCollision implements InequalityConstraint {
     
     private RigidBody vertexBody, faceBody;
-    private Vector3D vertex, facePoint, faceNormal;
+    private Vector3D vertexLocal, vertexWorld, facePoint, faceNormal;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
         t1, t2, t3, n1, n2, n3;
 
-    
+    // All vectors are in world coordinates!
     public VertexFaceCollision(RigidBody vertexBody, Vector3D vertex, RigidBody faceBody,
             Vector3D facePoint, Vector3D faceNormal) {
         this.vertexBody = vertexBody;
-        this.vertex = vertex;
+        this.vertexWorld = vertex;
         this.faceBody = faceBody;
         this.facePoint = facePoint;
-        this.faceNormal = faceNormal;
+        this.faceNormal = faceNormal.normalize();
     }
     
     private void update() {
+        vertexLocal = vertexWorld.subtract(vertexBody.getCoMPosition());
         a1 = faceBody.getCoMPosition().getComponent(0);
         a2 = faceBody.getCoMPosition().getComponent(1);
         a3 = faceBody.getCoMPosition().getComponent(2);
@@ -45,17 +46,16 @@ public class VertexFaceCollision implements InequalityConstraint {
         p1 = vertexBody.getAngularVelocity().getComponent(0);
         p2 = vertexBody.getAngularVelocity().getComponent(1);
         p3 = vertexBody.getAngularVelocity().getComponent(2);
-        t1 = vertex.getComponent(0);
-        t2 = vertex.getComponent(1);
-        t3 = vertex.getComponent(2);
+        t1 = vertexLocal.getComponent(0);
+        t2 = vertexLocal.getComponent(1);
+        t3 = vertexLocal.getComponent(2);
         n1 = faceNormal.getComponent(0);
         n2 = faceNormal.getComponent(0);
         n3 = faceNormal.getComponent(0);
     }
 
     public Vector getPenalty() {
-        double[] v = {vertexBody.getCoMPosition().add(vertex).subtract(faceBody.getCoMPosition()).
-            subtract(facePoint).mult(faceNormal)};
+        double[] v = {vertexWorld.subtract(facePoint).mult(faceNormal)};
         return new VectorImpl(v);
     }
 
