@@ -1,7 +1,5 @@
 package de.kleppmann.maniation.dynamics;
 
-import java.text.DecimalFormat;
-
 import de.kleppmann.maniation.maths.Vector;
 
 public class StateVector implements Vector {
@@ -72,18 +70,15 @@ public class StateVector implements Vector {
     }
     
     public String toString() {
-        DecimalFormat format = new DecimalFormat("######0.000000000000000");
         String result = "";
-        for (int i=0; i<getDimension(); i++) {
-            result += " " + format.format(getComponent(i));
-        }
+        for (int i=0; i<bodies.length; i++) result += (i == 0 ? "" : " ") + getSlice(i).toString();
         return result;
     }
     
     
     private enum Operation { ADD, SUBTRACT, SCALE };
     
-    private class StateVectorModified extends StateVector {
+    private static class StateVectorModified extends StateVector {
         private Vector[] slices;
         
         public StateVectorModified(Operation op, StateVector op1, StateVector op2, double factor) {

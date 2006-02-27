@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.dynamics;
 
+import java.text.DecimalFormat;
+
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.Matrix33;
 import de.kleppmann.maniation.maths.MatrixImpl;
@@ -301,6 +303,15 @@ public abstract class RigidBody implements Body {
                     getComponent(5), getComponent(6)));
             setLinearMomentum(new Vector3D(getComponent(7), getComponent(8), getComponent(9)));
             setAngularMomentum(new Vector3D(getComponent(10), getComponent(11), getComponent(12)));
+        }
+        
+        public String toString() {
+            DecimalFormat format = new DecimalFormat("######0.000000000000000");
+            String result = "";
+            for (int i=0; i<getDimension(); i++) {
+                result += " " + format.format(getComponent(i));
+            }
+            return result;
         }
     }
     
