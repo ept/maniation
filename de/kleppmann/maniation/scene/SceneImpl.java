@@ -177,8 +177,8 @@ class SceneImpl implements de.kleppmann.maniation.scene.Scene, de.kleppmann.mani
                     return;
                 }
             }
-            if (element instanceof de.kleppmann.maniation.scene.MeshImpl) {
-                if (((de.kleppmann.maniation.scene.MeshImpl) element).getTagName().equals(_handler._bodyChild)) {
+            if (element instanceof de.kleppmann.maniation.scene.BodyImpl) {
+                if (((de.kleppmann.maniation.scene.BodyImpl) element).getTagName().equals(_handler._bodyChild)) {
                     bodies.add((de.kleppmann.maniation.scene.BodyImpl) element);
                     return;
                 }
