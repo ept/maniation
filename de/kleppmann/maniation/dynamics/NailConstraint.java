@@ -13,7 +13,8 @@ public class NailConstraint implements Constraint {
     private RigidBody body;
     private Vector3D localPoint, target;
 
-    // All vectors are in local coordinates of the given body.
+    // localPoint is given in the body's local coordinates,
+    // while target is given in world coordinates.
     public NailConstraint(World world, RigidBody body, Vector3D localPoint, Vector3D target) {
         this.world = world; this.body = body; this.localPoint = localPoint; this.target = target;
     }

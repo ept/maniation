@@ -21,7 +21,7 @@ public class Simulation {
     public static final double RESTING_TOLERANCE = 1e-5;
     public static final double PENETRATION_TOLERANCE = 1e-5;
     public static final double ELASTICITY = 1.0;
-    public static final double FRAMES_PER_SECOND = 100.0;
+    public static final double FRAMES_PER_SECOND = 25.0;
     
     private World world = new World();
     private List<GeneralizedBody> bodies = new java.util.ArrayList<GeneralizedBody>();
@@ -148,6 +148,8 @@ public class Simulation {
         boolean lambdaNegative;
         do {
             il.compileConstraints(constrs);
+            // If there are no constraints, do nothing
+            if (il.getJacobian().getRows() == 0) return;
             // Set up Lagrange multiplier equation and solve it
             Vector term1 = il.getJacobianDot().mult(il.getVelocity());
             Vector term2 = il.getJacobian().mult(il.getAcceleration());
