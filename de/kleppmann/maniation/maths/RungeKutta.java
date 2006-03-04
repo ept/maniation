@@ -6,7 +6,7 @@ public class RungeKutta implements ODESolver {
     
     private ODE ode;
     private double time;
-    private double h, hmin = 0.00002, hmax = 0.1, eps = 5e-18, safety = 0.9;
+    private double h, hmin = 0.00002, hmax = 0.1, eps = 10e-18, safety = 0.9;
     private double shrinkPower = -0.25, growPower = -0.2;
     private Vector status, error;
     
@@ -29,36 +29,42 @@ public class RungeKutta implements ODESolver {
     
     public void setMinTimeStep(double minTimeStep) {
         hmin = minTimeStep;
+        if (h < hmin) h = hmin;
+    }
+    
+    public void setMaxTimeStep(double maxTimeStep) {
+        hmax = maxTimeStep;
+        if (h > hmax) h = hmax;
     }
     
     public void setAccuracy(double requiredAccuracy) {
         eps = requiredAccuracy;
     }
     
-    private Vector cashKarp() throws ODEBacktrackException {
-        Vector k1 = ode.derivative(time, status);
+    private Vector cashKarp(boolean allowBacktrack) throws ODEBacktrackException {
+        Vector k1 = ode.derivative(time, status, allowBacktrack);
         Vector d2 = status.add(k1.mult(b21*h));
-        Vector k2 = ode.derivative(time + a2*h, d2);
+        Vector k2 = ode.derivative(time + a2*h, d2, allowBacktrack);
         Vector d3 = status.add(k1.mult(b31*h).add(k2.mult(b32*h)));
-        Vector k3 = ode.derivative(time + a3*h, d3);
+        Vector k3 = ode.derivative(time + a3*h, d3, allowBacktrack);
         Vector d4 = status.add(k1.mult(b41*h).add(k2.mult(b42*h)).add(k3.mult(b43*h)));
-        Vector k4 = ode.derivative(time + a4*h, d4);
+        Vector k4 = ode.derivative(time + a4*h, d4, allowBacktrack);
         Vector d5 = status.add(k1.mult(b51*h).add(k2.mult(b52*h)).add(k3.mult(b53*h)).add(k4.mult(b54*h)));
-        Vector k5 = ode.derivative(time + a5*h, d5);
+        Vector k5 = ode.derivative(time + a5*h, d5, allowBacktrack);
         Vector d6 = status.add(k1.mult(b61*h).add(k2.mult(b62*h)).add(k3.mult(b63*h)).add(k4.mult(b64*h)).
                 add(k5.mult(b65*h)));
-        Vector k6 = ode.derivative(time + a6*h, d6);
+        Vector k6 = ode.derivative(time + a6*h, d6, allowBacktrack);
         error = k1.mult(dc1*h).add(k3.mult(dc3*h)).add(k4.mult(dc4*h)).add(k5.mult(dc5*h)).add(k6.mult(dc6*h));
         return status.add(k1.mult(c1*h).add(k3.mult(c3*h)).add(k4.mult(c4*h)).add(k6.mult(c6*h)));
     }
     
-    private void calcStep() throws ODEBacktrackException {
+    private void calcStep(boolean allowBacktrack) throws ODEBacktrackException {
         double errmax;
         Vector newstatus;
         DecimalFormat format = new DecimalFormat("0.00000000");
         while (true) {
             System.out.print("Time " + format.format(time) + " plus " + format.format(h) + ": ");
-            newstatus = cashKarp();
+            newstatus = cashKarp(allowBacktrack);
             errmax = 0.0;
             for (int i=0; i<newstatus.getDimension(); i++) {
                 double scale = Math.abs(newstatus.getComponent(i)) + eps;
@@ -77,7 +83,8 @@ public class RungeKutta implements ODESolver {
             if (h1 < hmin) h1 = hmin;
             h = h1;
         }
-        System.out.println("completed.");
+        if (allowBacktrack) System.out.println("completed.");
+        else System.out.println("completed (penetration ignored).");
         status = newstatus;
         double h1 = safety*h*Math.pow(errmax, growPower);
         if (h1 > 5.0*h) h1 = 5.0*h;
@@ -91,11 +98,12 @@ public class RungeKutta implements ODESolver {
         while (time + hmin < finishTime) {
             if (time + h > finishTime) h = finishTime - time;
             try {
-                calcStep();
+                calcStep(h >= 1.1*hmin);
+                status = ode.impulse(time, status);
                 ode.timeStepCompleted(time, status);
             } catch (ODEBacktrackException backtrack) {
-                if (h < 2*hmin) {
-                    System.out.println("penetration (treating as collision because time step is too small).");
+                if (h < 1.1*hmin) {
+                    System.out.println("illegally signalled penetration when it should have been ignored.");
                     status = ode.impulse(time, status);
                 } else {
                     System.out.println("penetration.");
