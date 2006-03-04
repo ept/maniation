@@ -25,7 +25,7 @@ public class AnimateMesh implements AnimateObject {
     MeshVertex[] vertices;
     MeshTriangle[] triangles;
     Map<Vertex, MeshVertex> vertexMap;
-    IndexedTriangleArray geometry;
+    IndexedTriangleArray geometry = null;
     private Shape3D shape;
     private MyUpdater myUpdater = new MyUpdater();
     private CollisionVolume volume;
@@ -64,6 +64,7 @@ public class AnimateMesh implements AnimateObject {
         sceneBody.getLocation().setX(location.getComponent(0));
         sceneBody.getLocation().setY(location.getComponent(1));
         sceneBody.getLocation().setZ(location.getComponent(2));
+        processStimulus();
     }
     
     public Quaternion getOrientation() {
@@ -76,6 +77,7 @@ public class AnimateMesh implements AnimateObject {
         sceneBody.getOrientation().setX(orientation.getX());
         sceneBody.getOrientation().setY(orientation.getY());
         sceneBody.getOrientation().setZ(orientation.getZ());
+        processStimulus();
     }
     
     private void updateVertex(Vertex vert, int offset, Quaternion orient, Vector3D loc) {
@@ -90,16 +92,24 @@ public class AnimateMesh implements AnimateObject {
         coordinates = new double[3*mesh.getVertices().size()];
         normals = new float[3*mesh.getVertices().size()];
         vertices = new MeshVertex[mesh.getVertices().size()];
-        vertexMap = new java.util.HashMap<Vertex, MeshVertex>();
         int i = 0;
         Quaternion orient = getOrientation(); Vector3D loc = getLocation();
+        Map<VertexPosition, MeshVertex> uniqueVertices = new java.util.HashMap<VertexPosition, MeshVertex>();
+        vertexMap = new java.util.HashMap<Vertex, MeshVertex>();
         for (Vertex v : mesh.getVertices()) {
             updateVertex(v, 3*i, orient, loc);
             normals[3*i+0] = (float) v.getNormal().getX();
             normals[3*i+1] = (float) v.getNormal().getY();
             normals[3*i+2] = (float) v.getNormal().getZ();
             vertices[i] = new MeshVertex(coordinates, i);
-            vertexMap.put(v, vertices[i]);
+            VertexPosition vp = new VertexPosition(v);
+            MeshVertex mv = uniqueVertices.get(vp);
+            if (mv != null) {
+                vertexMap.put(v, mv);
+            } else {
+                uniqueVertices.put(vp, vertices[i]);
+                vertexMap.put(v, vertices[i]);
+            }
             i++;
         }
         triangles = new MeshTriangle[mesh.getFaces().size()];
@@ -137,7 +147,7 @@ public class AnimateMesh implements AnimateObject {
 
 
     public void processStimulus() {
-        geometry.updateData(myUpdater);
+        if (geometry != null) geometry.updateData(myUpdater);
     }
 
     public Node getJava3D() {
@@ -154,6 +164,38 @@ public class AnimateMesh implements AnimateObject {
                 coordIndex += 3;
             }
             volume.updateBBox();
+        }
+    }
+    
+    
+    private static class VertexPosition {
+        static final double TOLERANCE = 1e-5;
+        private Vertex v;
+        private long x, y, z;
+        
+        VertexPosition(Vertex v) {
+            this.v = v;
+            this.x = Math.round(v.getPosition().getX()/TOLERANCE);
+            this.y = Math.round(v.getPosition().getY()/TOLERANCE);
+            this.z = Math.round(v.getPosition().getZ()/TOLERANCE);
+        }
+        
+        public Vertex getVertex() {
+            return v;
+        }
+
+        public boolean equals(Object obj) {
+            if (obj instanceof VertexPosition) {
+                VertexPosition other = (VertexPosition) obj;
+                return (this.x == other.x) && (this.y == other.y) && (this.z == other.z);
+            } else return false;
+        }
+
+        public int hashCode() {
+            long result = (x % (1l << 32)) ^ ((x / (1l << 32)) >> 32);
+            result ^= (y % (1l << 32)) ^ ((y / (1l << 32)) >> 32);
+            result ^= (z % (1l << 32)) ^ ((z / (1l << 32)) >> 32);
+            return (int) result;
         }
     }
 }
