@@ -18,7 +18,9 @@ public class MeshBody extends Cylinder implements Collideable {
     private Quaternion initialOrientation;
     
     private MeshBody(World world, AnimateMesh mesh, MeshInfo info) {
-        super(info.axis, info.radius, info.length, info.mass);
+        // Hard-coded moment of inertia for a 3x3x3 cube
+        super(new Vector3D(1,0,0), Math.sqrt(3.0/3.0), Math.sqrt(3.0), 1.0);
+        //super(info.axis, info.radius, info.length, info.mass);
         this.world = world;
         this.mesh = mesh;
         this.info = info;
@@ -67,7 +69,7 @@ public class MeshBody extends Cylinder implements Collideable {
     public void collideWith(RigidBody body, CollisionVolume volume, InteractionList result) {
         Collision collision = new Collision();
         mesh.getCollisionVolume().intersect(volume, collision);
-        result.processCollision(collision);
+        collision.process(result);
     }
 
     
