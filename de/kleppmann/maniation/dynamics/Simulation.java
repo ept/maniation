@@ -10,7 +10,6 @@ import de.kleppmann.maniation.maths.ConjugateGradient;
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.ODE;
 import de.kleppmann.maniation.maths.ODEBacktrackException;
-import de.kleppmann.maniation.maths.ODESolver;
 import de.kleppmann.maniation.maths.RungeKutta;
 import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
@@ -18,10 +17,10 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Simulation {
     
-    public static final double RESTING_TOLERANCE = 1e-5;
-    public static final double PENETRATION_TOLERANCE = 1e-5;
-    public static final double ELASTICITY = 1.0;
-    public static final double FRAMES_PER_SECOND = 25.0;
+    public static final double RESTING_TOLERANCE = 1e-3;
+    public static final double PENETRATION_TOLERANCE = 1e-3;
+    public static final double ELASTICITY = 0.2;
+    public static final double FRAMES_PER_SECOND = 120.0;
     
     private World world = new World();
     private List<GeneralizedBody> bodies = new java.util.ArrayList<GeneralizedBody>();
@@ -51,7 +50,8 @@ public class Simulation {
     }
     
     public void run(double time) {
-        ODESolver solver = new RungeKutta(new DifferentialEquation(), 0.01);
+        RungeKutta solver = new RungeKutta(new DifferentialEquation(), 0.01);
+        solver.setMaxTimeStep(1.0/FRAMES_PER_SECOND);
         log.clear();
         log.add("0.0 " + state.toString());
         solver.solve(0.0, time);
@@ -197,7 +197,7 @@ public class Simulation {
         double lastCompletedTime, lastAddedTime = -1e20;
         int lastAddedFrame;
         
-        public Vector derivative(double time, Vector state)
+        public Vector derivative(double time, Vector state, boolean allowBacktrack)
                 throws ODEBacktrackException {
             if (!(state instanceof StateVector)) throw new IllegalArgumentException();
             setTime(time);
@@ -205,7 +205,7 @@ public class Simulation {
             InteractionList il = getInteractions();
             // Check if penetration has occurred -- may throw ODEBacktrackException
             il.classifyConstraints();
-            checkPenetration(il, time);
+            if (allowBacktrack) checkPenetration(il, time);
             // Compute constraint/resting contact forces
             il.applyNonConstraints();
             constraintForces(il);
