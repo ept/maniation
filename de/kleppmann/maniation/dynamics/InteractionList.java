@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import de.kleppmann.maniation.geometry.Collision;
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
@@ -26,10 +25,6 @@ public class InteractionList {
     public void addInteraction(Interaction ia) {
         if (ia instanceof Constraint) constraints.add((Constraint) ia);
         else other.add(ia);
-    }
-    
-    public void processCollision(Collision coll) {
-        // TODO
     }
     
     public void applyNonConstraints() {
