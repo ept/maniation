@@ -7,12 +7,16 @@ package de.kleppmann.maniation.geometry;
 public class CollisionVolume {
     
     private Tree tree;
-    //private int triangleCount;
+    private MeshTriangle[] triangles;
     private int tests;
 
     public CollisionVolume(MeshTriangle[] triangles) {
-        //triangleCount = triangles.length;
+        this.triangles = triangles;
         tree = newTree(triangles);
+    }
+    
+    public MeshTriangle[] getTriangles() {
+        return triangles;
     }
     
     public void updateBBox() {
@@ -22,7 +26,8 @@ public class CollisionVolume {
     public void intersect(CollisionVolume other, Collision result) {
         tests = 0;
         tree.intersect(other.tree, result);
-        //System.out.println(tests + " primitive tests out of " + triangleCount*other.triangleCount);
+        /*if (tests > 0) System.out.println(tests + " primitive tests out of " +
+                getTriangles().length*other.getTriangles().length);*/
     }
     
     private Tree newTree(MeshTriangle[] triangles) {

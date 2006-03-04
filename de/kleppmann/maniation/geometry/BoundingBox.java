@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.geometry;
 
+import java.text.DecimalFormat;
+
 
 public class BoundingBox {
     
@@ -58,5 +60,12 @@ public class BoundingBox {
            (((this.minz >= other.minz) && (this.minz <= other.maxz)) ||
             ((this.maxz >= other.minz) && (this.maxz <= other.maxz)) ||
             ((this.maxz >= other.minz) && (this.minz <= other.minz)));
+    }
+    
+    public String toString() {
+        DecimalFormat format = new DecimalFormat("0.000");
+        return "BoundingBox (" + format.format(minx) + ", " + format.format(miny) +
+                ", " + format.format(minz) + ") to (" + format.format(maxx) + ", " +
+                format.format(maxy) + ", " + format.format(maxz) + ")";
     }
 }
