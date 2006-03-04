@@ -9,7 +9,7 @@ import de.kleppmann.maniation.maths.VectorImpl;
 public class World implements SimulationObject {
 
     // Gravity: 9.81 N/kg along negative Z axis
-    static final Vector GRAVITY = new Vector3D(0.0, 0.0, -3.0 /*-9.81*/);
+    static final Vector GRAVITY = new Vector3D(0.0, 0.0, -9.81);
 
     public void handleInteraction(Interaction action) {}
 
