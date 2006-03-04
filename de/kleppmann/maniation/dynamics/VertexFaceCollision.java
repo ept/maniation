@@ -50,8 +50,8 @@ public class VertexFaceCollision implements InequalityConstraint {
         t2 = vertexLocal.getComponent(1);
         t3 = vertexLocal.getComponent(2);
         n1 = faceNormal.getComponent(0);
-        n2 = faceNormal.getComponent(0);
-        n3 = faceNormal.getComponent(0);
+        n2 = faceNormal.getComponent(1);
+        n3 = faceNormal.getComponent(2);
     }
 
     public Vector getPenalty() {
