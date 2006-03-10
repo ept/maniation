@@ -1,6 +1,12 @@
 package de.kleppmann.maniation.dynamics;
 
 public interface SimulationObject {
-    void interaction(SimulationObject partner, InteractionList result, boolean allowReverse);
-    void handleInteraction(Interaction action);
+    
+    public interface State {
+        SimulationObject getOwner();
+        void interaction(State partnerState, InteractionList result, boolean allowReverse);
+        State handleInteraction(State state, Interaction action);
+    }
+    
+    State getInitialState();
 }

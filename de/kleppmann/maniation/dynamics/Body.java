@@ -4,6 +4,11 @@ import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 
 public interface Body extends GeneralizedBody {
-    Vector3D getLocation();
-    Quaternion getOrientation();
+    
+    public interface State extends GeneralizedBody.State {
+        Vector3D getLocation();
+        Quaternion getOrientation();
+    }
+
+    Body.State getInitialState();
 }
