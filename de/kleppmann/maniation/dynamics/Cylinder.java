@@ -6,13 +6,8 @@ import de.kleppmann.maniation.maths.Vector3D;
 
 public class Cylinder extends RigidBody {
     
-    // constant quantities
-    private Quaternion toPrincipalAxes;
-    private double mass;
-    private Vector3D principalInertia;
-    // derived quantities
-    private Matrix33 inertia, invInertia;
-    private boolean upToDate = false;
+    private final Quaternion toPrincipalAxes;
+    private final double mass, radial, axial;
     
     /**
      * Rigid body implementation of a cylinder with an arbitrary axis of symmetry.
@@ -25,36 +20,39 @@ public class Cylinder extends RigidBody {
     public Cylinder(Vector3D axis, double radius, double length, double mass) {
         this.mass = mass;
         toPrincipalAxes = Quaternion.fromDirectionRoll(axis, new Vector3D(0,0,1), 0.0);
-        double inert = (length*length + 3.0*radius*radius)*mass/12.0;
-        principalInertia = new Vector3D(inert, inert, 0.5*mass*radius*radius);
+        radial = (length*length + 3.0*radius*radius)*mass/12.0;
+        axial = 0.5*mass*radius*radius;
     }
     
-    private void updateInertia() {
-        if (upToDate) return;
-        inertia = new Matrix33(principalInertia);
-        invInertia = inertia.inverse();
-        Matrix33 rot = toPrincipalAxes.mult(getOrientation().getInverse()).toMatrix();
-        inertia    = rot.transpose().mult33(inertia   ).mult33(rot);
-        invInertia = rot.transpose().mult33(invInertia).mult33(rot);
-        upToDate = true;
-    }
-
     protected double getMass() {
         return mass;
     }
-
-    protected Matrix33 getInertia() {
-        updateInertia();
-        return inertia;
+    
+    protected Matrix33 getInertia(State state) {
+        Matrix33 i = new Matrix33(new Vector3D(radial, radial, axial));
+        Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
+        return rot.transpose().mult33(i).mult33(rot);
     }
 
-    protected Matrix33 getInvInertia() {
-        updateInertia();
-        return invInertia;
+    protected Matrix33 getInvInertia(State state) {
+        Matrix33 i = new Matrix33(new Vector3D(1.0/radial, 1.0/radial, 1.0/axial));
+        Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
+        return rot.transpose().mult33(i).mult33(rot);
     }
 
-    protected void setOrientation(Quaternion orient) {
-        upToDate = false;
-        super.setOrientation(orient);
+    protected Vector3D getInitialPosition() {
+        return new Vector3D();
+    }
+
+    protected Quaternion getInitialOrientation() {
+        return new Quaternion();
+    }
+
+    protected Vector3D getInitialLinearMomentum() {
+        return new Vector3D();
+    }
+
+    protected Vector3D getInitialAngularMomentum() {
+        return new Vector3D();
     }
 }

@@ -13,23 +13,24 @@ import de.kleppmann.maniation.maths.VectorImpl;
 public class RotationConstraint implements Constraint {
     
     private World world;
-    private RigidBody body1, body2;
+    private Body.State body1State, body2State;
     private Vector3D normal;
     private double n1, n2, n3, pw, px, py, pz, v1, v2, v3, qw, qx, qy, qz, w1, w2, w3;
 
     // normal is given in local coordinates of body1.
-    // if body1 is null, normal is in world coordinates
-    public RotationConstraint(World world, RigidBody body1, Vector3D normal, RigidBody body2) {
+    // if body1State is null, normal is in world coordinates
+    public RotationConstraint(World world, Body.State body1State, Vector3D normal,
+            Body.State body2State) {
         this.world = world;
-        this.body1 = body1;
-        this.body2 = body2;
+        this.body1State = body1State;
+        this.body2State = body2State;
         this.normal = normal.normalize();
     }
     
     public List<SimulationObject> getObjects() {
         List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
-        if (body1 != null) result.add(body1); else result.add(world);
-        result.add(body2);
+        if (body1State != null) result.add(body1State.getOwner()); else result.add(world);
+        result.add(body2State.getOwner());
         return result;
     }
 
@@ -38,17 +39,17 @@ public class RotationConstraint implements Constraint {
     }
 
     private void updateNumbers() {
-        Quaternion q = body2.getOrientation();
+        Quaternion q = body2State.getOrientation();
         qw = q.getW(); qx = q.getX(); qy = q.getY(); qz = q.getZ();
-        w1 = body2.getAngularVelocity().getComponent(0);
-        w2 = body2.getAngularVelocity().getComponent(1);
-        w3 = body2.getAngularVelocity().getComponent(2);
-        if (body1 != null) {
-            Quaternion p = body1.getOrientation();
+        w1 = body2State.getAngularVelocity().getComponent(0);
+        w2 = body2State.getAngularVelocity().getComponent(1);
+        w3 = body2State.getAngularVelocity().getComponent(2);
+        if (body1State != null) {
+            Quaternion p = body1State.getOrientation();
             pw = p.getW(); px = p.getX(); py = p.getY(); pz = p.getZ();
-            v1 = body1.getAngularVelocity().getComponent(0);
-            v2 = body1.getAngularVelocity().getComponent(1);
-            v3 = body1.getAngularVelocity().getComponent(2);
+            v1 = body1State.getAngularVelocity().getComponent(0);
+            v2 = body1State.getAngularVelocity().getComponent(1);
+            v3 = body1State.getAngularVelocity().getComponent(2);
         } else {
             pw = 1.0;
             px = py = pz = v1 = v2 = v3 = 0.0;
@@ -96,9 +97,9 @@ public class RotationConstraint implements Constraint {
                  n2*(py*qz + pz*qy + pw*qx + px*qw) +
                  n3*(pz*qz - py*qy - px*qx + pw*qw)) }};
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        if (body1 != null) result.put(body1, new MatrixImpl(m1));
+        if (body1State != null) result.put(body1State.getOwner(), new MatrixImpl(m1));
         double[][] m2 = {{0, 0, 0, -m1[0][3], -m1[0][4], -m1[0][5]}};
-        result.put(body2, new MatrixImpl(m2));
+        result.put(body2State.getOwner(), new MatrixImpl(m2));
         return result;
     }
 
@@ -124,7 +125,7 @@ public class RotationConstraint implements Constraint {
         double x17 = n1*x5 + n2*x6 + n3*x7;
         double x18 = n1*(qy*v3 - qz*v2) + n2*(qz*v1 - qx*v3) + n3*(qx*v2 - qy*v1);
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        if (body1 != null) {
+        if (body1State != null) {
             double[][] m1 = {{0, 0, 0,
                 0.5 *(qw*x1*px - x8*px) +
                 0.25*(pw*x16*qx - x17*qx + x13*qw - x14*qz + x15*qy - qw*x16*px + x18*px),
@@ -132,7 +133,7 @@ public class RotationConstraint implements Constraint {
                 0.25*(pw*x16*qy - x17*qy + x13*qz + x14*qw - x15*qx - qw*x16*py + x18*py),
                 0.5 *(qw*x1*pz - x8*pz) +
                 0.25*(pw*x16*qz - x17*qz - x13*qy + x14*qx + x15*qw - qw*x16*pz + x18*pz) }};
-            result.put(body1, new MatrixImpl(m1));
+            result.put(body1State.getOwner(), new MatrixImpl(m1));
         }
         double[][] m2 = {{0, 0, 0,
             0.25*(pw*x1*qx - qw*x1*px - x9*qx + x10*qw - x11*qz + x12*qy + x8*px) +
@@ -141,7 +142,7 @@ public class RotationConstraint implements Constraint {
             0.5 *(x17*qy - x13*qz - x14*qw + x15*qx - x16*pw*qy),
             0.25*(pw*x1*qz - qw*x1*pz - x9*qz - x10*qy + x11*qx + x12*qw + x8*pz) +
             0.5 *(x17*qz + x13*qy - x14*qx - x15*qw - x16*pw*qz) }};
-        result.put(body2, new MatrixImpl(m2));
+        result.put(body2State.getOwner(), new MatrixImpl(m2));
         return result;
     }
 }

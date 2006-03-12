@@ -111,14 +111,24 @@ public abstract class RigidBody implements Body {
             return potential + kinetic + rotational;
         }
 
-        public Vector3D getLocation() {
+        public Vector3D getCoMPosition() {
             if (rateOfChange) throw new UnsupportedOperationException();
             return pos;
+        }
+
+        public Vector3D getCoMVelocity() {
+            if (rateOfChange) throw new UnsupportedOperationException();
+            return vel;
         }
 
         public Quaternion getOrientation() {
             if (rateOfChange) throw new UnsupportedOperationException();
             return orient;
+        }
+
+        public Vector3D getAngularVelocity() {
+            if (rateOfChange) throw new UnsupportedOperationException();
+            return angvel;
         }
 
         public Body.State applyForce(Vector forceTorque) {

@@ -13,6 +13,7 @@ public interface GeneralizedBody extends SimulationObject {
         State applyForce(Vector forceTorque);
         State applyImpulse(Vector impulse);
         double getEnergy();
+        GeneralizedBody getOwner();
     }
 
     GeneralizedBody.State getInitialState();

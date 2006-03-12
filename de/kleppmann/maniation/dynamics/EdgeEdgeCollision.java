@@ -11,42 +11,42 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class EdgeEdgeCollision implements InequalityConstraint {
     
-    private RigidBody body1, body2;
+    private Body.State body1State, body2State;
     private Vector3D point1, direction1, point2, direction2;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
             s1, s2, s3, t1, t2, t3, u1, u2, u3, v1, v2, v3, h;
     private Matrix jacB1, jacB2, jDotB1, jDotB2;
     
     // All vectors are in world coordinates!
-    public EdgeEdgeCollision(RigidBody body1, Vector3D point1, Vector3D direction1,
-            RigidBody body2, Vector3D point2, Vector3D direction2) {
-        this.body1 = body1;
+    public EdgeEdgeCollision(Body.State body1State, Vector3D point1, Vector3D direction1,
+            Body.State body2State, Vector3D point2, Vector3D direction2) {
+        this.body1State = body1State;
         this.point1 = point1;
         this.direction1 = direction1.normalize();
-        this.body2 = body2;
+        this.body2State = body2State;
         this.point2 = point2;
         this.direction2 = direction2.normalize();
     }
     
     private void update() {
-        a1 = body1.getCoMPosition().getComponent(0);
-        a2 = body1.getCoMPosition().getComponent(1);
-        a3 = body1.getCoMPosition().getComponent(2);
-        b1 = body2.getCoMPosition().getComponent(0);
-        b2 = body2.getCoMPosition().getComponent(1);
-        b3 = body2.getCoMPosition().getComponent(2);
-        ad1 = body1.getCoMVelocity().getComponent(0);
-        ad2 = body1.getCoMVelocity().getComponent(1);
-        ad3 = body1.getCoMVelocity().getComponent(2);
-        bd1 = body2.getCoMVelocity().getComponent(0);
-        bd2 = body2.getCoMVelocity().getComponent(1);
-        bd3 = body2.getCoMVelocity().getComponent(2);
-        w1 = body1.getAngularVelocity().getComponent(0);
-        w2 = body1.getAngularVelocity().getComponent(1);
-        w3 = body1.getAngularVelocity().getComponent(2);
-        p1 = body2.getAngularVelocity().getComponent(0);
-        p2 = body2.getAngularVelocity().getComponent(1);
-        p3 = body2.getAngularVelocity().getComponent(2);
+        a1 = body1State.getCoMPosition().getComponent(0);
+        a2 = body1State.getCoMPosition().getComponent(1);
+        a3 = body1State.getCoMPosition().getComponent(2);
+        b1 = body2State.getCoMPosition().getComponent(0);
+        b2 = body2State.getCoMPosition().getComponent(1);
+        b3 = body2State.getCoMPosition().getComponent(2);
+        ad1 = body1State.getCoMVelocity().getComponent(0);
+        ad2 = body1State.getCoMVelocity().getComponent(1);
+        ad3 = body1State.getCoMVelocity().getComponent(2);
+        bd1 = body2State.getCoMVelocity().getComponent(0);
+        bd2 = body2State.getCoMVelocity().getComponent(1);
+        bd3 = body2State.getCoMVelocity().getComponent(2);
+        w1 = body1State.getAngularVelocity().getComponent(0);
+        w2 = body1State.getAngularVelocity().getComponent(1);
+        w3 = body1State.getAngularVelocity().getComponent(2);
+        p1 = body2State.getAngularVelocity().getComponent(0);
+        p2 = body2State.getAngularVelocity().getComponent(1);
+        p3 = body2State.getAngularVelocity().getComponent(2);
         s1 = point1.getComponent(0) - a1;
         s2 = point1.getComponent(1) - a2;
         s3 = point1.getComponent(2) - a3;
@@ -378,22 +378,22 @@ public class EdgeEdgeCollision implements InequalityConstraint {
 
     public Vector getPenaltyDot() {
         generateJacobian();
-        return jacB1.mult(body1.getVelocities()).add(jacB2.mult(body2.getVelocities()));
+        return jacB1.mult(body1State.getVelocities()).add(jacB2.mult(body2State.getVelocities()));
     }
 
     public Map<GeneralizedBody, Matrix> getJacobian() {
         generateJacobian();
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1, jacB1);
-        result.put(body2, jacB2);
+        result.put(body1State.getOwner(), jacB1);
+        result.put(body2State.getOwner(), jacB2);
         return result;
     }
 
     public Map<GeneralizedBody, Matrix> getJacobianDot() {
         generateJacobianDot();
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1, jDotB1);
-        result.put(body2, jDotB2);
+        result.put(body1State.getOwner(), jDotB1);
+        result.put(body2State.getOwner(), jDotB2);
         return result;
     }
 
@@ -403,8 +403,8 @@ public class EdgeEdgeCollision implements InequalityConstraint {
 
     public List<SimulationObject> getObjects() {
         List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
-        result.add(body1);
-        result.add(body2);
+        result.add(body1State.getOwner());
+        result.add(body2State.getOwner());
         return result;
     }
 }
