@@ -15,19 +15,19 @@ public class World implements SimulationObject {
         return new WorldState();
     }
 
+    public State handleInteraction(State previousState, Interaction action) {
+        return previousState;
+    }
+
+    public void interaction(State ownState, State partnerState, InteractionList result, boolean allowReverse) {
+        if (partnerState instanceof GeneralizedBody.State)
+            result.addInteraction(new Gravity((GeneralizedBody.State) partnerState));
+    }
+
 
     private class WorldState implements SimulationObject.State {
         public SimulationObject getOwner() {
             return World.this;
-        }
-
-        public State handleInteraction(State state, Interaction action) {
-            return state;
-        }
-
-        public void interaction(State partnerState, InteractionList result, boolean allowReverse) {
-            if (partnerState instanceof GeneralizedBody.State)
-                result.addInteraction(new Gravity((GeneralizedBody.State) partnerState));
         }
     }
     
