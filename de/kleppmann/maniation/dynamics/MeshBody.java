@@ -5,70 +5,107 @@ import java.util.List;
 import de.kleppmann.maniation.geometry.AnimateMesh;
 import de.kleppmann.maniation.geometry.Collision;
 import de.kleppmann.maniation.geometry.CollisionVolume;
+import de.kleppmann.maniation.maths.Matrix33;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Vertex;
 
-public class MeshBody extends Cylinder implements Collideable {
+public class MeshBody extends RigidBody implements Collideable {
     
-    private World world;
-    private AnimateMesh mesh;
-    private MeshInfo info;
-    private Vector3D initialCoMPosition;
-    private Quaternion initialOrientation;
+    private final World world;
+    private final AnimateMesh mesh;
+    private final MeshInfo info;
+    private final Vector3D initialLocation;
+    private final Quaternion initialOrientation;
+    private final Vector3D nail1, nail2, nail3;
+    //private final Quaternion toPrincipalAxes;
+    //private final double radial, axial;
+    private final Matrix33 inertia, invInertia;
     
-    private MeshBody(World world, AnimateMesh mesh, MeshInfo info) {
-        // Hard-coded moment of inertia for a 3x3x3 cube
-        super(new Vector3D(1,0,0), Math.sqrt(3.0/3.0), Math.sqrt(3.0), 1.0);
-        //super(info.axis, info.radius, info.length, info.mass);
+    public MeshBody(World world, AnimateMesh mesh) {
         this.world = world;
         this.mesh = mesh;
-        this.info = info;
-        setLocation(mesh.getLocation());
-        setOrientation(mesh.getOrientation());
-        this.initialCoMPosition = getCoMPosition();
-        this.initialOrientation = getOrientation();
+        this.info = new MeshInfo(mesh);
+        this.initialLocation = mesh.getLocation();
+        this.initialOrientation = mesh.getOrientation();
+        nail1 = getInitialPosition();
+        nail2 = initialOrientation.transform(new Vector3D(1,0,0)).add(nail1);
+        nail3 = initialOrientation.transform(new Vector3D(0,1,0)).add(nail1);
+
+        /*this.toPrincipalAxes = Quaternion.fromDirectionRoll(info.axis, new Vector3D(0,0,1), 0.0);
+        this.radial = (info.length*info.length + 3.0*info.radius*info.radius)*info.mass/12.0;
+        this.axial = 0.5*info.mass*info.radius*info.radius;*/
+        
+        // Hard-coded moment of inertia for a 3x3x3 cube
+        this.inertia = new Matrix33(new Vector3D(1.5, 1.5, 1.5));
+        this.invInertia = new Matrix33(new Vector3D(1.0/1.5, 1.0/1.5, 1.0/1.5));
     }
     
-    public static MeshBody newMeshBody(World world, AnimateMesh mesh) {
-        MeshInfo info = new MeshInfo(mesh);
-        return new MeshBody(world, mesh, info);
-    }
-    
-    protected void setCoMPosition(Vector3D pos) {
-        super.setCoMPosition(pos);
-        mesh.setLocation(getLocation());
-    }
-    
-    protected void setOrientation(Quaternion orient) {
-        super.setOrientation(orient);
-        mesh.setOrientation(orient);
-    }
-    
-    public Vector3D getLocation() {
-        return getCoMPosition().subtract(getOrientation().transform(info.com));
-    }
-    
-    protected void setLocation(Vector3D location) {
-        setCoMPosition(location.add(getOrientation().transform(info.com)));
+    protected double getMass() {
+        return info.mass;
     }
 
-    public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
-        if (partner instanceof Collideable) {
-            ((Collideable) partner).collideWith(this, mesh.getCollisionVolume(), result);
-        } else super.interaction(partner, result, allowReverse);
-        if (!mesh.getSceneBody().isMobile() && (partner == world)) {
-            Vector3D v1 = initialOrientation.transform(new Vector3D(1,0,0)).add(initialCoMPosition);
-            Vector3D v2 = initialOrientation.transform(new Vector3D(0,1,0)).add(initialCoMPosition);
-            result.addInteraction(new NailConstraint(world, this, new Vector3D(0,0,0), initialCoMPosition));
-            result.addInteraction(new NailConstraint(world, this, new Vector3D(1,0,0), v1));
-            result.addInteraction(new NailConstraint(world, this, new Vector3D(0,1,0), v2));
+    protected Matrix33 getInertia(Body.State state) {
+        // Hard-coded moment of inertia for a 3x3x3 cube
+        return inertia;
+        /*Matrix33 i = new Matrix33(new Vector3D(radial, radial, axial));
+        Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
+        return rot.transpose().mult33(i).mult33(rot);*/
+    }
+
+    protected Matrix33 getInvInertia(Body.State state) {
+        // Hard-coded moment of inertia for a 3x3x3 cube
+        return invInertia;
+        /*Matrix33 i = new Matrix33(new Vector3D(1.0/radial, 1.0/radial, 1.0/axial));
+        Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
+        return rot.transpose().mult33(i).mult33(rot);*/
+    }
+
+    protected Vector3D getInitialPosition() {
+        return initialLocation.add(initialOrientation.transform(info.com));
+    }
+
+    protected Quaternion getInitialOrientation() {
+        return initialOrientation;
+    }
+
+    protected Vector3D getInitialLinearMomentum() {
+        return new Vector3D();
+    }
+
+    protected Vector3D getInitialAngularMomentum() {
+        return new Vector3D();
+    }
+    
+    public void interaction(SimulationObject.State ownState, SimulationObject.State partnerState,
+            InteractionList result, boolean allowReverse) {
+        try {
+            Body.State me = (Body.State) ownState;
+            if (me.getOwner() != this) throw new IllegalArgumentException();
+            // If interaction partner supports collision detection, check for collision.
+            if (partnerState.getOwner() instanceof Collideable) {
+                mesh.setLocation(me.getCoMPosition().subtract(me.getOrientation().transform(info.com)));
+                mesh.setOrientation(me.getOrientation());
+                Collideable partner = (Collideable) partnerState.getOwner();
+                partner.collide((Body.State) partnerState, mesh.getCollisionVolume(), result);
+            } else super.interaction(me, partnerState, result, allowReverse);
+            // If this body is immobile, also nail it to the world
+            if (!mesh.getSceneBody().isMobile() && (partnerState.getOwner() == world)) {
+                result.addInteraction(new NailConstraint(world, me, new Vector3D(0,0,0), nail1));
+                result.addInteraction(new NailConstraint(world, me, new Vector3D(1,0,0), nail2));
+                result.addInteraction(new NailConstraint(world, me, new Vector3D(0,1,0), nail3));
+            }
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(e);
         }
     }
 
-    public void collideWith(RigidBody body, CollisionVolume volume, InteractionList result) {
+    public void collide(Body.State ownState, CollisionVolume partnerVolume, InteractionList result) {
+        if (ownState.getOwner() != this) throw new IllegalArgumentException();
+        mesh.setLocation(ownState.getCoMPosition().subtract(ownState.getOrientation().transform(info.com)));
+        mesh.setOrientation(ownState.getOrientation());
         Collision collision = new Collision();
-        mesh.getCollisionVolume().intersect(volume, collision);
+        mesh.getCollisionVolume().intersect(partnerVolume, collision);
         collision.process(result);
     }
 
