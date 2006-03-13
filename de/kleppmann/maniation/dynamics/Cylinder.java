@@ -28,13 +28,13 @@ public class Cylinder extends RigidBody {
         return mass;
     }
     
-    protected Matrix33 getInertia(State state) {
+    protected Matrix33 getInertia(Body.State state) {
         Matrix33 i = new Matrix33(new Vector3D(radial, radial, axial));
         Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
         return rot.transpose().mult33(i).mult33(rot);
     }
 
-    protected Matrix33 getInvInertia(State state) {
+    protected Matrix33 getInvInertia(Body.State state) {
         Matrix33 i = new Matrix33(new Vector3D(1.0/radial, 1.0/radial, 1.0/axial));
         Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
         return rot.transpose().mult33(i).mult33(rot);
