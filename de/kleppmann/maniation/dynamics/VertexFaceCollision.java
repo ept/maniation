@@ -11,22 +11,30 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class VertexFaceCollision implements InequalityConstraint {
     
+    private final Body vertexBody, faceBody;
     private Body.State vertexBodyState, faceBodyState;
-    private Vector3D vertexLocal, vertexWorld, facePoint, faceNormal;
+    private final Vector3D vertexWorld, facePoint, faceNormal;
+    private Vector3D vertexLocal;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
         t1, t2, t3, n1, n2, n3;
 
     // All vectors are in world coordinates!
-    public VertexFaceCollision(Body.State vertexBodyState, Vector3D vertex,
-            Body.State faceBodyState, Vector3D facePoint, Vector3D faceNormal) {
-        this.vertexBodyState = vertexBodyState;
+    public VertexFaceCollision(Body vertexBody, Vector3D vertex,
+            Body faceBody, Vector3D facePoint, Vector3D faceNormal) {
+        this.vertexBody = vertexBody;
         this.vertexWorld = vertex;
-        this.faceBodyState = faceBodyState;
+        this.faceBody = faceBody;
         this.facePoint = facePoint;
         this.faceNormal = faceNormal.normalize();
     }
     
-    private void update() {
+    public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+        try {
+            vertexBodyState = (Body.State) states.get(vertexBody);
+            faceBodyState   = (Body.State) states.get(faceBody);
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
         vertexLocal = vertexWorld.subtract(vertexBodyState.getCoMPosition());
         a1 = faceBodyState.getCoMPosition().getComponent(0);
         a2 = faceBodyState.getCoMPosition().getComponent(1);
@@ -60,7 +68,6 @@ public class VertexFaceCollision implements InequalityConstraint {
     }
 
     public Vector getPenaltyDot() {
-        update();
         double[] v = {n1*(bd1 - ad1 + p2*t3 - p3*t2) + n2*(bd2 - ad2 + p3*t1 - p1*t3) +
                 n3*(bd3 - ad3 + p1*t2 - p2*t1) + (a1 - b1 - t1)*(n2*w3 - n3*w2) +
                 (a2 - b2 - t2)*(n3*w1 - n1*w3) + (a3 - b3 - t3)*(n1*w2 - n2*w1) };
@@ -68,13 +75,12 @@ public class VertexFaceCollision implements InequalityConstraint {
     }
 
     public Map<GeneralizedBody, Matrix> getJacobian() {
-        update();
         double x1 = a1 - b1 - t1, x2 = a2 - b2 - t2, x3 = a3 - b3 - t3;
         double[][] jf = {{ -n1, -n2, -n3, x2*n3 - x3*n2, x3*n1 - x1*n3, x1*n2 - x2*n1 }};
         double[][] jv = {{  n1,  n2,  n3, t2*n3 - t3*n2, t3*n1 - t1*n3, t1*n2 - t2*n1 }};
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(faceBodyState.getOwner(), new MatrixImpl(jf));
-        result.put(vertexBodyState.getOwner(), new MatrixImpl(jv));
+        result.put(faceBody, new MatrixImpl(jf));
+        result.put(vertexBody, new MatrixImpl(jv));
         return result;
     }
 
@@ -97,8 +103,8 @@ public class VertexFaceCollision implements InequalityConstraint {
         double t16 = p2*t3-p3*t2;
         double[][] jv = {{ 0, 0, 0, -t7*n2-n3*t10, t7*n1-n3*t16, n1*t10+n2*t16 }};
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(faceBodyState.getOwner(), new MatrixImpl(jf));
-        result.put(vertexBodyState.getOwner(), new MatrixImpl(jv));
+        result.put(faceBody, new MatrixImpl(jf));
+        result.put(vertexBody, new MatrixImpl(jv));
         return result;
     }
 
@@ -112,8 +118,8 @@ public class VertexFaceCollision implements InequalityConstraint {
 
     public List<SimulationObject> getObjects() {
         List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
-        result.add(faceBodyState.getOwner());
-        result.add(vertexBodyState.getOwner());
+        result.add(faceBody);
+        result.add(vertexBody);
         return result;
     }
 }

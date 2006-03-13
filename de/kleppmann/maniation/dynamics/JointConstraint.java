@@ -9,20 +9,29 @@ import de.kleppmann.maniation.maths.Vector3D;
 
 public class JointConstraint implements Constraint {
     
+    private final Body body1, body2;
     private Body.State body1State, body2State;
-    private Vector3D localPos1, localPos2;
+    private final Vector3D localPos1, localPos2;
 
     // All vectors are in local coordinates of the respective body.
-    public JointConstraint(Body.State body1State, Vector3D localPos1,
-            Body.State body2State, Vector3D localPos2) {
-        this.body1State = body1State; this.localPos1 = localPos1;
-        this.body2State = body2State; this.localPos2 = localPos2;
+    public JointConstraint(Body body1, Vector3D localPos1, Body body2, Vector3D localPos2) {
+        this.body1 = body1; this.localPos1 = localPos1;
+        this.body2 = body2; this.localPos2 = localPos2;
+    }
+
+    public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+        try {
+            body1State = (Body.State) states.get(body1);
+            body2State = (Body.State) states.get(body2);
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public List<SimulationObject> getObjects() {
         List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
-        result.add(body1State.getOwner());
-        result.add(body2State.getOwner());
+        result.add(body1);
+        result.add(body2);
         return result;
     }
 
@@ -57,8 +66,8 @@ public class JointConstraint implements Constraint {
                 {0,   -1,  0,   t3,  0,  -t1},
                 {0,   0,   -1, -t2,  t1,  0 }};
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1State.getOwner(), new MatrixImpl(j1));
-        result.put(body2State.getOwner(), new MatrixImpl(j2));
+        result.put(body1, new MatrixImpl(j1));
+        result.put(body2, new MatrixImpl(j2));
         return result;
     }
 
@@ -82,8 +91,8 @@ public class JointConstraint implements Constraint {
                 {0, 0, 0,   w1*t2-w2*t1,    0,              w3*t2-w2*t3},
                 {0, 0, 0,   w1*t3-w3*t1,    w2*t3-w3*t2,    0          }};
         Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1State.getOwner(), new MatrixImpl(jdot1));
-        result.put(body2State.getOwner(), new MatrixImpl(jdot2));
+        result.put(body1, new MatrixImpl(jdot1));
+        result.put(body2, new MatrixImpl(jdot2));
         return result;
     }
 }
