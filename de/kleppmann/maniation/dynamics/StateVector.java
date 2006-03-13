@@ -1,99 +1,67 @@
 package de.kleppmann.maniation.dynamics;
 
+import de.kleppmann.maniation.maths.SlicedVector;
 import de.kleppmann.maniation.maths.Vector;
 
-public class StateVector implements Vector {
+public class StateVector extends SlicedVector<GeneralizedBody.State> {
 
-    private GeneralizedBody[] bodies;
-    private boolean rateOfChange;
-    private int[] stateOffsets = {0};
+    private final GeneralizedBody[] bodies;
+    private final boolean rateOfChange;
     
-    public StateVector(GeneralizedBody[] bodies, boolean rateOfChange) {
+    public StateVector(GeneralizedBody[] bodies) {
+        super(initialState(bodies));
+        this.bodies = bodies;
+        this.rateOfChange = false;
+    }
+
+    private StateVector(GeneralizedBody[] bodies, SlicedVector<GeneralizedBody.State> values,
+            boolean rateOfChange) {
+        super(newState(values));
         this.bodies = bodies;
         this.rateOfChange = rateOfChange;
-        updateObjects();
     }
     
-    private void updateObjects() {
-        int i=0, j=0;
-        stateOffsets = new int[bodies.length + 1];
-        for (GeneralizedBody body : bodies) {
-            stateOffsets[i] = j;
-            i++; j += body.getState(false).getDimension();
-        }
-        stateOffsets[i] = j;
+    private StateVector(GeneralizedBody[] bodies, GeneralizedBody.State[] states,
+            boolean rateOfChange) {
+        super(states);
+        this.bodies = bodies;
+        this.rateOfChange = rateOfChange;
     }
     
-    Vector getSlice(int index) {
-        return bodies[index].getState(rateOfChange);
+    private static GeneralizedBody.State[] initialState(GeneralizedBody[] bodies) {
+        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
+        for (int i=0; i<bodies.length; i++) states[i] = bodies[i].getInitialState();
+        return states;
     }
     
-    public int getDimension() {
-        return stateOffsets[stateOffsets.length - 1];
+    private static GeneralizedBody.State[] newState(SlicedVector<GeneralizedBody.State> values) {
+        GeneralizedBody.State[] states = new GeneralizedBody.State[values.getSlices()];
+        for (int i=0; i<values.getSlices(); i++) states[i] = values.getSlice(i);
+        return states;
     }
 
-    public double getComponent(int index) {
-        // Naive linear search. Replace this by binary chop.
-        int i = stateOffsets.length - 1;
-        while (stateOffsets[i] > index) i--;
-        return getSlice(i).getComponent(index - stateOffsets[i]);
+    public StateVector getDerivative() {
+        if (rateOfChange) throw new UnsupportedOperationException();
+        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
+        for (int i=0; i<getSlices(); i++) states[i] = getSlice(i).getDerivative();
+        return new StateVector(bodies, states, true);
     }
 
-    public Vector mult(double scalar) {
-        return new StateVectorModified(Operation.SCALE, this, this, scalar);
+    public StateVector mult(double scalar) {
+        return new StateVector(bodies, super.mult(scalar), rateOfChange);
     }
 
-    public double mult(Vector v) {
-        throw new UnsupportedOperationException();
-    }
-
-    public Vector multComponents(Vector v) {
-        throw new UnsupportedOperationException();
-    }
-
-    public Vector add(Vector v) {
+    public StateVector add(Vector v) {
         if (!(v instanceof StateVector)) throw new IllegalArgumentException();
-        return new StateVectorModified(Operation.ADD, this, (StateVector) v, 0);
+        StateVector other = (StateVector) v;
+        if (this.bodies != other.bodies) throw new IllegalArgumentException();
+        return new StateVector(bodies, super.add(v), this.rateOfChange && other.rateOfChange);
     }
 
-    public Vector subtract(Vector v) {
+    public StateVector subtract(Vector v) {
         if (!(v instanceof StateVector)) throw new IllegalArgumentException();
-        return new StateVectorModified(Operation.SUBTRACT, this, (StateVector) v, 0);
-    }
-
-    public void toDoubleArray(double[] array, int offset) {
-        for (int i=0; i<getDimension(); i++) array[i+offset] = getComponent(i);
-    }
-    
-    public void apply() {
-        for (int i=0; i<bodies.length; i++) bodies[i].setState(getSlice(i));
-    }
-    
-    public String toString() {
-        String result = "";
-        for (int i=0; i<bodies.length; i++) result += (i == 0 ? "" : " ") + getSlice(i).toString();
-        return result;
-    }
-    
-    
-    private enum Operation { ADD, SUBTRACT, SCALE };
-    
-    private static class StateVectorModified extends StateVector {
-        private Vector[] slices;
-        
-        public StateVectorModified(Operation op, StateVector op1, StateVector op2, double factor) {
-            super(op1.bodies, op1.rateOfChange && op2.rateOfChange);
-            this.slices = new Vector[op1.bodies.length];
-            for (int i=0; i<slices.length; i++) {
-                if (op == Operation.ADD) slices[i] = op1.getSlice(i).add(op2.getSlice(i)); else
-                if (op == Operation.SUBTRACT) slices[i] = op1.getSlice(i).subtract(op2.getSlice(i)); else
-                if (op == Operation.SCALE) slices[i] = op1.getSlice(i).mult(factor);
-            }
-        }
-
-        // Don't override getComponent as well!
-        Vector getSlice(int index) {
-            return slices[index];
-        }
+        StateVector other = (StateVector) v;
+        if (this.bodies != other.bodies) throw new IllegalArgumentException();
+        return new StateVector(bodies, super.subtract(v), this.rateOfChange && other.rateOfChange);
     }
 }
