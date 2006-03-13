@@ -21,12 +21,32 @@ public abstract class RigidBody implements Body {
     protected abstract Matrix33 getInvInertia(Body.State state);
     
     public Body.State getInitialState() {
-        return new ObjectState(getInitialPosition(), getInitialOrientation(),
+        return new State(getInitialPosition(), getInitialOrientation(),
                 getInitialLinearMomentum(), getInitialAngularMomentum(), false);
     }
 
+    public void interaction(SimulationObject.State ownState, SimulationObject.State partnerState,
+            InteractionList result, boolean allowReverse) {
+        if (allowReverse) partnerState.getOwner().interaction(partnerState, ownState, result, false);
+    }
     
-    private class ObjectState implements Body.State {
+    public State handleInteraction(SimulationObject.State previousState, Interaction action) {
+        State me;
+        try {
+            me = (State) previousState;
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException(e);
+        }
+        if ((me.getOwner() != this) || me.rateOfChange) throw new IllegalArgumentException();
+        if (action instanceof InteractionForce) {
+            InteractionForce f = (InteractionForce) action;
+            return me.applyForce(f.getForceTorque(me.getOwner()));
+        }
+        return me;
+    }
+    
+    
+    class State implements Body.State {
         // Primary quantities
         private final Vector3D pos, mom, angmom;
         private final Quaternion orient; // orient transforms local to world
@@ -38,7 +58,7 @@ public abstract class RigidBody implements Body {
         private final Vector vel2, accel2;
         private final MassInertia massInertia;
         
-        ObjectState(Vector3D pos, Quaternion orient, Vector3D mom, Vector3D angmom, boolean rateOfChange) {
+        State(Vector3D pos, Quaternion orient, Vector3D mom, Vector3D angmom, boolean rateOfChange) {
             if (!rateOfChange) {
                 this.pos = pos; this.orient = orient; this.mom = mom; this.angmom = angmom;
                 this.forces = new Vector3D(); this.torques = new Vector3D();
@@ -65,7 +85,7 @@ public abstract class RigidBody implements Body {
             }
         }
         
-        ObjectState(ObjectState origin, Vector3D linear, Vector3D angular, boolean impulse) {
+        State(State origin, Vector3D linear, Vector3D angular, boolean impulse) {
             this.pos = origin.pos; this.orient = origin.orient; rateOfChange = false;
             if (impulse) {
                 this.mom = origin.mom.add(linear); this.angmom = origin.angmom.add(angular);
@@ -90,7 +110,7 @@ public abstract class RigidBody implements Body {
             massInertia = new MassInertia(this);
         }
         
-        ObjectState(ObjectState origin, boolean rateOfChange) {
+        State(State origin, boolean rateOfChange) {
             this.pos = origin.pos; this.mom = origin.mom; this.angmom = origin.angmom;
             this.orient = origin.orient; this.forces = origin.forces; this.torques = origin.torques;
             this.rateOfChange = rateOfChange;
@@ -131,26 +151,26 @@ public abstract class RigidBody implements Body {
             return angvel;
         }
 
-        public Body.State applyForce(Vector forceTorque) {
+        public State applyForce(Vector forceTorque) {
             if (rateOfChange) throw new UnsupportedOperationException();
             Vector3D force = new Vector3D(forceTorque.getComponent(0),
                     forceTorque.getComponent(1), forceTorque.getComponent(2));
             Vector3D torque = new Vector3D(forceTorque.getComponent(3),
                     forceTorque.getComponent(4), forceTorque.getComponent(5));
-            return new ObjectState(this, force, torque, false);
+            return new State(this, force, torque, false);
         }
 
-        public Body.State applyImpulse(Vector impulse) {
+        public State applyImpulse(Vector impulse) {
             if (rateOfChange) throw new UnsupportedOperationException();
             Vector3D linear = new Vector3D(impulse.getComponent(0),
                     impulse.getComponent(1), impulse.getComponent(2));
             Vector3D angular = new Vector3D(impulse.getComponent(3),
                     impulse.getComponent(4), impulse.getComponent(5));
-            return new ObjectState(this, linear, angular, true);
+            return new State(this, linear, angular, true);
         }
 
-        public ObjectState getDerivative() {
-            return new ObjectState(this, true);
+        public State getDerivative() {
+            return new State(this, true);
         }
 
         public Matrix getMassInertia() {
@@ -168,29 +188,14 @@ public abstract class RigidBody implements Body {
             return accel2;
         }
 
-        public Body.State handleInteraction(SimulationObject.State state, Interaction action) {
-            if (rateOfChange) throw new UnsupportedOperationException();
-            if (!(state instanceof ObjectState)) throw new IllegalArgumentException();
-            if (action instanceof InteractionForce) {
-                InteractionForce f = (InteractionForce) action;
-                return applyForce(f.getForceTorque(getOwner()));
-            }
-            return (ObjectState) state;
-        }
-
-        public void interaction(SimulationObject.State partnerState, InteractionList result, boolean allowReverse) {
-            if (rateOfChange) throw new UnsupportedOperationException();
-            if (allowReverse) partnerState.interaction(this, result, false);
-        }
-
         public Vector add(Vector v) {
-            if (!(v instanceof ObjectState)) throw new IllegalArgumentException();
+            if (!(v instanceof State)) throw new IllegalArgumentException();
             // If we are performing an integration step, v2 should be the derivative.
             // Otherwise the order is arbitrary.
-            ObjectState v1 = this;
-            ObjectState v2 = (ObjectState) v;
+            State v1 = this;
+            State v2 = (State) v;
             if (v1.rateOfChange && !v2.rateOfChange) {
-                ObjectState tmp = v1; v1 = v2; v2 = tmp;
+                State tmp = v1; v1 = v2; v2 = tmp;
             }
             // Gather the quantities that we are adding
             Vector3D   p1 = v1.rateOfChange ? v1.vel       : v1.pos;
@@ -207,7 +212,7 @@ public abstract class RigidBody implements Body {
             else q = new Quaternion(q1.getW() + q2.getW(), q1.getX() + q2.getX(),
                     q1.getY() + q2.getY(), q1.getZ() + q2.getZ());
             // Create sum
-            return new ObjectState(p1.add(p2), q, r1.add(r2), s1.add(s2),
+            return new State(p1.add(p2), q, r1.add(r2), s1.add(s2),
                     v1.rateOfChange && v2.rateOfChange);
         }
 
@@ -237,11 +242,11 @@ public abstract class RigidBody implements Body {
 
         public Vector mult(double scalar) {
             if (!rateOfChange) {
-                return new ObjectState(pos.mult(scalar), new Quaternion(scalar*orient.getW(),
+                return new State(pos.mult(scalar), new Quaternion(scalar*orient.getW(),
                         scalar*orient.getX(), scalar*orient.getY(), scalar*orient.getZ()),
                         mom.mult(scalar), angmom.mult(scalar), rateOfChange);
             } else {
-                return new ObjectState(vel.mult(scalar), new Quaternion(scalar*orientDot.getW(),
+                return new State(vel.mult(scalar), new Quaternion(scalar*orientDot.getW(),
                         scalar*orientDot.getX(), scalar*orientDot.getY(), scalar*orientDot.getZ()),
                         forces.mult(scalar), torques.mult(scalar), rateOfChange);
             }
@@ -275,10 +280,10 @@ public abstract class RigidBody implements Body {
     
     
     private class MassInertia extends MatrixImpl {
-        private ObjectState state;
+        private State state;
         private Matrix inv;
         
-        private MassInertia(ObjectState state) {
+        private MassInertia(State state) {
             super(null);
             this.state = state;
             inv = new InverseMassInertia(this);
@@ -307,7 +312,7 @@ public abstract class RigidBody implements Body {
     
     
     private class InverseMassInertia extends MatrixImpl {
-        private ObjectState state;
+        private State state;
         private Matrix inv;
 
         private InverseMassInertia(MassInertia mi) {
