@@ -188,7 +188,7 @@ public abstract class RigidBody implements Body {
             return accel2;
         }
 
-        public Vector add(Vector v) {
+        public State add(Vector v) {
             if (!(v instanceof State)) throw new IllegalArgumentException();
             // If we are performing an integration step, v2 should be the derivative.
             // Otherwise the order is arbitrary.
@@ -240,7 +240,7 @@ public abstract class RigidBody implements Body {
             return 13;
         }
 
-        public Vector mult(double scalar) {
+        public State mult(double scalar) {
             if (!rateOfChange) {
                 return new State(pos.mult(scalar), new Quaternion(scalar*orient.getW(),
                         scalar*orient.getX(), scalar*orient.getY(), scalar*orient.getZ()),
@@ -256,11 +256,11 @@ public abstract class RigidBody implements Body {
             throw new UnsupportedOperationException();
         }
 
-        public Vector multComponents(Vector v) {
+        public State multComponents(Vector v) {
             throw new UnsupportedOperationException();
         }
 
-        public Vector subtract(Vector v) {
+        public State subtract(Vector v) {
             return add(v.mult(-1.0));
         }
 

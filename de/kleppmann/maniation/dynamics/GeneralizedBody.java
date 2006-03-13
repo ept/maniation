@@ -14,6 +14,9 @@ public interface GeneralizedBody extends SimulationObject {
         State applyImpulse(Vector impulse);
         double getEnergy();
         GeneralizedBody getOwner();
+        State mult(double scalar);
+        State add(Vector v);
+        State subtract(Vector v);
     }
 
     GeneralizedBody.State getInitialState();
