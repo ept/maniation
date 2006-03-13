@@ -3,5 +3,5 @@ package de.kleppmann.maniation.dynamics;
 import de.kleppmann.maniation.geometry.CollisionVolume;
 
 public interface Collideable {
-    void collideWith(RigidBody body, CollisionVolume volume, InteractionList result);
+    void collide(Body.State ownState, CollisionVolume partnerVolume, InteractionList result);
 }
