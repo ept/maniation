@@ -19,24 +19,20 @@ public class InteractionList {
     private SparseMatrix massInertia, jacobian, jacobianDot;
     private Set<Constraint> equalities;
     private Set<InequalityConstraint> colliding, resting;
-    private Map<GeneralizedBody,Integer> bodyOffsets;
-    private Map<Constraint,Integer> constrOffsets;
+    private Map<GeneralizedBody, Integer> bodyOffsets, bodyStateSizes;
+    private Map<Constraint, Integer> constrOffsets;
     
     public void addInteraction(Interaction ia) {
         if (ia instanceof Constraint) constraints.add((Constraint) ia);
         else other.add(ia);
     }
     
-    public void applyNonConstraints() {
-        for (Interaction i : other)
-            for (SimulationObject obj : i.getObjects()) obj.handleInteraction(i);
-    }
-    
-    public void classifyConstraints() {
+    public void classifyConstraints(StateVector state) {
         equalities = new java.util.HashSet<Constraint>();
         colliding = new java.util.HashSet<InequalityConstraint>();
         resting = new java.util.HashSet<InequalityConstraint>();
         for (Constraint c : constraints) {
+            c.setStateMapping(state.getStateMap());
             // If it's an inequality, is the contact colliding, resting or separating?
             if ((c instanceof InequalityConstraint) && (((InequalityConstraint) c).isInequality())) {
                 boolean isColliding = false, isSeparating = true;
@@ -51,31 +47,39 @@ public class InteractionList {
         }
     }
     
-    public void compileConstraints(Collection<Constraint> constraintList) {
+    public void compileConstraints(StateVector state, Collection<Constraint> constraintList) {
         // Put all bodies mentioned by the constraints in some order, and assign each
         // an offset into the velocity/acceleration/force vectors.
         int bodyOffset = 0, bodyCount = 0;
-        bodyOffsets = new java.util.HashMap<GeneralizedBody,Integer>();
-        for (Constraint constr : constraintList)
-            for (SimulationObject obj : constr.getObjects())
+        bodyOffsets = new java.util.HashMap<GeneralizedBody, Integer>();
+        bodyStateSizes = new java.util.HashMap<GeneralizedBody, Integer>();
+        for (Constraint constr : constraintList) {
+            constr.setStateMapping(state.getStateMap());
+            for (SimulationObject obj : constr.getObjects()) {
                 if (obj instanceof GeneralizedBody) {
                     GeneralizedBody b = (GeneralizedBody) obj;
                     if (bodyOffsets.get(b) == null) {
+                        GeneralizedBody.State bstate = state.getStateMap().get(b);
+                        int bsize = bstate.getVelocities().getDimension();
                         bodyOffsets.put(b, bodyOffset);
-                        bodyOffset += b.getVelocities().getDimension();
+                        bodyStateSizes.put(b, bsize);
+                        bodyOffset += bsize;
                         bodyCount++;
                     }
                 }
+            }
+        }
         // Assemble the velocity and acceleration vectors, and the mass/inertia matrix
         // containing all bodies.
         double[] v = new double[bodyOffset], a = new double[bodyOffset];
         SparseMatrix.Slice[] mass = new SparseMatrix.Slice[bodyCount];
         int j = 0;
         for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
+            GeneralizedBody.State bstate = state.getStateMap().get(entry.getKey());
             int offset = entry.getValue();
-            entry.getKey().getVelocities().toDoubleArray(v, offset);
-            entry.getKey().getAccelerations().toDoubleArray(a, offset);
-            mass[j] = new SparseMatrix.SliceImpl(entry.getKey().getMassInertia(), offset, offset);
+            bstate.getVelocities().toDoubleArray(v, offset);
+            bstate.getAccelerations().toDoubleArray(a, offset);
+            mass[j] = new SparseMatrix.SliceImpl(bstate.getMassInertia(), offset, offset);
             j++;
         }
         veloc = new VectorImpl(v); accel = new VectorImpl(a);
@@ -112,26 +116,17 @@ public class InteractionList {
                 jdotSlices.toArray(new SparseMatrix.Slice[jdotSlices.size()]));
     }
 
-    public void applyForces(Vector force) {
+    public StateVector applyForces(StateVector state, Vector force, boolean impulse) {
+        Map<GeneralizedBody, Vector> forceMap = new java.util.HashMap<GeneralizedBody, Vector>();
         for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
             GeneralizedBody body = entry.getKey();
             int offset = entry.getValue();
-            int length = body.getVelocities().getDimension();
+            int length = bodyStateSizes.get(body);
             double[] v = new double[length];
             for (int i=0; i<length; i++) v[i] = force.getComponent(i+offset);
-            body.applyForce(new VectorImpl(v));
+            forceMap.put(body, new VectorImpl(v));
         }
-    }
-    
-    public void applyImpulses(Vector impulse) {
-        for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
-            GeneralizedBody body = entry.getKey();
-            int offset = entry.getValue();
-            int length = body.getVelocities().getDimension();
-            double[] v = new double[length];
-            for (int i=0; i<length; i++) v[i] = impulse.getComponent(i+offset);
-            body.applyImpulse(new VectorImpl(v));
-        }
+        return state.applyForces(forceMap, impulse);
     }
     
     public Vector getVelocity() { return veloc; }
