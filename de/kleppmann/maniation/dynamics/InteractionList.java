@@ -9,18 +9,16 @@ import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.VectorImpl;
-import de.kleppmann.maniation.maths.SparseMatrix.Slice;
 
 public class InteractionList {
     
     private Set<Constraint> constraints = new java.util.HashSet<Constraint>();
     private Set<Interaction> other = new java.util.HashSet<Interaction>();
-    private Vector veloc, accel, penalty, penaltyDot;
-    private SparseMatrix massInertia, jacobian, jacobianDot;
     private Set<Constraint> equalities;
     private Set<InequalityConstraint> colliding, resting;
-    private Map<GeneralizedBody, Integer> bodyOffsets, bodyStateSizes;
     private Map<Constraint, Integer> constrOffsets;
+    private Vector penalty, penaltyDot;
+    private SparseMatrix jacobian, jacobianDot;
     
     public void addInteraction(Interaction ia) {
         if (ia instanceof Constraint) constraints.add((Constraint) ia);
@@ -48,42 +46,8 @@ public class InteractionList {
     }
     
     public void compileConstraints(StateVector state, Collection<Constraint> constraintList) {
-        // Put all bodies mentioned by the constraints in some order, and assign each
-        // an offset into the velocity/acceleration/force vectors.
-        int bodyOffset = 0, bodyCount = 0;
-        bodyOffsets = new java.util.HashMap<GeneralizedBody, Integer>();
-        bodyStateSizes = new java.util.HashMap<GeneralizedBody, Integer>();
-        for (Constraint constr : constraintList) {
-            constr.setStateMapping(state.getStateMap());
-            for (SimulationObject obj : constr.getObjects()) {
-                if (obj instanceof GeneralizedBody) {
-                    GeneralizedBody b = (GeneralizedBody) obj;
-                    if (bodyOffsets.get(b) == null) {
-                        GeneralizedBody.State bstate = state.getStateMap().get(b);
-                        int bsize = bstate.getVelocities().getDimension();
-                        bodyOffsets.put(b, bodyOffset);
-                        bodyStateSizes.put(b, bsize);
-                        bodyOffset += bsize;
-                        bodyCount++;
-                    }
-                }
-            }
-        }
-        // Assemble the velocity and acceleration vectors, and the mass/inertia matrix
-        // containing all bodies.
-        double[] v = new double[bodyOffset], a = new double[bodyOffset];
-        SparseMatrix.Slice[] mass = new SparseMatrix.Slice[bodyCount];
-        int j = 0;
-        for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
-            GeneralizedBody.State bstate = state.getStateMap().get(entry.getKey());
-            int offset = entry.getValue();
-            bstate.getVelocities().toDoubleArray(v, offset);
-            bstate.getAccelerations().toDoubleArray(a, offset);
-            mass[j] = new SparseMatrix.SliceImpl(bstate.getMassInertia(), offset, offset);
-            j++;
-        }
-        veloc = new VectorImpl(v); accel = new VectorImpl(a);
-        massInertia = new SparseMatrix(v.length, v.length, mass);
+        // Update the state of all constraints.
+        for (Constraint constr : constraintList) constr.setStateMapping(state.getStateMap());
         // Assign each constraint to some offset in the constraint vector
         int constrOffset = 0;
         constrOffsets = new java.util.HashMap<Constraint,Integer>();
@@ -102,54 +66,40 @@ public class InteractionList {
             int offset = entry.getValue();
             c.getPenalty().toDoubleArray(p, offset);
             c.getPenaltyDot().toDoubleArray(pdot, offset);
-            for (GeneralizedBody b : c.getJacobian().keySet())
-                jSlices.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), false));
-            for (GeneralizedBody b : c.getJacobianDot().keySet())
-                jdotSlices.add(new JacobianSlice(c, offset, b, bodyOffsets.get(b).intValue(), true));
+            for (GeneralizedBody b : c.getJacobian().keySet()) {
+                int bodyOffset = state.getOffsetMap().get(b);
+                jSlices.add(new JacobianSlice(c, offset, b, bodyOffset, false));
+            }
+            for (GeneralizedBody b : c.getJacobianDot().keySet()) {
+                int bodyOffset = state.getOffsetMap().get(b);
+                jdotSlices.add(new JacobianSlice(c, offset, b, bodyOffset, true));
+            }
         }
         // Create the matrix and vector objects
+        int dimension = state.getVelocities().getDimension();
         penalty = new VectorImpl(p);
         penaltyDot = new VectorImpl(pdot);
-        jacobian = new SparseMatrix(constrOffset, veloc.getDimension(),
+        jacobian = new SparseMatrix(constrOffset, dimension,
                 jSlices.toArray(new SparseMatrix.Slice[jSlices.size()]));
-        jacobianDot = new SparseMatrix(constrOffset, veloc.getDimension(),
+        jacobianDot = new SparseMatrix(constrOffset, dimension,
                 jdotSlices.toArray(new SparseMatrix.Slice[jdotSlices.size()]));
     }
 
-    public StateVector applyForces(StateVector state, Vector force, boolean impulse) {
-        Map<GeneralizedBody, Vector> forceMap = new java.util.HashMap<GeneralizedBody, Vector>();
-        for (Map.Entry<GeneralizedBody,Integer> entry : bodyOffsets.entrySet()) {
-            GeneralizedBody body = entry.getKey();
-            int offset = entry.getValue();
-            int length = bodyStateSizes.get(body);
-            double[] v = new double[length];
-            for (int i=0; i<length; i++) v[i] = force.getComponent(i+offset);
-            forceMap.put(body, new VectorImpl(v));
-        }
-        return state.applyForces(forceMap, impulse);
-    }
-    
-    public Vector getVelocity() { return veloc; }
-    public Vector getAcceleration() { return accel; }
     public Vector getPenalty() { return penalty; }
     public Vector getPenaltyDot() { return penaltyDot; }
-    public SparseMatrix getMassInertia() { return massInertia; }
     public SparseMatrix getJacobian() { return jacobian; }
     public SparseMatrix getJacobianDot() { return jacobianDot; }
+    public Set<Interaction> getNonConstraints() { return other; }
     public Set<Constraint> getEqualityConstraints() { return equalities; }
     public Set<InequalityConstraint> getCollidingContacts() { return colliding; }
     public Set<InequalityConstraint> getRestingContacts() { return resting; }
-    
-    public int getBodyOffset(GeneralizedBody b) {
-        return bodyOffsets.get(b);
-    }
     
     public int getConstraintOffset(Constraint c) {
         return constrOffsets.get(c);
     }
 
 
-    private class JacobianSlice implements Slice {
+    private class JacobianSlice implements SparseMatrix.Slice {
 
         private Constraint constr;
         private GeneralizedBody body;

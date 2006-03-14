@@ -1,38 +1,48 @@
 package de.kleppmann.maniation.dynamics;
 
 import java.util.Map;
-import java.util.Set;
 
+import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.SlicedVector;
+import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
+import de.kleppmann.maniation.maths.VectorImpl;
 
-public class StateVector extends SlicedVector<GeneralizedBody.State> {
+public class StateVector extends SlicedVector<GeneralizedBody.State> implements GeneralizedBody.State {
 
+    private final GeneralizedBody owner;
     private final GeneralizedBody[] bodies;
     private final boolean rateOfChange;
     private Map<GeneralizedBody, GeneralizedBody.State> stateMap;
+    private Map<GeneralizedBody, Integer> bodyIndices, bodyOffsets;
+    private SlicedVector<Vector> veloc, accel;
+    private SparseMatrix massInertia;
+    private double energy;
     
-    public StateVector(GeneralizedBody[] bodies) {
+    public StateVector(GeneralizedBody owner, GeneralizedBody[] bodies) {
         super(initialState(bodies));
+        this.owner = owner;
         this.bodies = bodies;
         this.rateOfChange = false;
-        updateStateMap();
+        update();
     }
 
-    private StateVector(GeneralizedBody[] bodies, SlicedVector<GeneralizedBody.State> values,
-            boolean rateOfChange) {
+    private StateVector(GeneralizedBody owner, GeneralizedBody[] bodies,
+            SlicedVector<GeneralizedBody.State> values, boolean rateOfChange) {
         super(newState(values));
+        this.owner = owner;
         this.bodies = bodies;
         this.rateOfChange = rateOfChange;
-        updateStateMap();
+        update();
     }
     
-    private StateVector(GeneralizedBody[] bodies, GeneralizedBody.State[] states,
-            boolean rateOfChange) {
+    private StateVector(GeneralizedBody owner, GeneralizedBody[] bodies,
+            GeneralizedBody.State[] states, boolean rateOfChange) {
         super(states);
+        this.owner = owner;
         this.bodies = bodies;
         this.rateOfChange = rateOfChange;
-        updateStateMap();
+        update();
     }
     
     private static GeneralizedBody.State[] initialState(GeneralizedBody[] bodies) {
@@ -47,67 +57,131 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> {
         return states;
     }
     
-    private void updateStateMap() {
+    private void update() {
+        bodyIndices = new java.util.HashMap<GeneralizedBody, Integer>();
+        bodyOffsets = new java.util.HashMap<GeneralizedBody, Integer>();
         stateMap = new java.util.HashMap<GeneralizedBody, GeneralizedBody.State>();
-        for (int i=0; i<getSlices(); i++) stateMap.put(bodies[i], getSlice(i));
+        Vector[] velarray = new Vector[bodies.length];
+        Vector[] accarray = new Vector[bodies.length];
+        SparseMatrix.Slice[] mass = new SparseMatrix.Slice[bodies.length];
+        energy = 0.0;
+        int offset = 0;
+        // For all bodies
+        for (int i=0; i<bodies.length; i++) {
+            GeneralizedBody.State state = getSlice(i);
+            bodyIndices.put(bodies[i], i);
+            // stateMap and offsetMap: include sub-bodies
+            bodyOffsets.put(bodies[i], offset);
+            stateMap.put(bodies[i], state);
+            if (state instanceof StateVector) {
+                StateVector sv = (StateVector) state;
+                stateMap.putAll(sv.getStateMap());
+                for (Map.Entry<GeneralizedBody, Integer> bodyOffset : sv.getOffsetMap().entrySet()) {
+                    bodyOffsets.put(bodyOffset.getKey(), bodyOffset.getValue() + offset);
+                }
+            }
+            // Velocity & acceleration vectors, mass/inertia tensor, total energy
+            velarray[i] = state.getVelocities();
+            accarray[i] = state.getAccelerations();
+            mass[i] = new SparseMatrix.SliceImpl(state.getMassInertia(), offset, offset);
+            energy += state.getEnergy();
+            // New offset
+            offset += velarray[i].getDimension();
+        }
+        veloc = new SlicedVector<Vector>(velarray);
+        accel = new SlicedVector<Vector>(accarray);
+        massInertia = new SparseMatrix(offset, offset, mass);
     }
-    
+
     public Map<GeneralizedBody, GeneralizedBody.State> getStateMap() {
         return stateMap;
     }
-
+    
+    public Map<GeneralizedBody, Integer> getOffsetMap() {
+        return bodyOffsets;
+    }
+    
     public StateVector getDerivative() {
         if (rateOfChange) throw new UnsupportedOperationException();
         GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
         for (int i=0; i<getSlices(); i++) states[i] = getSlice(i).getDerivative();
-        return new StateVector(bodies, states, true);
+        return new StateVector(owner, bodies, states, true);
     }
     
-    public StateVector handleInteractions(Set<Interaction> interactions) {
-        for (Interaction i : interactions) {
-            for (SimulationObject obj : i.getObjects()) {
-                if (obj instanceof GeneralizedBody) {
-                    GeneralizedBody body = (GeneralizedBody) obj;
-                    SimulationObject.State newState = obj.handleInteraction(stateMap.get(body), i);
-                    if (newState instanceof GeneralizedBody.State)
-                        stateMap.put(body, (GeneralizedBody.State) newState);
+    public StateVector handleInteraction(Interaction interaction) {
+        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
+        for (int i=0; i<bodies.length; i++) states[i] = getSlice(i);
+        for (SimulationObject obj : interaction.getObjects()) {
+            if (obj instanceof GeneralizedBody) {
+                GeneralizedBody body = (GeneralizedBody) obj;
+                SimulationObject.State newState = body.handleInteraction(stateMap.get(body), interaction);
+                if (newState instanceof GeneralizedBody.State) {
+                    states[bodyIndices.get(body)] = (GeneralizedBody.State) newState;
                 }
             }
         }
-        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
-        for (int i=0; i<bodies.length; i++) states[i] = stateMap.get(bodies[i]);
-        StateVector result = new StateVector(bodies, states, true);
-        updateStateMap();
-        return result;
+        return new StateVector(owner, bodies, states, true);
     }
     
-    public StateVector applyForces(Map<GeneralizedBody, Vector> forceMap, boolean impulse) {
-        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
-        for (int i=0; i<bodies.length; i++) {
-            Vector f = forceMap.get(bodies[i]);
-            if (f != null) {
-                if (impulse) states[i] = getSlice(i).applyImpulse(f);
-                else states[i] = getSlice(i).applyForce(f);
-            } else states[i] = getSlice(i);
-        }
-        return new StateVector(bodies, states, true);
-    }
-
     public StateVector mult(double scalar) {
-        return new StateVector(bodies, super.mult(scalar), rateOfChange);
+        return new StateVector(owner, bodies, super.mult(scalar), rateOfChange);
     }
 
     public StateVector add(Vector v) {
         if (!(v instanceof StateVector)) throw new IllegalArgumentException();
         StateVector other = (StateVector) v;
         if (this.bodies != other.bodies) throw new IllegalArgumentException();
-        return new StateVector(bodies, super.add(v), this.rateOfChange && other.rateOfChange);
+        return new StateVector(owner, bodies, super.add(v), this.rateOfChange && other.rateOfChange);
     }
 
     public StateVector subtract(Vector v) {
         if (!(v instanceof StateVector)) throw new IllegalArgumentException();
         StateVector other = (StateVector) v;
         if (this.bodies != other.bodies) throw new IllegalArgumentException();
-        return new StateVector(bodies, super.subtract(v), this.rateOfChange && other.rateOfChange);
+        return new StateVector(owner, bodies, super.subtract(v), this.rateOfChange && other.rateOfChange);
+    }
+    
+    private StateVector applyImpulseOrForce(Vector value, boolean impulse) {
+        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
+        double[] array = new double[value.getDimension()];
+        value.toDoubleArray(array, 0);
+        int offset = 0;
+        for (int i=0; i<bodies.length; i++) {
+            GeneralizedBody.State state = getSlice(i);
+            int size = state.getVelocities().getDimension();
+            double[] vec = new double[size];
+            for (int j=0; j<size; j++) vec[j] = array[offset+j];
+            states[i] = state.applyImpulse(new VectorImpl(vec));
+            offset += size;
+        }
+        return new StateVector(owner, bodies, states, true);
+    }
+
+    public StateVector applyImpulse(Vector impulse) {
+        return applyImpulseOrForce(impulse, true);
+    }
+
+    public StateVector applyForce(Vector forceTorque) {
+        return applyImpulseOrForce(forceTorque, false);
+    }
+
+    public Vector getVelocities() {
+        return veloc;
+    }
+
+    public Vector getAccelerations() {
+        return accel;
+    }
+
+    public double getEnergy() {
+        return energy;
+    }
+
+    public Matrix getMassInertia() {
+        return massInertia;
+    }
+
+    public GeneralizedBody getOwner() {
+        return owner;
     }
 }
