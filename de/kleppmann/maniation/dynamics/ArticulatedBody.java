@@ -16,14 +16,38 @@ public class ArticulatedBody extends CompoundBody implements Body {
         return result;
     }
 
-    public Vector3D getLocation() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    public Quaternion getOrientation() {
+    public State getInitialState() {
         // TODO Auto-generated method stub
         return null;
     }
     
+    private class State extends StateVector implements Body.State {
+        State() {
+            super(ArticulatedBody.this, null);
+        }
+
+        public ArticulatedBody getOwner() {
+            return ArticulatedBody.this;
+        }
+
+        public Vector3D getCoMPosition() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Quaternion getOrientation() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+        
+        public Vector3D getCoMVelocity() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public Vector3D getAngularVelocity() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    }
 }
