@@ -28,6 +28,8 @@ public class SparseMatrix implements Matrix {
         this.root = new SliceTree();
         this.slices = new Slice[slices.length];
         for (int i=0; i<slices.length; i++) {
+            if (slices[i].getStartColumn() != slices[i].getStartRow())
+                throw new UnsupportedOperationException();
             this.slices[i] = new SliceInverse(slices[i]);
             root.addSlice(this.slices[i]);
         }
