@@ -9,17 +9,15 @@ import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.Node;
 import javax.media.j3d.Shape3D;
 
-import de.kleppmann.maniation.dynamics.RigidBody;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
-import de.kleppmann.maniation.scene.Body;
 import de.kleppmann.maniation.scene.Face;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Vertex;
 
 public class AnimateMesh implements AnimateObject {
 
-    Body sceneBody;
+    de.kleppmann.maniation.scene.Body sceneBody;
     double[] coordinates;
     float[] normals;
     MeshVertex[] vertices;
@@ -29,22 +27,23 @@ public class AnimateMesh implements AnimateObject {
     private Shape3D shape;
     private MyUpdater myUpdater = new MyUpdater();
     private CollisionVolume volume;
-    private RigidBody dynamicBody;
+    private de.kleppmann.maniation.dynamics.Body dynamicBody;
+    private de.kleppmann.maniation.dynamics.Body.State dynamicState;
 
-    public AnimateMesh(Body sceneBody) {
+    public AnimateMesh(de.kleppmann.maniation.scene.Body sceneBody) {
         this.sceneBody = sceneBody;
         // need to call setDynamicBody before object is operational!
     }
     
-    public Body getSceneBody() {
+    public de.kleppmann.maniation.scene.Body getSceneBody() {
         return sceneBody;
     }
     
-    public RigidBody getDynamicBody() {
+    public de.kleppmann.maniation.dynamics.Body getDynamicBody() {
         return dynamicBody;
     }
     
-    public void setDynamicBody(RigidBody dynamicBody) {
+    public void setDynamicBody(de.kleppmann.maniation.dynamics.Body dynamicBody) {
         this.dynamicBody = dynamicBody;
         buildArrays();
         buildJava3D();
@@ -60,23 +59,21 @@ public class AnimateMesh implements AnimateObject {
                 sceneBody.getLocation().getY(), sceneBody.getLocation().getZ());
     }
     
-    public void setLocation(Vector3D location) {
-        sceneBody.getLocation().setX(location.getComponent(0));
-        sceneBody.getLocation().setY(location.getComponent(1));
-        sceneBody.getLocation().setZ(location.getComponent(2));
-        processStimulus();
-    }
-    
     public Quaternion getOrientation() {
         return new Quaternion(sceneBody.getOrientation().getW(), sceneBody.getOrientation().getX(), 
                 sceneBody.getOrientation().getY(), sceneBody.getOrientation().getZ());
     }
     
-    public void setOrientation(Quaternion orientation) {
-        sceneBody.getOrientation().setW(orientation.getW());
-        sceneBody.getOrientation().setX(orientation.getX());
-        sceneBody.getOrientation().setY(orientation.getY());
-        sceneBody.getOrientation().setZ(orientation.getZ());
+    public void setDynamicState(de.kleppmann.maniation.dynamics.Body.State state, Vector3D com) {
+        this.dynamicState = state;
+        Vector3D location = state.getCoMPosition().subtract(state.getOrientation().transform(com));
+        sceneBody.getLocation().setX(location.getComponent(0));
+        sceneBody.getLocation().setY(location.getComponent(1));
+        sceneBody.getLocation().setZ(location.getComponent(2));
+        sceneBody.getOrientation().setW(state.getOrientation().getW());
+        sceneBody.getOrientation().setX(state.getOrientation().getX());
+        sceneBody.getOrientation().setY(state.getOrientation().getY());
+        sceneBody.getOrientation().setZ(state.getOrientation().getZ());
         processStimulus();
     }
     
@@ -115,7 +112,7 @@ public class AnimateMesh implements AnimateObject {
         triangles = new MeshTriangle[mesh.getFaces().size()];
         i = 0;
         for (Face face : mesh.getFaces()) {
-            triangles[i] = new MeshTriangle(dynamicBody,
+            triangles[i] = new MeshTriangle(dynamicState,
                     vertexMap.get(face.getVertices().get(0)),
                     vertexMap.get(face.getVertices().get(1)),
                     vertexMap.get(face.getVertices().get(2)));
