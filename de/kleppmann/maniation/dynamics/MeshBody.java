@@ -84,16 +84,15 @@ public class MeshBody extends RigidBody implements Collideable {
             if (me.getOwner() != this) throw new IllegalArgumentException();
             // If interaction partner supports collision detection, check for collision.
             if (partnerState.getOwner() instanceof Collideable) {
-                mesh.setLocation(me.getCoMPosition().subtract(me.getOrientation().transform(info.com)));
-                mesh.setOrientation(me.getOrientation());
+                mesh.setDynamicState(me, info.com);
                 Collideable partner = (Collideable) partnerState.getOwner();
                 partner.collide((Body.State) partnerState, mesh.getCollisionVolume(), result);
             } else super.interaction(me, partnerState, result, allowReverse);
             // If this body is immobile, also nail it to the world
             if (!mesh.getSceneBody().isMobile() && (partnerState.getOwner() == world)) {
-                result.addInteraction(new NailConstraint(world, me, new Vector3D(0,0,0), nail1));
-                result.addInteraction(new NailConstraint(world, me, new Vector3D(1,0,0), nail2));
-                result.addInteraction(new NailConstraint(world, me, new Vector3D(0,1,0), nail3));
+                result.addInteraction(new NailConstraint(world, me.getOwner(), new Vector3D(0,0,0), nail1));
+                result.addInteraction(new NailConstraint(world, me.getOwner(), new Vector3D(1,0,0), nail2));
+                result.addInteraction(new NailConstraint(world, me.getOwner(), new Vector3D(0,1,0), nail3));
             }
         } catch (ClassCastException e) {
             throw new IllegalArgumentException(e);
@@ -102,8 +101,7 @@ public class MeshBody extends RigidBody implements Collideable {
 
     public void collide(Body.State ownState, CollisionVolume partnerVolume, InteractionList result) {
         if (ownState.getOwner() != this) throw new IllegalArgumentException();
-        mesh.setLocation(ownState.getCoMPosition().subtract(ownState.getOrientation().transform(info.com)));
-        mesh.setOrientation(ownState.getOrientation());
+        mesh.setDynamicState(ownState, info.com);
         Collision collision = new Collision();
         mesh.getCollisionVolume().intersect(partnerVolume, collision);
         collision.process(result);
