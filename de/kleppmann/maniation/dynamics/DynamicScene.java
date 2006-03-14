@@ -9,7 +9,7 @@ public class DynamicScene {
     public DynamicScene(Scene scene, Simulation sim) {
         for (Body body : scene.getBodies()) {
             AnimateMesh geometry = new AnimateMesh(body);
-            MeshBody dynamics = MeshBody.newMeshBody(sim.getWorld(), geometry);
+            MeshBody dynamics = new MeshBody(sim.getWorld(), geometry);
             geometry.setDynamicBody(dynamics);
             sim.addBody(dynamics);
         }
