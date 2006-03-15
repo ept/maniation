@@ -13,15 +13,22 @@ import de.realityinabox.util.CommutativePair;
 
 public class Collision {
 
-    private List<CollisionPoint> intersections = new java.util.ArrayList<CollisionPoint>();
-    private Body.State body1State, body2State;
+    private final List<CollisionPoint> intersections = new java.util.ArrayList<CollisionPoint>();
+    private final AnimateMesh mesh1, mesh2;
+    private final Body body1, body2;
     private Set<MeshTriangle> body1Triangles, body2Triangles;
     private Vector3D planePoint = null, planeNormal = null, penetrationPoint = null;
-    private Body.State planeBodyState = null;
+    private Body planeBody = null;
     private MeshVertex vfVertex = null;
     private MeshTriangle vfFace = null;
     private Vector3D vfNormal = null;
     private CommutativePair<MeshVertex> body1Edge = null, body2Edge = null;
+    
+    public Collision(AnimateMesh mesh1, AnimateMesh mesh2) {
+        this.mesh1 = mesh1; this.mesh2 = mesh2;
+        this.body1 = mesh1.getDynamicBody();
+        this.body2 = mesh2.getDynamicBody();
+    }
     
     public void addIntersection(Vector3D lineFrom, Vector3D lineTo, MeshTriangle tri1, MeshTriangle tri2) {
         intersections.add(new CollisionPoint(lineFrom, lineTo, tri1, tri2));
@@ -33,17 +40,11 @@ public class Collision {
     
     public void process(InteractionList result) {
         if (!isColliding()) return;
-        // Find the two bodies that are actually colliding here
-        Set<Body.State> bodyStates = new HashSet<Body.State>();
+        // Sanity check the two colliding bodies
         for (CollisionPoint coll : intersections) {
-            bodyStates.add(coll.tri1.getBodyState());
-            bodyStates.add(coll.tri2.getBodyState());
-        }
-        if (bodyStates.size() != 2) throw new IllegalStateException();
-        int i = 0;
-        for (Body.State state : bodyStates) {
-            if (i == 0) body1State = state; else body2State = state;
-            i++;
+            if (!(((coll.tri1.getBody() == body1) && (coll.tri2.getBody() == body2)) ||
+                  ((coll.tri1.getBody() == body2) && (coll.tri2.getBody() == body1))))
+                throw new IllegalStateException();
         }
         // Find the sets of intersected triangles for each body
         body1Triangles = new HashSet<MeshTriangle>();
@@ -55,21 +56,19 @@ public class Collision {
         // Test if we can determine a particular type of collision; if not, just
         // approximate the lot with a plane.
         if (detectVertexFace()) {
-            Body vertexBody = (vfFace.getBodyState() == body1State) ?
-                    body2State.getOwner() : body1State.getOwner();
+            Body vertexBody = (vfFace.getBody() == body1) ? body2 : body1;
             result.addInteraction(new VertexFaceCollision(vertexBody, vfVertex.getPosition(),
-                    vfFace.getBodyState().getOwner(), vfFace.getVertices()[0].getPosition(), vfNormal));
+                    vfFace.getBody(), vfFace.getVertices()[0].getPosition(), vfNormal));
         } else if (detectEdgeEdge(body1Triangles) && detectEdgeEdge(body2Triangles)) {
             Vector3D p1 = body1Edge.getLeft().getPosition(), p2 = body2Edge.getLeft().getPosition();
             Vector3D d1 = body1Edge.getRight().getPosition().subtract(p1);
             Vector3D d2 = body2Edge.getRight().getPosition().subtract(p2);
             if (d1.cross(d2).mult(p2.subtract(p1)) > 0.0) d1 = d1.mult(-1.0);
-            result.addInteraction(new EdgeEdgeCollision(body1State.getOwner(), p1, d1,
-                    body2State.getOwner(), p2, d2));
+            result.addInteraction(new EdgeEdgeCollision(body1, p1, d1, body2, p2, d2));
         } else if (calcPlane()) {
-            Body vertexBody = (planeBodyState == body1State) ? body2State.getOwner() : body1State.getOwner();
+            Body vertexBody = (planeBody == body1) ? body2 : body1;
             result.addInteraction(new VertexFaceCollision(vertexBody, penetrationPoint,
-                    planeBodyState.getOwner(), planePoint, planeNormal));
+                    planeBody, planePoint, planeNormal));
         }
     }
     
@@ -96,10 +95,12 @@ public class Collision {
         if (planeNormal.magnitude() < 1e-8) return false;
         planeNormal = planeNormal.normalize();
         // Find the relative velocity (body2 minus body1) of the bodies at the plane
-        Vector3D r1 = planePoint.subtract(body1State.getCoMPosition());
-        Vector3D r2 = planePoint.subtract(body1State.getCoMPosition());
-        Vector3D v1 = body1State.getAngularVelocity().cross(r1).add(body1State.getCoMVelocity());
-        Vector3D v2 = body2State.getAngularVelocity().cross(r2).add(body2State.getCoMVelocity());
+        Vector3D r1 = planePoint.subtract(mesh1.getDynamicState().getCoMPosition());
+        Vector3D r2 = planePoint.subtract(mesh2.getDynamicState().getCoMPosition());
+        Vector3D v1 = mesh1.getDynamicState().getAngularVelocity().cross(r1).add(
+                mesh1.getDynamicState().getCoMVelocity());
+        Vector3D v2 = mesh2.getDynamicState().getAngularVelocity().cross(r2).add(
+                mesh2.getDynamicState().getCoMVelocity());
         double vsign = (v2.subtract(v1).mult(planeNormal) < 0.0) ? -1.0 : +1.0;
         // Find the point of maximum penetration through the plane
         double dmax = -1e20;
@@ -107,13 +108,13 @@ public class Collision {
             for (MeshVertex v : coll.getTri1().getVertices()) {
                 double dist = -vsign*v.getPosition().subtract(planePoint).mult(planeNormal);
                 if (dist > dmax) {
-                    penetrationPoint = v.getPosition(); dmax = dist; planeBodyState = body2State;
+                    penetrationPoint = v.getPosition(); dmax = dist; planeBody = body2;
                 }
             }
             for (MeshVertex v : coll.getTri2().getVertices()) {
                 double dist = vsign*v.getPosition().subtract(planePoint).mult(planeNormal);
                 if (dist > dmax) {
-                    penetrationPoint = v.getPosition(); dmax = dist; planeBodyState = body1State;
+                    penetrationPoint = v.getPosition(); dmax = dist; planeBody = body1;
                 }
             }
         }
@@ -187,11 +188,11 @@ public class Collision {
         }
         
         MeshTriangle getTri1() {
-            return (tri1.getBodyState() == body1State) ? tri1 : tri2;
+            return (tri1.getBody() == body1) ? tri1 : tri2;
         }
 
         MeshTriangle getTri2() {
-            return (tri1.getBodyState() == body2State) ? tri1 : tri2;
+            return (tri1.getBody() == body2) ? tri1 : tri2;
         }
     }
 }

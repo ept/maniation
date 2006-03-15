@@ -43,6 +43,10 @@ public class AnimateMesh implements AnimateObject {
         return dynamicBody;
     }
     
+    public de.kleppmann.maniation.dynamics.Body.State getDynamicState() {
+        return dynamicState;
+    }
+    
     public void setDynamicBody(de.kleppmann.maniation.dynamics.Body dynamicBody) {
         this.dynamicBody = dynamicBody;
         buildArrays();
@@ -112,7 +116,7 @@ public class AnimateMesh implements AnimateObject {
         triangles = new MeshTriangle[mesh.getFaces().size()];
         i = 0;
         for (Face face : mesh.getFaces()) {
-            triangles[i] = new MeshTriangle(dynamicState,
+            triangles[i] = new MeshTriangle(dynamicBody,
                     vertexMap.get(face.getVertices().get(0)),
                     vertexMap.get(face.getVertices().get(1)),
                     vertexMap.get(face.getVertices().get(2)));

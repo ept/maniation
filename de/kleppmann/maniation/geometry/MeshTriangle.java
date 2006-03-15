@@ -5,14 +5,13 @@ import java.util.List;
 import de.kleppmann.maniation.dynamics.Body;
 import de.kleppmann.maniation.maths.Vector3D;
 
-
 /**
  * A triangle in a mesh in which the vertex positions may change, but
  * the triangle configurations stay constant.
  */
 public class MeshTriangle {
     
-    Body.State bodyState;
+    Body body;
     MeshVertex[] vertices;
     BoundingBox bbox;
     double[] centre;
@@ -26,8 +25,8 @@ public class MeshTriangle {
         e1, e2, e3, f1, f2, f3, ab1, ab2, ab3, ac1, ac2, ac3,
         de1, de2, de3, df1, df2, df3, n1, n2, n3, m1, m2, m3;
 
-    public MeshTriangle(Body.State bodyState, MeshVertex v1, MeshVertex v2, MeshVertex v3) {
-        this.bodyState = bodyState;
+    public MeshTriangle(Body body, MeshVertex v1, MeshVertex v2, MeshVertex v3) {
+        this.body = body;
         vertices = new MeshVertex[3];
         vertices[0] = v1;
         vertices[1] = v2;
@@ -40,8 +39,8 @@ public class MeshTriangle {
         return vertices;
     }
     
-    public Body.State getBodyState() {
-        return bodyState;
+    public Body getBody() {
+        return body;
     }
     
     public void updateBBox() {
