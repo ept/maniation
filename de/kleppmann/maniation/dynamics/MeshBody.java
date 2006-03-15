@@ -4,7 +4,6 @@ import java.util.List;
 
 import de.kleppmann.maniation.geometry.AnimateMesh;
 import de.kleppmann.maniation.geometry.Collision;
-import de.kleppmann.maniation.geometry.CollisionVolume;
 import de.kleppmann.maniation.maths.Matrix33;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
@@ -86,7 +85,7 @@ public class MeshBody extends RigidBody implements Collideable {
             if (partnerState.getOwner() instanceof Collideable) {
                 mesh.setDynamicState(me, info.com);
                 Collideable partner = (Collideable) partnerState.getOwner();
-                partner.collide((Body.State) partnerState, mesh.getCollisionVolume(), result);
+                partner.collide((Body.State) partnerState, mesh, result);
             } else super.interaction(me, partnerState, result, allowReverse);
             // If this body is immobile, also nail it to the world
             if (!mesh.getSceneBody().isMobile() && (partnerState.getOwner() == world)) {
@@ -99,11 +98,11 @@ public class MeshBody extends RigidBody implements Collideable {
         }
     }
 
-    public void collide(Body.State ownState, CollisionVolume partnerVolume, InteractionList result) {
+    public void collide(Body.State ownState, AnimateMesh partner, InteractionList result) {
         if (ownState.getOwner() != this) throw new IllegalArgumentException();
         mesh.setDynamicState(ownState, info.com);
-        Collision collision = new Collision();
-        mesh.getCollisionVolume().intersect(partnerVolume, collision);
+        Collision collision = new Collision(mesh, partner);
+        mesh.getCollisionVolume().intersect(partner.getCollisionVolume(), collision);
         collision.process(result);
     }
 
