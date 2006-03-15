@@ -6,7 +6,7 @@ public class RungeKutta implements ODESolver {
     
     private ODE ode;
     private double time;
-    private double h, hmin = 0.00002, hmax = 0.1, eps = 10e-18, safety = 0.9;
+    private double h, hmin = 0.00002, hmax = 0.1, eps = 1e-10 /*10e-18*/, safety = 0.9;
     private double shrinkPower = -0.25, growPower = -0.2;
     private Vector status, error;
     
@@ -74,8 +74,9 @@ public class RungeKutta implements ODESolver {
             errmax /= eps;
             if (errmax <= 1.0) break;
             if (h < 1.3*hmin) {
-                System.out.print("error too large, but continuing anyway -- ");
-                break;
+                System.out.println("error too large, but continuing anyway.");
+                status = newstatus; h = hmin; time += h;
+                return;
             }
             System.out.println("error too large.");
             double h1 = safety*h*Math.pow(errmax, shrinkPower);
