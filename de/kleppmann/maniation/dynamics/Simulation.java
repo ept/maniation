@@ -65,20 +65,21 @@ public class Simulation {
             throws ODEBacktrackException {
         // Check for colliding contacts and abort this simulation step if necessary
         il.classifyConstraints(state);
-        if (il.getCollidingContacts().size() > 0) {
-            double penetrationTime = 0.0; boolean penetrated = false;
-            for (Constraint c : il.getCollidingContacts()) {
-                for (int i=0; i<c.getDimension(); i++) {
-                    double d = c.getPenaltyDot().getComponent(i);
-                    if (d < -PENETRATION_TOLERANCE) {
-                        double t = c.getPenalty().getComponent(i) / d;
-                        if ((!penetrated) || (t > penetrationTime)) penetrationTime = t;
-                        penetrated = true;
-                    }
+        double penetrationTime = 0.0; boolean penetrated = false;
+        Set<Constraint> contacts = new java.util.HashSet<Constraint>();
+        contacts.addAll(il.getCollidingContacts());
+        contacts.addAll(il.getRestingContacts());
+        for (Constraint c : contacts) {
+            for (int i=0; i<c.getDimension(); i++) {
+                double d = c.getPenalty().getComponent(i);
+                if (d < -PENETRATION_TOLERANCE) {
+                    double t = d / c.getPenaltyDot().getComponent(i);
+                    if ((!penetrated) || (t > penetrationTime)) penetrationTime = t;
+                    penetrated = true;
                 }
             }
-            if (penetrated) throw new ODEBacktrackException(time, time - penetrationTime);
         }
+        if (penetrated) throw new ODEBacktrackException(time, time - penetrationTime);
     }
     
     private StateVector constraintImpulses(StateVector state, InteractionList il) {
