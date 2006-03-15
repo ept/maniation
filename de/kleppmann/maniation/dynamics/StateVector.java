@@ -58,6 +58,10 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
     }
     
     private void update() {
+        if (rateOfChange) {
+            bodyIndices = bodyOffsets = null; stateMap = null;
+            return;
+        }
         bodyIndices = new java.util.HashMap<GeneralizedBody, Integer>();
         bodyOffsets = new java.util.HashMap<GeneralizedBody, Integer>();
         stateMap = new java.util.HashMap<GeneralizedBody, GeneralizedBody.State>();
@@ -94,10 +98,12 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
     }
 
     public Map<GeneralizedBody, GeneralizedBody.State> getStateMap() {
+        if (rateOfChange) throw new UnsupportedOperationException();
         return stateMap;
     }
     
     public Map<GeneralizedBody, Integer> getOffsetMap() {
+        if (rateOfChange) throw new UnsupportedOperationException();
         return bodyOffsets;
     }
     
@@ -109,6 +115,7 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
     }
     
     public StateVector handleInteraction(Interaction interaction) {
+        if (rateOfChange) throw new UnsupportedOperationException();
         GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
         for (int i=0; i<bodies.length; i++) states[i] = getSlice(i);
         for (SimulationObject obj : interaction.getObjects()) {
@@ -120,7 +127,7 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
                 }
             }
         }
-        return new StateVector(owner, bodies, states, true);
+        return new StateVector(owner, bodies, states, rateOfChange);
     }
     
     public StateVector mult(double scalar) {
@@ -154,7 +161,7 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
             states[i] = state.applyImpulse(new VectorImpl(vec));
             offset += size;
         }
-        return new StateVector(owner, bodies, states, true);
+        return new StateVector(owner, bodies, states, rateOfChange);
     }
 
     public StateVector applyImpulse(Vector impulse) {
@@ -166,18 +173,22 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
     }
 
     public Vector getVelocities() {
+        if (rateOfChange) throw new UnsupportedOperationException();
         return veloc;
     }
 
     public Vector getAccelerations() {
+        if (rateOfChange) throw new UnsupportedOperationException();
         return accel;
     }
 
     public double getEnergy() {
+        if (rateOfChange) throw new UnsupportedOperationException();
         return energy;
     }
 
     public Matrix getMassInertia() {
+        if (rateOfChange) throw new UnsupportedOperationException();
         return massInertia;
     }
 
