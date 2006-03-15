@@ -67,7 +67,7 @@ public class SlicedVector <T extends Vector> implements Vector {
     public SlicedVector<T> multComponents(Vector v) {
         if (!(v instanceof SlicedVector)) throw new IllegalArgumentException();
         SlicedVector other = (SlicedVector) v;
-        if (!sliceOffsets.equals(other.sliceOffsets)) throw new IllegalArgumentException();
+        //if (!sliceOffsets.equals(other.sliceOffsets)) throw new IllegalArgumentException();
         try {
             T[] newSlices = (T[]) java.lang.reflect.Array.newInstance(
                     slices.getClass().getComponentType(), slices.length);
@@ -83,7 +83,7 @@ public class SlicedVector <T extends Vector> implements Vector {
     public SlicedVector<T> add(Vector v) {
         if (!(v instanceof SlicedVector)) throw new IllegalArgumentException();
         SlicedVector other = (SlicedVector) v;
-        if (!sliceOffsets.equals(other.sliceOffsets)) throw new IllegalArgumentException();
+        //if (!sliceOffsets.equals(other.sliceOffsets)) throw new IllegalArgumentException();
         try {
             T[] newSlices = (T[]) java.lang.reflect.Array.newInstance(
                     slices.getClass().getComponentType(), slices.length);
@@ -99,7 +99,7 @@ public class SlicedVector <T extends Vector> implements Vector {
     public SlicedVector<T> subtract(Vector v) {
         if (!(v instanceof SlicedVector)) throw new IllegalArgumentException();
         SlicedVector other = (SlicedVector) v;
-        if (!sliceOffsets.equals(other.sliceOffsets)) throw new IllegalArgumentException();
+        //if (!sliceOffsets.equals(other.sliceOffsets)) throw new IllegalArgumentException();
         try {
             T[] newSlices = (T[]) java.lang.reflect.Array.newInstance(
                     slices.getClass().getComponentType(), slices.length);
