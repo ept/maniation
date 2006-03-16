@@ -74,15 +74,23 @@ public class Collision {
     
     private boolean calcPlane() {
         // Find a point on the plane by averaging all collision line endpoints
-        planePoint = new Vector3D();
+        Set<CommutativePair<InexactPoint>> lines = new java.util.HashSet<CommutativePair<InexactPoint>>();
         for (CollisionPoint coll : intersections) {
-            planePoint = planePoint.add(coll.lineFrom).add(coll.lineTo);
+            lines.add(new CommutativePair<InexactPoint>(new InexactPoint(coll.lineFrom),
+                    new InexactPoint(coll.lineTo)));
         }
-        planePoint = planePoint.mult(0.5/intersections.size());
+        planePoint = new Vector3D();
+        for (CommutativePair<InexactPoint> line : lines) {
+            planePoint = planePoint.add(line.getLeft ().getPosition());
+            planePoint = planePoint.add(line.getRight().getPosition());
+        }
+        planePoint = planePoint.mult(0.5/lines.size());
         // Find the plane normal by averaging the normals of all triangles
         planeNormal = new Vector3D();
-        for (CollisionPoint coll : intersections) {
-            Vector3D n = coll.lineFrom.subtract(planePoint).cross(coll.lineTo.subtract(planePoint));
+        for (CommutativePair<InexactPoint> line : lines) {
+            Vector3D a = line.getLeft ().getPosition().subtract(planePoint);
+            Vector3D b = line.getRight().getPosition().subtract(planePoint);
+            Vector3D n = a.cross(b);
             if (n.magnitude() > 1e-6) {
                 // Flip this normal if it's pointing in the opposite direction to the previous ones
                 if (planeNormal.mult(n) < 0.0) n = n.mult(-1.0);
@@ -94,6 +102,29 @@ public class Collision {
         // would be better to handle this case separately.)
         if (planeNormal.magnitude() < 1e-8) return false;
         planeNormal = planeNormal.normalize();
+        // Find the point of maximum penetration through the plane
+        double dmax = -1e20, dmin = 1e20;
+        Body bmax = null, bmin = null;
+        for (CollisionPoint coll : intersections) {
+            for (MeshVertex v : coll.getTri1().getVertices()) {
+                double dist = -v.getPosition().subtract(planePoint).mult(planeNormal);
+                if (dist > dmax) {
+                    dmax = dist; bmax = body2;
+                }
+                if (dist < dmin) {
+                    dmin = dist; bmin = body2;
+                }
+            }
+            for (MeshVertex v : coll.getTri2().getVertices()) {
+                double dist = v.getPosition().subtract(planePoint).mult(planeNormal);
+                if (dist > dmax) {
+                    dmax = dist; bmax = body1;
+                }
+                if (dist < dmin) {
+                    dmin = dist; bmin = body1;
+                }
+            }
+        }
         // Find the relative velocity (body2 minus body1) of the bodies at the plane
         Vector3D r1 = planePoint.subtract(mesh1.getDynamicState().getCoMPosition());
         Vector3D r2 = planePoint.subtract(mesh2.getDynamicState().getCoMPosition());
@@ -101,28 +132,24 @@ public class Collision {
                 mesh1.getDynamicState().getCoMVelocity());
         Vector3D v2 = mesh2.getDynamicState().getAngularVelocity().cross(r2).add(
                 mesh2.getDynamicState().getCoMVelocity());
-        double vsign = (v2.subtract(v1).mult(planeNormal) < 0.0) ? -1.0 : +1.0;
-        // Find the point of maximum penetration through the plane
-        double dmax = -1e20;
-        for (CollisionPoint coll : intersections) {
-            for (MeshVertex v : coll.getTri1().getVertices()) {
-                double dist = -vsign*v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (dist > dmax) {
-                    penetrationPoint = v.getPosition(); dmax = dist; planeBody = body2;
-                }
-            }
-            for (MeshVertex v : coll.getTri2().getVertices()) {
-                double dist = vsign*v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (dist > dmax) {
-                    penetrationPoint = v.getPosition(); dmax = dist; planeBody = body1;
-                }
-            }
+        double vrel = v2.subtract(v1).mult(planeNormal);
+        // We presume that if there is a relative velocity perpendicular to the plane,
+        // then points with the same sign as the velocity when projected onto the normal
+        // are the points of furthest penetration. If there is no significant relative
+        // velocity, we choose the smaller of the distances on the two sides (to be safe).
+        double dist;
+        if (vrel < -0.001) {
+            planeBody = bmin; dist = dmin;
+        } else if (vrel > 0.001) {
+            planeBody = bmax; dist = -dmax;
+        } else if (Math.abs(dmax) > Math.abs(dmin)) {
+            planeBody = bmin; dist = dmin;
+        } else {
+            planeBody = bmax; dist = -dmax;
         }
-        // The sign of the plane normal is chosen arbitrarily. Flip it such that the
-        // point of maximum penetration lies on the forbidden side.
-        if (penetrationPoint.subtract(planePoint).mult(planeNormal) > 0.0) {
-            planeNormal = planeNormal.mult(-1.0);
-        }
+        // As penetration point, we just choose one offset from the plane centrepoint
+        // by the appropriate distance.
+        penetrationPoint = planePoint.add(planeNormal.mult(dist));
         return true;
     }
     
