@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.maths;
 
+import java.text.DecimalFormat;
+
 public class MatrixImpl implements Matrix {
     
     private double[][] m;
@@ -98,5 +100,17 @@ public class MatrixImpl implements Matrix {
             for (int j=0; j<getColumns(); j++)
                 t[i][j] = this.getComponent(i,j) - other.getComponent(i,j);
         return new MatrixImpl(t);
+    }
+    
+    public String toString() {
+        DecimalFormat format = new DecimalFormat("#####0.0000000000");
+        String result = "[";
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++) {
+                result += format.format(getComponent(i,j));
+                if (j < getColumns() - 1) result += ", "; else
+                if (i < getRows() - 1) result += "; "; else result += "]";
+            }
+        return result;
     }
 }

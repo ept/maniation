@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.maths;
 
+import java.text.DecimalFormat;
+
 public class Matrix33 implements Matrix {
     
     private double m11, m12, m13, m21, m22, m23, m31, m32, m33;
@@ -169,5 +171,17 @@ public class Matrix33 implements Matrix {
                 m31 - other.getComponent(2,0),
                 m32 - other.getComponent(2,1),
                 m33 - other.getComponent(2,2));
+    }
+    
+    public String toString() {
+        DecimalFormat format = new DecimalFormat("#####0.0000000000");
+        String result = "[";
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++) {
+                result += format.format(getComponent(i,j));
+                if (j < getColumns() - 1) result += ", "; else
+                if (i < getRows() - 1) result += "; "; else result += "]";
+            }
+        return result;
     }
 }
