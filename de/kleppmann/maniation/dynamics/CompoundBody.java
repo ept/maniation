@@ -8,11 +8,11 @@ public class CompoundBody implements GeneralizedBody {
         this.bodies = bodies;
     }
 
-    public GeneralizedBody.State getInitialState() {
+    public StateVector getInitialState() {
         return new StateVector(this, bodies);
     }
 
-    public GeneralizedBody.State handleInteraction(SimulationObject.State previousState, Interaction action) {
+    public StateVector handleInteraction(SimulationObject.State previousState, Interaction action) {
         if (!(previousState instanceof StateVector)) throw new IllegalArgumentException();
         StateVector state = (StateVector) previousState;
         if (state.getOwner() != this) throw new IllegalArgumentException();
