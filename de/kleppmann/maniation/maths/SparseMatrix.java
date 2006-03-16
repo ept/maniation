@@ -1,23 +1,21 @@
 package de.kleppmann.maniation.maths;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class SparseMatrix implements Matrix {
     
     private int rows, columns;
     private Slice[] slices;
-    private SliceTree root;
     private SparseMatrix transpose, inverse;
     
     private SparseMatrix(boolean nonsense, int rows, int columns, Slice[] slices) {
         // Create transpose
         this.rows = columns;
         this.columns = rows;
-        this.root = new SliceTree();
         this.slices = new Slice[slices.length];
         for (int i=0; i<slices.length; i++) {
             this.slices[i] = new SliceTranspose(slices[i]);
-            root.addSlice(this.slices[i]);
         }
     }
     
@@ -25,32 +23,23 @@ public class SparseMatrix implements Matrix {
         // Create inverse
         this.rows = rows;
         this.columns = columns;
-        this.root = new SliceTree();
         this.slices = new Slice[slices.length];
         for (int i=0; i<slices.length; i++) {
             if (slices[i].getStartColumn() != slices[i].getStartRow())
                 throw new UnsupportedOperationException();
             this.slices[i] = new SliceInverse(slices[i]);
-            root.addSlice(this.slices[i]);
         }
     }
 
     public SparseMatrix(int rows, int columns, Slice[] slices) {
         this.rows = rows;
         this.columns = columns;
-        this.root = new SliceTree();
         List<Slice> sList = new java.util.ArrayList<Slice>();
         for (Slice s : slices) {
             Matrix m = s.getMatrix();
             if (m instanceof SparseMatrix) {
-                for (Slice s2 : ((SparseMatrix) m).slices) {
-                    sList.add(s2);
-                    root.addSlice(s2);
-                }
-            } else {
-                sList.add(s);
-                root.addSlice(s);
-            }
+                for (Slice s2 : ((SparseMatrix) m).slices) sList.add(s2);
+            } else sList.add(s);
         }
         this.slices = sList.toArray(new Slice[sList.size()]);
         this.transpose = new SparseMatrix(true, rows, columns, this.slices);
@@ -72,7 +61,13 @@ public class SparseMatrix implements Matrix {
     }
 
     public double getComponent(int row, int column) {
-        return this.root.getComponent(row, column);
+        for (Slice s : slices) {
+            if ((row >= s.getStartRow()) && (row - s.getStartRow() < s.getMatrix().getRows()) &&
+                    (column >= s.getStartColumn()) &&
+                    (column - s.getStartColumn() < s.getMatrix().getColumns()))
+                return s.getMatrix().getComponent(row - s.getStartRow(), column - s.getStartColumn());
+        }
+        return 0.0;
     }
 
     public SparseMatrix transpose() {
@@ -136,6 +131,18 @@ public class SparseMatrix implements Matrix {
             for (int j=0; j<columns; j++)
                 t[i][j] = getComponent(i,j) - other.getComponent(i,j);
         return new MatrixImpl(t);
+    }
+    
+    public String toString() {
+        DecimalFormat format = new DecimalFormat("#####0.0000000000");
+        String result = "[";
+        for (int i=0; i<getRows(); i++)
+            for (int j=0; j<getColumns(); j++) {
+                result += format.format(getComponent(i,j));
+                if (j < getColumns() - 1) result += ", "; else
+                if (i < getRows() - 1) result += "; "; else result += "]";
+            }
+        return result;
     }
 
         
@@ -217,82 +224,6 @@ public class SparseMatrix implements Matrix {
         }
         public int getStartRow() {
             return row;
-        }
-    }
-
-    
-    private class SliceTree {
-        private SliceTree left = null, right = null;
-        private Slice slice = null;
-        private int minRow, minCol, maxRow, maxCol;
-        private boolean splitRows;
-        
-        public SliceTree() {
-            minRow = minCol = 0;
-            maxRow = rows - 1;
-            maxCol = columns - 1;
-        }
-        
-        private SliceTree(SliceTree parent, boolean splitRows, boolean upper) {
-            if (splitRows) {
-                minCol = parent.minCol; maxCol = parent.maxCol;
-                if (upper) {
-                    minRow = (parent.minRow + parent.maxRow) / 2 + 1;
-                    maxRow = parent.maxRow;
-                } else {
-                    minRow = parent.minRow;
-                    maxRow = (parent.minRow + parent.maxRow) / 2;
-                }
-            } else {
-                minRow = parent.minRow; maxRow = parent.maxRow;
-                if (upper) {
-                    minCol = (parent.minCol + parent.maxCol) / 2 + 1;
-                    maxCol = parent.maxCol;
-                } else {
-                    minCol = parent.minCol;
-                    maxCol = (parent.minCol + parent.maxCol) / 2;
-                }
-            }
-            if ((minCol > maxCol) || (minRow > maxRow))
-                throw new IllegalArgumentException("overlapping slices");
-        }
-        
-        public void addSlice(Slice s) {
-            if ((s.getStartRow() > maxRow) || (s.getStartColumn() > maxCol) ||
-                    (s.getStartRow() + s.getMatrix().getRows() <= minRow) ||
-                    (s.getStartColumn() + s.getMatrix().getColumns() <= minCol)) return;
-            if ((left == null) && (right == null)) {
-                if (slice == null) {
-                    slice = s;
-                    return;
-                }
-                splitRows = (maxRow - minRow > maxCol - minCol);
-                left = new SliceTree(this, splitRows, false);
-                right = new SliceTree(this, splitRows, true);
-            }
-            left.addSlice(s);
-            right.addSlice(s);
-        }
-        
-        public double getComponent(int row, int column) {
-            if ((left == null) && (right == null)) {
-                if (slice == null) return 0.0;
-                row -= slice.getStartRow();
-                column -= slice.getStartColumn();
-                if ((row < 0) || (column < 0) || (row >= slice.getMatrix().getRows()) ||
-                        (column >= slice.getMatrix().getColumns())) return 0.0;
-                return slice.getMatrix().getComponent(row, column);
-            } else {
-                if (splitRows) {
-                    if (row <= (minRow + maxRow) / 2)
-                        return left.getComponent(row, column); else
-                        return right.getComponent(row, column);
-                } else {
-                    if (column <= (minCol + maxCol) / 2)
-                        return left.getComponent(row, column); else
-                        return right.getComponent(row, column);
-                }
-            }
         }
     }
 }
