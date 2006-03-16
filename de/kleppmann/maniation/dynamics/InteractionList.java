@@ -127,5 +127,9 @@ public class InteractionList {
             if (dot) return constr.getJacobianDot().get(body); 
             else return constr.getJacobian().get(body);
         }
+        
+        public String toString() {
+            return getMatrix().toString();
+        }
     }
 }
