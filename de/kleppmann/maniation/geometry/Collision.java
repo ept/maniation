@@ -104,25 +104,16 @@ public class Collision {
         planeNormal = planeNormal.normalize();
         // Find the point of maximum penetration through the plane
         double dmax = -1e20, dmin = 1e20;
-        Body bmax = null, bmin = null;
         for (CollisionPoint coll : intersections) {
             for (MeshVertex v : coll.getTri1().getVertices()) {
                 double dist = -v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (dist > dmax) {
-                    dmax = dist; bmax = body2;
-                }
-                if (dist < dmin) {
-                    dmin = dist; bmin = body2;
-                }
+                if (dist > dmax) dmax = dist;
+                if (dist < dmin) dmin = dist;
             }
             for (MeshVertex v : coll.getTri2().getVertices()) {
                 double dist = v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (dist > dmax) {
-                    dmax = dist; bmax = body1;
-                }
-                if (dist < dmin) {
-                    dmin = dist; bmin = body1;
-                }
+                if (dist > dmax) dmax = dist;
+                if (dist < dmin) dmin = dist;
             }
         }
         // Find the relative velocity (body2 minus body1) of the bodies at the plane
@@ -136,16 +127,20 @@ public class Collision {
         // We presume that if there is a relative velocity perpendicular to the plane,
         // then points with the same sign as the velocity when projected onto the normal
         // are the points of furthest penetration. If there is no significant relative
-        // velocity, we choose the smaller of the distances on the two sides (to be safe).
+        // velocity, we choose depending on the bodies' centres of masses.
         double dist;
-        if (vrel < -0.001) {
-            planeBody = bmin; dist = dmin;
-        } else if (vrel > 0.001) {
-            planeBody = bmax; dist = -dmax;
-        } else if (Math.abs(dmax) > Math.abs(dmin)) {
-            planeBody = bmin; dist = dmin;
+        if (vrel < -0.01) {
+            planeBody = body1; dist = dmin;
+        } else if (vrel > 0.01) {
+            planeBody = body2; dist = -dmax;
         } else {
-            planeBody = bmax; dist = -dmax;
+            double com = mesh2.getDynamicState().getCoMPosition().subtract(
+                    mesh1.getDynamicState().getCoMPosition()).mult(planeNormal);
+            if (com > 0.0) {
+                planeBody = body1; dist = dmin;
+            } else {
+                planeBody = body2; dist = -dmax;
+            }
         }
         // As penetration point, we just choose one offset from the plane centrepoint
         // by the appropriate distance.
