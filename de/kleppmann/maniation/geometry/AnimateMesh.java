@@ -169,34 +169,16 @@ public class AnimateMesh implements AnimateObject {
     }
     
     
-    private static class VertexPosition {
-        static final double TOLERANCE = 1e-5;
+    private static class VertexPosition extends InexactPoint {
         private Vertex v;
-        private long x, y, z;
         
         VertexPosition(Vertex v) {
+            super(new Vector3D(v.getPosition().getX(), v.getPosition().getY(), v.getPosition().getZ()));
             this.v = v;
-            this.x = Math.round(v.getPosition().getX()/TOLERANCE);
-            this.y = Math.round(v.getPosition().getY()/TOLERANCE);
-            this.z = Math.round(v.getPosition().getZ()/TOLERANCE);
         }
         
         public Vertex getVertex() {
             return v;
-        }
-
-        public boolean equals(Object obj) {
-            if (obj instanceof VertexPosition) {
-                VertexPosition other = (VertexPosition) obj;
-                return (this.x == other.x) && (this.y == other.y) && (this.z == other.z);
-            } else return false;
-        }
-
-        public int hashCode() {
-            long result = (x % (1l << 32)) ^ ((x / (1l << 32)) >> 32);
-            result ^= (y % (1l << 32)) ^ ((y / (1l << 32)) >> 32);
-            result ^= (z % (1l << 32)) ^ ((z / (1l << 32)) >> 32);
-            return (int) result;
         }
     }
 }
