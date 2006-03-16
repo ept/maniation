@@ -158,7 +158,8 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
             int size = state.getVelocities().getDimension();
             double[] vec = new double[size];
             for (int j=0; j<size; j++) vec[j] = array[offset+j];
-            states[i] = state.applyImpulse(new VectorImpl(vec));
+            if (impulse) states[i] = state.applyImpulse(new VectorImpl(vec));
+            else states[i] = state.applyForce(new VectorImpl(vec));
             offset += size;
         }
         return new StateVector(owner, bodies, states, rateOfChange);

@@ -307,7 +307,7 @@ public abstract class RigidBody implements Body {
 
         public Matrix inverse() {
             return inv;
-        }        
+        }
     }
     
     
@@ -331,7 +331,7 @@ public abstract class RigidBody implements Body {
 
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
-                if (row == column) return getMass();
+                if (row == column) return 1.0/getMass();
                 return 0.0;
             }
             return getInvInertia(state).getComponent(row - 3, column - 3);

@@ -36,8 +36,9 @@ public class MeshBody extends RigidBody implements Collideable {
         this.axial = 0.5*info.mass*info.radius*info.radius;*/
         
         // Hard-coded moment of inertia for a 3x3x3 cube
-        this.inertia = new Matrix33(new Vector3D(1.5, 1.5, 1.5));
-        this.invInertia = new Matrix33(new Vector3D(1.0/1.5, 1.0/1.5, 1.0/1.5));
+        double inert = info.mass*1.5;
+        this.inertia    = new Matrix33(new Vector3D(    inert,     inert,     inert));
+        this.invInertia = new Matrix33(new Vector3D(1.0/inert, 1.0/inert, 1.0/inert));
     }
     
     protected double getMass() {
