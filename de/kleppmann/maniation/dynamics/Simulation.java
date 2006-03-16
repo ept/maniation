@@ -72,6 +72,8 @@ public class Simulation {
         for (Constraint c : contacts) {
             for (int i=0; i<c.getDimension(); i++) {
                 double d = c.getPenalty().getComponent(i);
+                DecimalFormat format = new DecimalFormat("0.00000");
+                System.out.print("[" + format.format(d) + "] ");
                 if (d < -PENETRATION_TOLERANCE) {
                     double t = d / c.getPenaltyDot().getComponent(i);
                     if ((!penetrated) || (t > penetrationTime)) penetrationTime = t;
@@ -139,7 +141,7 @@ public class Simulation {
             // Set up Lagrange multiplier equation and solve it
             Vector term1 = il.getJacobianDot().mult(state.getVelocities());
             Vector term2 = il.getJacobian().mult(state.getAccelerations());
-            Vector rhs = term1.add(term2)/*.add(il.getPenalty()).add(il.getPenaltyDot())*/.mult(-1.0);
+            Vector rhs = term1.add(term2).add(il.getPenalty()).add(il.getPenaltyDot()).mult(-1.0);
             Matrix[] lhs = new Matrix[3];
             lhs[0] = il.getJacobian();
             lhs[1] = state.getMassInertia().inverse();
@@ -179,6 +181,7 @@ public class Simulation {
     
     private class DifferentialEquation implements ODE {
         
+        InteractionList interactions;
         Vector lastCompleted = null;
         double lastCompletedTime, lastAddedTime = -1e20;
         int lastAddedFrame;
@@ -187,29 +190,33 @@ public class Simulation {
                 throws ODEBacktrackException {
             if (!(state instanceof StateVector)) throw new IllegalArgumentException();
             StateVector sv = (StateVector) state;
-            InteractionList il = new InteractionList();
-            compoundBody.interaction(sv, worldState, il, true);
-            // Check if penetration has occurred -- may throw ODEBacktrackException
-            if (allowBacktrack) checkPenetration(sv, il, time);
             // Compute constraint/resting contact forces
-            for (Interaction i : il.getNonConstraints()) sv = sv.handleInteraction(i);
-            sv = constraintForces(sv, il);
+            for (Interaction i : interactions.getNonConstraints()) sv = sv.handleInteraction(i);
+            sv = constraintForces(sv, interactions);
             return sv.getDerivative();
         }
 
-        public Vector impulse(double time, Vector state) {
+        public Vector getInitial() {
+            StateVector state = compoundBody.getInitialState();
+            interactions = new InteractionList();
+            compoundBody.interaction(state, worldState, interactions, true);
+            return state;
+        }
+
+        public Vector timeStep(double time, Vector state, boolean allowBacktrack) throws ODEBacktrackException {
             if (!(state instanceof StateVector)) throw new IllegalArgumentException();
             StateVector sv = (StateVector) state;
-            InteractionList il = new InteractionList();
-            compoundBody.interaction(sv, worldState, il, true);
-            return constraintImpulses(sv, il);
+            interactions = new InteractionList();
+            compoundBody.interaction(sv, worldState, interactions, true);
+            // Check if penetration has occurred -- may throw ODEBacktrackException
+            if (allowBacktrack) checkPenetration(sv, interactions, time);
+            // Compute constraint/collision impulses
+            StateVector result = constraintImpulses(sv, interactions);
+            addToLog(time, state);
+            return result;
         }
-
-        public Vector getInitial() {
-            return compoundBody.getInitialState();
-        }
-
-        public void timeStepCompleted(double time, Vector state) {
+        
+        private void addToLog(double time, Vector state) {
             if (time - lastAddedTime < 1.0/FRAMES_PER_SECOND) {
                 lastCompleted = state;
                 lastCompletedTime = time;
