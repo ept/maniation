@@ -6,7 +6,7 @@ public class RungeKutta implements ODESolver {
     
     private ODE ode;
     private double time;
-    private double h, hmin = 0.00002, hmax = 0.1, eps = 1e-5 /*10e-18*/, safety = 0.9;
+    private double h, hnew, hmin = 0.00002, hmax = 0.1, eps = 1e-5 /*10e-18*/, safety = 0.9;
     private double shrinkPower = -0.25, growPower = -0.2;
     private Vector status, error;
     private boolean colliding = false;
@@ -59,7 +59,7 @@ public class RungeKutta implements ODESolver {
         return status.add(k1.mult(c1*h).add(k3.mult(c3*h)).add(k4.mult(c4*h)).add(k6.mult(c6*h)));
     }
     
-    private void calcStep(boolean allowBacktrack) throws ODEBacktrackException {
+    private Vector calcStep(boolean allowBacktrack) throws ODEBacktrackException {
         double errmax;
         Vector newstatus;
         DecimalFormat format = new DecimalFormat("0.000000");
@@ -75,23 +75,22 @@ public class RungeKutta implements ODESolver {
             errmax /= eps;
             if (errmax <= 1.0) break;
             if (h < 1.3*hmin) {
-                System.out.println("error too large, but continuing anyway.");
-                status = newstatus; h = hmin;
-                return;
+                System.out.print("error too large, but continuing anyway: ");
+                hnew = hmin;
+                return newstatus;
             }
             System.out.println("error too large.");
-            double h1 = safety*h*Math.pow(errmax, shrinkPower);
-            if (h1 < 0.1*h) h1 = 0.1*h;
-            if (h1 < hmin) h1 = hmin;
-            h = h1;
+            hnew = safety*h*Math.pow(errmax, shrinkPower);
+            if (hnew < 0.1*h) hnew = 0.1*h;
+            if (hnew < hmin) hnew = hmin;
+            h = hnew;
         }
-        status = newstatus;
         if (!colliding) {
-            double h1 = safety*h*Math.pow(errmax, growPower);
-            if (h1 > 5.0*h) h1 = 5.0*h;
-            if (h1 > hmax) h1 = hmax;
-            h = h1;
-        }
+            hnew = safety*h*Math.pow(errmax, growPower);
+            if (hnew > 5.0*h) hnew = 5.0*h;
+            if (hnew > hmax) hnew = hmax;
+        } else hnew = h;
+        return newstatus;
     }
 
     public void solve(double startTime, double finishTime) {
@@ -100,11 +99,10 @@ public class RungeKutta implements ODESolver {
             if (time + h > finishTime) h = finishTime - time;
             try {
                 boolean allowBacktrack = (h >= 1.1*hmin);
-                calcStep(allowBacktrack);
-                status = ode.timeStep(time, status, allowBacktrack);
+                status = ode.timeStep(time, calcStep(allowBacktrack), allowBacktrack);
                 if (allowBacktrack) System.out.println("completed.");
                 else System.out.println("completed (penetration ignored).");
-                time += h; colliding = false;
+                time += h; h = hnew; colliding = false;
             } catch (ODEBacktrackException backtrack) {
                 if (h < 1.1*hmin) {
                     System.out.println("illegally signalled penetration when it should have been ignored.");
@@ -112,8 +110,8 @@ public class RungeKutta implements ODESolver {
                     System.out.println("penetration.");
                     colliding = true;
                     if (backtrack.hasTimeEstimate()) {
-                        double newh = backtrack.getTimeEstimate() - time;
-                        if (newh < 0.85*h) h = newh; else h /= 2.0;
+                        hnew = backtrack.getTimeEstimate() - time;
+                        if (hnew < 0.85*h) h = hnew; else h /= 2.0;
                     } else h /= 2.0;
                     if (h < hmin) h = hmin;
                 }
