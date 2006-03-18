@@ -106,6 +106,10 @@ public class MeshBody extends RigidBody implements Collideable {
         mesh.getCollisionVolume().intersect(partner.getCollisionVolume(), collision);
         collision.process(result);
     }
+    
+    public AnimateMesh getMesh() {
+        return mesh;
+    }
 
     
     private static class MeshInfo {

@@ -2,10 +2,12 @@ package de.kleppmann.maniation.dynamics;
 
 import java.util.Map;
 
+import de.kleppmann.maniation.dynamics.GeneralizedBody.State;
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.SlicedVector;
 import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
+import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
 
 public class StateVector extends SlicedVector<GeneralizedBody.State> implements GeneralizedBody.State {
@@ -165,12 +167,19 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
         return new StateVector(owner, bodies, states, rateOfChange);
     }
 
+    public StateVector applyForce(Vector forceTorque) {
+        return applyImpulseOrForce(forceTorque, false);
+    }
+
     public StateVector applyImpulse(Vector impulse) {
         return applyImpulseOrForce(impulse, true);
     }
 
-    public StateVector applyForce(Vector forceTorque) {
-        return applyImpulseOrForce(forceTorque, false);
+    public State applyPosition(Map<Body, Vector3D> newPositions) {
+        GeneralizedBody.State[] states = new GeneralizedBody.State[bodies.length];
+        for (int i=0; i<bodies.length; i++)
+            states[i] = getSlice(i).applyPosition(newPositions);
+        return new StateVector(owner, bodies, states, rateOfChange);
     }
 
     public Vector getVelocities() {

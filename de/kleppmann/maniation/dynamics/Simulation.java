@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import de.kleppmann.maniation.maths.ConjugateGradient;
@@ -13,12 +14,13 @@ import de.kleppmann.maniation.maths.ODEBacktrackException;
 import de.kleppmann.maniation.maths.RungeKutta;
 import de.kleppmann.maniation.maths.SparseMatrix;
 import de.kleppmann.maniation.maths.Vector;
+import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Simulation {
     
-    public static final double RESTING_TOLERANCE = 1e-3;
-    public static final double PENETRATION_TOLERANCE = 1e-3;
+    public static final double RESTING_TOLERANCE = 0.05;
+    public static final double PENETRATION_TOLERANCE = 0.001;
     public static final double ELASTICITY = 0.2;
     public static final double FRAMES_PER_SECOND = 120.0;
     
@@ -73,15 +75,28 @@ public class Simulation {
             for (int i=0; i<c.getDimension(); i++) {
                 double d = c.getPenalty().getComponent(i);
                 DecimalFormat format = new DecimalFormat("0.00000");
-                System.out.print("[" + format.format(d) + "] ");
+                System.out.print("[" + format.format(d) + " / " + format.format(c.getPenaltyDot().getComponent(i)) + "] ");
                 if (d < -PENETRATION_TOLERANCE) {
-                    double t = d / c.getPenaltyDot().getComponent(i);
+                    double t = (d + PENETRATION_TOLERANCE) / c.getPenaltyDot().getComponent(i);
                     if ((!penetrated) || (t > penetrationTime)) penetrationTime = t;
                     penetrated = true;
                 }
             }
         }
         if (penetrated) throw new ODEBacktrackException(time, time - penetrationTime);
+    }
+    
+    private StateVector fudgeInequalities(StateVector state, InteractionList il) {
+        // Resets inequality constraints which have gone slightly negative to their zero position
+        il.classifyConstraints(state);
+        Map<Body, Vector3D> positionMap = new java.util.HashMap<Body, Vector3D>();
+        Set<InequalityConstraint> contacts = new java.util.HashSet<InequalityConstraint>();
+        contacts.addAll(il.getCollidingContacts());
+        contacts.addAll(il.getRestingContacts());
+        for (InequalityConstraint c : contacts) positionMap.putAll(c.setToZero());
+        GeneralizedBody.State result = state.applyPosition(positionMap);
+        if (!(result instanceof StateVector)) throw new IllegalStateException();
+        return (StateVector) result;
     }
     
     private StateVector constraintImpulses(StateVector state, InteractionList il) {
@@ -211,7 +226,8 @@ public class Simulation {
             // Check if penetration has occurred -- may throw ODEBacktrackException
             if (allowBacktrack) checkPenetration(sv, interactions, time);
             // Compute constraint/collision impulses
-            StateVector result = constraintImpulses(sv, interactions);
+            StateVector result = fudgeInequalities(sv, interactions);
+            result = constraintImpulses(result, interactions);
             addToLog(time, state);
             return result;
         }

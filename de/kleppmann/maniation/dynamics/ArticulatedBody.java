@@ -35,6 +35,11 @@ public class ArticulatedBody extends CompoundBody implements Body {
             return null;
         }
 
+        public State setCoMPosition(Vector3D pos) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
         public Quaternion getOrientation() {
             // TODO Auto-generated method stub
             return null;

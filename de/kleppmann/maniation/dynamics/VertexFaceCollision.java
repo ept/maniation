@@ -108,6 +108,15 @@ public class VertexFaceCollision implements InequalityConstraint {
         return result;
     }
 
+    public Map<Body, Vector3D> setToZero() {
+        double value = 0.5*getPenalty().getComponent(0);
+        Vector3D shift = faceNormal.mult(value);
+        Map<Body, Vector3D> result = new java.util.HashMap<Body, Vector3D>();
+        result.put(vertexBody, vertexBodyState.getCoMPosition().subtract(shift));
+        result.put(faceBody, faceBodyState.getCoMPosition().add(shift));
+        return result;
+    }
+
     public boolean isInequality() {
         return true;
     }

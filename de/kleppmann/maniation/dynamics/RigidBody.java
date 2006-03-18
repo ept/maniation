@@ -1,6 +1,7 @@
 package de.kleppmann.maniation.dynamics;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.Matrix33;
@@ -58,7 +59,7 @@ public abstract class RigidBody implements Body {
         private final Vector vel2, accel2;
         private final MassInertia massInertia;
         
-        State(Vector3D pos, Quaternion orient, Vector3D mom, Vector3D angmom, boolean rateOfChange) {
+        private State(Vector3D pos, Quaternion orient, Vector3D mom, Vector3D angmom, boolean rateOfChange) {
             if (!rateOfChange) {
                 this.pos = pos; this.orient = orient; this.mom = mom; this.angmom = angmom;
                 this.forces = new Vector3D(); this.torques = new Vector3D();
@@ -85,7 +86,7 @@ public abstract class RigidBody implements Body {
             }
         }
         
-        State(State origin, Vector3D linear, Vector3D angular, boolean impulse) {
+        private State(State origin, Vector3D linear, Vector3D angular, boolean impulse) {
             this.pos = origin.pos; this.orient = origin.orient; rateOfChange = false;
             if (impulse) {
                 this.mom = origin.mom.add(linear); this.angmom = origin.angmom.add(angular);
@@ -110,8 +111,9 @@ public abstract class RigidBody implements Body {
             massInertia = new MassInertia(this);
         }
         
-        State(State origin, boolean rateOfChange) {
-            this.pos = origin.pos; this.mom = origin.mom; this.angmom = origin.angmom;
+        private State(State origin, Vector3D newPos, boolean rateOfChange) {
+            this.pos = (newPos != null ? newPos : origin.pos);
+            this.mom = origin.mom; this.angmom = origin.angmom;
             this.orient = origin.orient; this.forces = origin.forces; this.torques = origin.torques;
             this.rateOfChange = rateOfChange;
             this.vel = origin.vel; this.angvel = origin.angvel; this.accel = origin.accel;
@@ -157,6 +159,9 @@ public abstract class RigidBody implements Body {
                     forceTorque.getComponent(1), forceTorque.getComponent(2));
             Vector3D torque = new Vector3D(forceTorque.getComponent(3),
                     forceTorque.getComponent(4), forceTorque.getComponent(5));
+            /*if (RigidBody.this instanceof MeshBody)
+                if (((MeshBody) RigidBody.this).getMesh().getSceneBody().getName().equals("box2"))
+                    System.out.print(" {" + forceTorque.getComponent(2) + "} ");*/
             return new State(this, force, torque, false);
         }
 
@@ -169,8 +174,14 @@ public abstract class RigidBody implements Body {
             return new State(this, linear, angular, true);
         }
 
+        public State applyPosition(Map<Body, Vector3D> newPositions) {
+            Vector3D pos = newPositions.get(RigidBody.this);
+            if (pos == null) return this;
+            return new State(this, pos, rateOfChange);
+        }
+
         public State getDerivative() {
-            return new State(this, true);
+            return new State(this, null, true);
         }
 
         public Matrix getMassInertia() {

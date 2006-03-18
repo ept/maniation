@@ -404,6 +404,15 @@ public class EdgeEdgeCollision implements InequalityConstraint {
         result.put(body2, jDotB2);
         return result;
     }
+    
+    public Map<Body, Vector3D> setToZero() {
+        Vector3D normal = direction1.cross(direction2).normalize();
+        Vector3D shift = normal.mult(0.5*point2.subtract(point1).mult(normal));
+        Map<Body, Vector3D> result = new java.util.HashMap<Body, Vector3D>();
+        result.put(body1, body1State.getCoMPosition().add(shift));
+        result.put(body2, body2State.getCoMPosition().subtract(shift));
+        return result;
+    }
 
     public int getDimension() {
         return 1;
