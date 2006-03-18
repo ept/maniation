@@ -31,8 +31,15 @@ public class InteractionList {
         resting = new java.util.HashSet<InequalityConstraint>();
         for (Constraint c : constraints) {
             c.setStateMapping(state.getStateMap());
-            // If it's an inequality, is the contact colliding, resting or separating?
+            // If it's an inequality...
             if ((c instanceof InequalityConstraint) && (((InequalityConstraint) c).isInequality())) {
+                // Ignore positive inequalities
+                boolean positive = true;
+                for (int i=0; i<c.getDimension(); i++)
+                    if (c.getPenalty().getComponent(i) < Simulation.PENETRATION_TOLERANCE)
+                        positive = false;
+                if (positive) continue;
+                // Is the contact colliding, resting or separating?
                 boolean isColliding = false, isSeparating = true;
                 for (int i=0; i<c.getDimension(); i++) {
                     double component = c.getPenaltyDot().getComponent(i);
