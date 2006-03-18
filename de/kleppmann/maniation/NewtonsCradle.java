@@ -3,6 +3,7 @@ package de.kleppmann.maniation;
 import java.util.List;
 import java.util.Map;
 
+import de.kleppmann.maniation.dynamics.Body;
 import de.kleppmann.maniation.dynamics.GeneralizedBody;
 import de.kleppmann.maniation.dynamics.Constraint;
 import de.kleppmann.maniation.dynamics.Cylinder;
@@ -14,6 +15,7 @@ import de.kleppmann.maniation.dynamics.SimulationObject;
 import de.kleppmann.maniation.dynamics.World;
 import de.kleppmann.maniation.maths.Matrix;
 import de.kleppmann.maniation.maths.MatrixImpl;
+import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
@@ -46,13 +48,8 @@ public class NewtonsCradle {
         public Ball(World world, int number) {
             super(new Vector3D(0, 0, 1), 0.01, 0.02, 0.03);
             this.number = number;
-            setCoMPosition(new Vector3D(0.02*(number - 2), 0.0, 0.02));
-            if (number < 1) {
-                setLinearMomentum(new Vector3D(0.012, 0, 0));
-                setAngularMomentum(new Vector3D(0, -8.75e-6, 0));
-            }
             this.world = world;
-            nail = new NailConstraint(world, this, new Vector3D(0, 0, 0.08),
+            this.nail = new NailConstraint(world, this, new Vector3D(0, 0, 0.08),
                     new Vector3D(0.02*(number - 2), 0, 0.1));
         }
         
@@ -60,24 +57,26 @@ public class NewtonsCradle {
             return number;
         }
         
-        public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
-            super.interaction(partner, result, allowReverse);
-            if (partner == world) result.addInteraction(nail);
-            if ((partner == previous) && (collPrev.getPenalty().getComponent(0) <= 0))
-                result.addInteraction(collPrev);
-            if ((partner == next) && (collNext.getPenalty().getComponent(0) <= 0))
-                result.addInteraction(collNext);
+        @Override
+        protected Vector3D getInitialPosition() {
+            return getInitialOrientation().transform(new Vector3D(0, 0, -0.08)).add(
+                    new Vector3D(0.02*(number - 2), 0.0, 0.1));
         }
 
-        public void applyImpulse(Vector impulse) {
-            super.applyImpulse(impulse);
-            /*System.out.println("body " + number + ": linear impulse (" +
-                    impulse.getComponent(0) + ", " +
-                    impulse.getComponent(1) + ", " +
-                    impulse.getComponent(2) + "), angular impulse (" +
-                    impulse.getComponent(3) + ", " +
-                    impulse.getComponent(4) + ", " +
-                    impulse.getComponent(5) + ")");*/
+        @Override
+        protected Quaternion getInitialOrientation() {
+            if (number == 0) return Quaternion.fromYRotation(Math.PI/8.0);
+            return new Quaternion();
+        }
+
+        @Override
+        public void interaction(SimulationObject.State ownState, SimulationObject.State partnerState,
+                InteractionList result, boolean allowReverse) {
+            super.interaction(ownState, partnerState, result, allowReverse);
+            SimulationObject partner = partnerState.getOwner();
+            if (partner == world) result.addInteraction(nail);
+            if (partner == previous) result.addInteraction(collPrev);
+            if (partner == next) result.addInteraction(collNext);
         }
     }
     
@@ -85,6 +84,7 @@ public class NewtonsCradle {
     private class BallDistance implements InequalityConstraint {
 
         private Ball ball1, ball2;
+        private Body.State ball1State, ball2State;
         private double dist;
         private double x1, y1, z1, xd1, yd1, zd1, x2, y2, z2, xd2, yd2, zd2;
         
@@ -92,27 +92,32 @@ public class NewtonsCradle {
             this.ball1 = ball1; this.ball2 = ball2; this.dist = dist;
         }
         
-        private void update() {
-            x1 = ball1.getCoMPosition().getComponent(0);
-            y1 = ball1.getCoMPosition().getComponent(1);
-            z1 = ball1.getCoMPosition().getComponent(2);
-            x2 = ball2.getCoMPosition().getComponent(0);
-            y2 = ball2.getCoMPosition().getComponent(1);
-            z2 = ball2.getCoMPosition().getComponent(2);
-            xd1 = ball1.getCoMVelocity().getComponent(0);
-            yd1 = ball1.getCoMVelocity().getComponent(1);
-            zd1 = ball1.getCoMVelocity().getComponent(2);
-            xd2 = ball2.getCoMVelocity().getComponent(0);
-            yd2 = ball2.getCoMVelocity().getComponent(1);
-            zd2 = ball2.getCoMVelocity().getComponent(2);
-        };
-        
         public int getDimension() {
             return 1;
         }
 
+        public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+            try {
+                ball1State = (Body.State) states.get(ball1);
+                ball2State = (Body.State) states.get(ball2);
+            } catch (ClassCastException e) {
+                throw new IllegalStateException(e);
+            }
+            x1 = ball1State.getCoMPosition().getComponent(0);
+            y1 = ball1State.getCoMPosition().getComponent(1);
+            z1 = ball1State.getCoMPosition().getComponent(2);
+            x2 = ball2State.getCoMPosition().getComponent(0);
+            y2 = ball2State.getCoMPosition().getComponent(1);
+            z2 = ball2State.getCoMPosition().getComponent(2);
+            xd1 = ball1State.getCoMVelocity().getComponent(0);
+            yd1 = ball1State.getCoMVelocity().getComponent(1);
+            zd1 = ball1State.getCoMVelocity().getComponent(2);
+            xd2 = ball2State.getCoMVelocity().getComponent(0);
+            yd2 = ball2State.getCoMVelocity().getComponent(1);
+            zd2 = ball2State.getCoMVelocity().getComponent(2);
+        }
+
         public Map<GeneralizedBody, Matrix> getJacobian() {
-            update();
             double[][] m1 = {{2*(x1-x2), 2*(y1-y2), 2*(z1-z2)}};
             double[][] m2 = {{2*(x2-x1), 2*(y2-y1), 2*(z2-z1)}};
             Map<GeneralizedBody, Matrix> map = new java.util.HashMap<GeneralizedBody,Matrix>();
@@ -122,7 +127,6 @@ public class NewtonsCradle {
         }
 
         public Map<GeneralizedBody, Matrix> getJacobianDot() {
-            update();
             double[][] m1 = {{2*(xd1-xd2), 2*(yd1-yd2), 2*(zd1-zd2)}};
             double[][] m2 = {{2*(xd2-xd1), 2*(yd2-yd1), 2*(zd2-zd1)}};
             Map<GeneralizedBody, Matrix> map = new java.util.HashMap<GeneralizedBody,Matrix>();
@@ -132,13 +136,11 @@ public class NewtonsCradle {
         }
 
         public Vector getPenalty() {
-            update();
             double[] v = {(x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1) - dist*dist};
             return new VectorImpl(v);
         }
 
         public Vector getPenaltyDot() {
-            update();
             double[] v = {2*(x2-x1)*(xd2-xd1) + 2*(y2-y1)*(yd2-yd1) + 2*(z2-z1)*(zd2-zd1)};
             return new VectorImpl(v);
         }
@@ -154,11 +156,13 @@ public class NewtonsCradle {
             return true;
         }
 
-        /*public void setToZero() {
-            Vector3D d = ball2.getCoMPosition().subtract(ball1.getCoMPosition());
+        public Map<Body, Vector3D> setToZero() {
+            Map<Body, Vector3D> result = new java.util.HashMap<Body, Vector3D>();
+            Vector3D d = ball2State.getCoMPosition().subtract(ball1State.getCoMPosition());
             d = d.mult(0.5 * (d.magnitude() - dist) / d.magnitude());
-            ball1.setCoMPosition(ball1.getCoMPosition().add(d));
-            ball2.setCoMPosition(ball2.getCoMPosition().subtract(d));
-        }*/
+            result.put(ball1, ball1State.getCoMPosition().add(d));
+            result.put(ball2, ball2State.getCoMPosition().subtract(d));
+            return result;
+        }
     }
 }

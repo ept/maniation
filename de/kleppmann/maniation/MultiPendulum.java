@@ -9,26 +9,36 @@ import de.kleppmann.maniation.dynamics.JointConstraint;
 import de.kleppmann.maniation.dynamics.NailConstraint;
 import de.kleppmann.maniation.dynamics.Simulation;
 import de.kleppmann.maniation.dynamics.SimulationObject;
+import de.kleppmann.maniation.dynamics.SimulationObject.State;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 
 public class MultiPendulum extends Cylinder {
     
     private Map<SimulationObject,Constraint> constraints;
+    private int segment;
 
     private MultiPendulum(int segment) {
         super(new Vector3D(0, 0, 1), 0.05, 2.0, 1.0);
-        if (segment == 0) {
-            setCoMPosition(new Vector3D(0.5*Math.sqrt(2.0), 0.0, -0.5*Math.sqrt(2.0)));
-            setOrientation(Quaternion.fromYRotation(-Math.PI/4.0));
-        } else {
-            setCoMPosition(new Vector3D(Math.sqrt(2.0), 0.0, 1.0 - Math.sqrt(2.0) - 2.0*segment));
-        }
+        this.segment = segment;
     }
     
-    public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
-        super.interaction(partner, result, allowReverse);
-        Constraint c = constraints.get(partner);
+    @Override
+    protected Vector3D getInitialPosition() {
+        if (segment == 0) return new Vector3D(0.5*Math.sqrt(2.0), 0.0, -0.5*Math.sqrt(2.0));
+        return new Vector3D(Math.sqrt(2.0), 0.0, 1.0 - Math.sqrt(2.0) - 2.0*segment);
+    }
+
+    @Override
+    protected Quaternion getInitialOrientation() {
+        if (segment == 0) return Quaternion.fromYRotation(-Math.PI/4.0);
+        return new Quaternion();
+    }
+
+    @Override
+    public void interaction(State ownState, State partnerState, InteractionList result, boolean allowReverse) {
+        super.interaction(ownState, partnerState, result, allowReverse);
+        Constraint c = constraints.get(partnerState.getOwner());
         if (c != null) result.addInteraction(c);
     }
 

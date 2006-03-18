@@ -14,25 +14,33 @@ import de.kleppmann.maniation.dynamics.RotationConstraint;
 import de.kleppmann.maniation.dynamics.Simulation;
 import de.kleppmann.maniation.dynamics.SimulationObject;
 import de.kleppmann.maniation.dynamics.World;
+import de.kleppmann.maniation.dynamics.SimulationObject.State;
 import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Centrifuge extends Cylinder {
 
+    private boolean sphere;
     private Map<SimulationObject,Interaction[]> interactions;
     private static final double[] torque = {0.0, 0.0, 0.0, 0.0, 0.0, 0.01};
     private static final Vector torqueVector = new VectorImpl(torque);
     
     private Centrifuge(boolean sphere) {
         super(new Vector3D(0, 0, 1), 0.5, 1.0, 1.0);
-        if (sphere) setCoMPosition(new Vector3D(0, 0.7, 2.2));
-        else setCoMPosition(new Vector3D(0, 0, 0));
+        this.sphere = sphere;
     }
 
-    public void interaction(SimulationObject partner, InteractionList result, boolean allowReverse) {
-        super.interaction(partner, result, allowReverse);
-        Interaction[] ia = interactions.get(partner);
+    @Override
+    protected Vector3D getInitialPosition() {
+        if (sphere) return new Vector3D(0, 0.7, 2.2);
+        return new Vector3D(0, 0, 0);
+    }
+
+    @Override
+    public void interaction(State ownState, State partnerState, InteractionList result, boolean allowReverse) {
+        super.interaction(ownState, partnerState, result, allowReverse);
+        Interaction[] ia = interactions.get(partnerState.getOwner());
         if (ia != null) for (Interaction i : ia) result.addInteraction(i);
     }
 
