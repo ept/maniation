@@ -19,10 +19,11 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Simulation {
     
-    public static final double RESTING_TOLERANCE = 0.05;
-    public static final double PENETRATION_TOLERANCE = 0.001;
-    public static final double ELASTICITY = 0.2;
+    public static final double RESTING_TOLERANCE = 0.0005;
+    public static final double PENETRATION_TOLERANCE = 0.0001;
+    public static final double ELASTICITY = 1.0;
     public static final double FRAMES_PER_SECOND = 120.0;
+    public static final boolean ENABLE_FUDGE = true;
     
     private World world = new World();
     private SimulationObject.State worldState = world.getInitialState();
@@ -87,6 +88,7 @@ public class Simulation {
     }
     
     private StateVector fudgeInequalities(StateVector state, InteractionList il) {
+        if (!ENABLE_FUDGE) return state;
         // Resets inequality constraints which have gone slightly negative to their zero position
         il.classifyConstraints(state);
         Map<Body, Vector3D> positionMap = new java.util.HashMap<Body, Vector3D>();
@@ -99,7 +101,7 @@ public class Simulation {
         return (StateVector) result;
     }
     
-    private StateVector constraintImpulses(StateVector state, InteractionList il) {
+    private StateVector constraintImpulses(StateVector state, InteractionList il, double time) {
         while (true) {
             // Repeat until there are no more colliding contacts
             il.classifyConstraints(state);
@@ -227,7 +229,7 @@ public class Simulation {
             if (allowBacktrack) checkPenetration(sv, interactions, time);
             // Compute constraint/collision impulses
             StateVector result = fudgeInequalities(sv, interactions);
-            result = constraintImpulses(result, interactions);
+            result = constraintImpulses(result, interactions, time);
             addToLog(time, state);
             return result;
         }
