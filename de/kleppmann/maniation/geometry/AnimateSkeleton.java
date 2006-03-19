@@ -14,7 +14,7 @@ import de.kleppmann.maniation.scene.Skeleton;
 import de.kleppmann.maniation.scene.Vertex;
 import de.realityinabox.util.Pair;
 
-public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
+public class AnimateSkeleton implements AnimateObject {
     
     public static final boolean DRAW_SKELETON = false;
     
@@ -138,11 +138,11 @@ public class AnimateSkeleton implements AnimateObject, GeometryUpdater {
     }
     
     public void processStimulus() {
-        lines.updateData(this);
-    }
-
-    public void updateData(Geometry geometry) {
-        updateBones();
-        if (DRAW_SKELETON) updateSkeleton();
+        lines.updateData(new GeometryUpdater() {
+            public void updateData(Geometry geometry) {
+                updateBones();
+                if (DRAW_SKELETON) updateSkeleton();
+            }
+        });
     }
 }

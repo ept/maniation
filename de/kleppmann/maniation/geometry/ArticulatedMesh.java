@@ -114,7 +114,7 @@ public class ArticulatedMesh extends AnimateMesh {
     
     private class MyUpdater implements GeometryUpdater {
         public void updateData(Geometry geometry) {
-            skeleton.updateData(geometry);
+            skeleton.processStimulus();
             int coordIndex = 0;
             for (Vertex vert : sceneBody.getMesh().getVertices()) {
                 Vector deformed = skeleton.currentVertexPosition(vert);
