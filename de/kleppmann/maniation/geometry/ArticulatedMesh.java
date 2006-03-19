@@ -106,6 +106,7 @@ public class ArticulatedMesh extends AnimateMesh {
         }
     }
     
+    @Override
     public void processStimulus() {
         geometry.updateData(myUpdater);
         super.processStimulus();

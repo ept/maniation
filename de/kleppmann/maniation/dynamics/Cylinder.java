@@ -24,34 +24,41 @@ public class Cylinder extends RigidBody {
         axial = 0.5*mass*radius*radius;
     }
     
+    @Override
     protected double getMass() {
         return mass;
     }
     
+    @Override
     protected Matrix33 getInertia(Body.State state) {
         Matrix33 i = new Matrix33(new Vector3D(radial, radial, axial));
         Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
         return rot.transpose().mult33(i).mult33(rot);
     }
 
+    @Override
     protected Matrix33 getInvInertia(Body.State state) {
         Matrix33 i = new Matrix33(new Vector3D(1.0/radial, 1.0/radial, 1.0/axial));
         Matrix33 rot = toPrincipalAxes.mult(state.getOrientation().getInverse()).toMatrix();
         return rot.transpose().mult33(i).mult33(rot);
     }
 
+    @Override
     protected Vector3D getInitialPosition() {
         return new Vector3D();
     }
 
+    @Override
     protected Quaternion getInitialOrientation() {
         return new Quaternion();
     }
 
+    @Override
     protected Vector3D getInitialLinearMomentum() {
         return new Vector3D();
     }
 
+    @Override
     protected Vector3D getInitialAngularMomentum() {
         return new Vector3D();
     }

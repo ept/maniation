@@ -133,6 +133,7 @@ public class SparseMatrix implements Matrix {
         return new MatrixImpl(t);
     }
     
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("#####0.0000000000");
         String result = "[";

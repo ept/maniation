@@ -20,6 +20,7 @@ public class VectorImpl implements Vector {
         }
     }
 
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("######0.000000000000000");
         String result = "";

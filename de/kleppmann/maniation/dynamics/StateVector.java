@@ -132,10 +132,12 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
         return new StateVector(owner, bodies, states, rateOfChange);
     }
     
+    @Override
     public StateVector mult(double scalar) {
         return new StateVector(owner, bodies, super.mult(scalar), rateOfChange);
     }
 
+    @Override
     public StateVector add(Vector v) {
         if (!(v instanceof StateVector)) throw new IllegalArgumentException();
         StateVector other = (StateVector) v;
@@ -143,6 +145,7 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
         return new StateVector(owner, bodies, super.add(v), this.rateOfChange && other.rateOfChange);
     }
 
+    @Override
     public StateVector subtract(Vector v) {
         if (!(v instanceof StateVector)) throw new IllegalArgumentException();
         StateVector other = (StateVector) v;

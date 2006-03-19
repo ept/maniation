@@ -62,6 +62,7 @@ public class BoundingBox {
             ((this.maxz >= other.minz) && (this.minz <= other.minz)));
     }
     
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("0.000");
         return "BoundingBox (" + format.format(minx) + ", " + format.format(miny) +

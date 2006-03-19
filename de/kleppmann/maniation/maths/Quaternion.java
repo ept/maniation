@@ -57,6 +57,7 @@ public class Quaternion {
         return z;
     }
 
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("######0.00000");
         return "Quaternion(w: " + format.format(w) +

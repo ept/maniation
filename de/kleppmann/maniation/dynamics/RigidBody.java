@@ -279,6 +279,7 @@ public abstract class RigidBody implements Body {
             for (int i=0; i<getDimension(); i++) array[offset+i] = getComponent(i);
         }
         
+        @Override
         public String toString() {
             DecimalFormat format = new DecimalFormat("######0.000000000000000");
             String result = "";
@@ -300,14 +301,17 @@ public abstract class RigidBody implements Body {
             inv = new InverseMassInertia(this);
         }
         
+        @Override
         public int getRows() {
             return 6;
         }
         
+        @Override
         public int getColumns() {
             return 6;
         }
 
+        @Override
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
                 if (row == column) return getMass();
@@ -316,6 +320,7 @@ public abstract class RigidBody implements Body {
             return getInertia(state).getComponent(row - 3, column - 3);
         }
 
+        @Override
         public Matrix inverse() {
             return inv;
         }
@@ -332,14 +337,17 @@ public abstract class RigidBody implements Body {
             this.inv = mi;
         }
         
+        @Override
         public int getRows() {
             return 6;
         }
         
+        @Override
         public int getColumns() {
             return 6;
         }
 
+        @Override
         public double getComponent(int row, int column) {
             if ((row < 3) || (column < 3)) {
                 if (row == column) return 1.0/getMass();
@@ -348,6 +356,7 @@ public abstract class RigidBody implements Body {
             return getInvInertia(state).getComponent(row - 3, column - 3);
         }
 
+        @Override
         public Matrix inverse() {
             return inv;
         }        

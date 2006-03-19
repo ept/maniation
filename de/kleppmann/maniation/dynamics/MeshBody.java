@@ -41,10 +41,12 @@ public class MeshBody extends RigidBody implements Collideable {
         this.invInertia = new Matrix33(new Vector3D(1.0/inert, 1.0/inert, 1.0/inert));
     }
     
+    @Override
     protected double getMass() {
         return info.mass;
     }
 
+    @Override
     protected Matrix33 getInertia(Body.State state) {
         // Hard-coded moment of inertia for a 3x3x3 cube
         return inertia;
@@ -53,6 +55,7 @@ public class MeshBody extends RigidBody implements Collideable {
         return rot.transpose().mult33(i).mult33(rot);*/
     }
 
+    @Override
     protected Matrix33 getInvInertia(Body.State state) {
         // Hard-coded moment of inertia for a 3x3x3 cube
         return invInertia;
@@ -61,22 +64,27 @@ public class MeshBody extends RigidBody implements Collideable {
         return rot.transpose().mult33(i).mult33(rot);*/
     }
 
+    @Override
     protected Vector3D getInitialPosition() {
         return initialLocation.add(initialOrientation.transform(info.com));
     }
 
+    @Override
     protected Quaternion getInitialOrientation() {
         return initialOrientation;
     }
 
+    @Override
     protected Vector3D getInitialLinearMomentum() {
         return new Vector3D();
     }
 
+    @Override
     protected Vector3D getInitialAngularMomentum() {
         return new Vector3D();
     }
     
+    @Override
     public void interaction(SimulationObject.State ownState, SimulationObject.State partnerState,
             InteractionList result, boolean allowReverse) {
         try {

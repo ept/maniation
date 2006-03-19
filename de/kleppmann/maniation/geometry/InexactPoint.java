@@ -18,6 +18,7 @@ public class InexactPoint {
         return v;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof InexactPoint) {
             InexactPoint other = (InexactPoint) obj;
@@ -25,6 +26,7 @@ public class InexactPoint {
         } else return false;
     }
 
+    @Override
     public int hashCode() {
         long result = (x % (1l << 32)) ^ ((x / (1l << 32)) >> 32);
         result ^= (y % (1l << 32)) ^ ((y / (1l << 32)) >> 32);

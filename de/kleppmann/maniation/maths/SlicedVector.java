@@ -115,6 +115,7 @@ public class SlicedVector <T extends Vector> implements Vector {
         for (int i=0; i<slices.length; i++) slices[i].toDoubleArray(array, offset + sliceOffsets[i]);
     }
 
+    @Override
     public String toString() {
         String result = "";
         for (int i=0; i<slices.length; i++) result += (i == 0 ? "" : " ") + slices[i].toString();

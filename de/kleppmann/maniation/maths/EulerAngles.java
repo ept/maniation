@@ -44,6 +44,7 @@ public class EulerAngles {
         return new EulerAngles(this.conv, a1, a2, a3);
     }
     
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("######0.000000000000000");
         return format.format(ang1) + " " + format.format(ang2) + " " +

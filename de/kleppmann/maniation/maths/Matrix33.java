@@ -173,6 +173,7 @@ public class Matrix33 implements Matrix {
                 m33 - other.getComponent(2,2));
     }
     
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("#####0.0000000000");
         String result = "[";

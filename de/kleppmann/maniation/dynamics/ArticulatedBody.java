@@ -16,12 +16,21 @@ public class ArticulatedBody extends CompoundBody implements Body {
         return result;
     }
 
+    @Override
     public State getInitialState() {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public void interaction(SimulationObject.State ownState, SimulationObject.State partnerState,
+            InteractionList result, boolean allowReverse) {
+        // TODO Auto-generated method stub
+        super.interaction(ownState, partnerState, result, allowReverse);
+    }
     
-    private class State extends StateVector implements Body.State {
+    
+    public class State extends StateVector implements Body.State {
         State() {
             super(ArticulatedBody.this, null);
         }
@@ -31,11 +40,6 @@ public class ArticulatedBody extends CompoundBody implements Body {
         }
 
         public Vector3D getCoMPosition() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        public State setCoMPosition(Vector3D pos) {
             // TODO Auto-generated method stub
             return null;
         }

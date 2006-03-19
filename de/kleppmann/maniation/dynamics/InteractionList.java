@@ -135,6 +135,7 @@ public class InteractionList {
             else return constr.getJacobian().get(body);
         }
         
+        @Override
         public String toString() {
             return getMatrix().toString();
         }

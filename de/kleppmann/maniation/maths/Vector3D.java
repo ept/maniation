@@ -97,6 +97,7 @@ public class Vector3D implements Vector {
         array[offset+2] = z;
     }
     
+    @Override
     public String toString() {
         DecimalFormat format = new DecimalFormat("######0.00000");
         return "Vector3D(" + format.format(x) + ", " + format.format(y) +
