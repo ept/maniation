@@ -7,6 +7,8 @@ import de.kleppmann.maniation.geometry.AnimateMesh;
 import de.kleppmann.maniation.geometry.ArticulatedLimb;
 import de.kleppmann.maniation.geometry.ArticulatedMesh;
 import de.kleppmann.maniation.geometry.MeshVertex;
+import de.kleppmann.maniation.maths.Vector3D;
+import de.kleppmann.maniation.scene.AxisConstraint;
 import de.kleppmann.maniation.scene.Bone;
 import de.kleppmann.maniation.scene.Skeleton;
 
@@ -15,12 +17,19 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
     private World world;
     private ArticulatedMesh mesh;
     private Map<ArticulatedLimb, Set<Integer>> collisionTestLimbs;
+    private Map<SimulationObject, Set<Interaction>> links;
 
     public ArticulatedBody(World world, ArticulatedMesh mesh) {
         super(world, bodiesFromMesh(world, mesh));
         this.world = world;
         this.mesh = mesh;
         mesh.setDynamicBody(this);
+        // Collect links between the limbs into a single map
+        links = new java.util.HashMap<SimulationObject, Set<Interaction>>();
+        for (int i=0; i<getBodies(); i++) {
+            Limb limb = (Limb) getBody(i);
+            links.put(limb, limb.links);
+        }
         // Determine which bones should be tested for collision against each other.
         // Tests should not be symmetric (if A is tested against B, B should not be tested
         // against A), and any two bones whose triangle sets share a vertex (i.e. they are
@@ -46,9 +55,42 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
     }
     
     private static GeneralizedBody[] bodiesFromMesh(World world, ArticulatedMesh mesh) {
-        GeneralizedBody[] result = new GeneralizedBody[mesh.getLimbList().length];
-        for (int i=0; i<result.length; i++) result[i] = new MeshBody(world, mesh.getLimbList()[i]);
+        Limb[] result = new Limb[mesh.getLimbList().length];
+        Map<ArticulatedLimb, Limb> bodyMap = new java.util.HashMap<ArticulatedLimb, Limb>();
+        for (int i=0; i<result.length; i++) {
+            ArticulatedLimb limb = mesh.getLimbList()[i];
+            result[i] = new Limb(world, limb);
+            bodyMap.put(limb, result[i]);
+            if (limb.getParent() != null) {
+                Limb parent = bodyMap.get(limb.getParent());
+                if (parent == null) throw new IllegalStateException();
+                Vector3D thispos = result[i].getInitialOrientation().getInverse().transform(
+                        limb.getLocation().subtract(result[i].getInitialPosition()));
+                Vector3D parentpos = parent.getInitialOrientation().getInverse().transform(
+                        limb.getLocation().subtract(parent.getInitialPosition()));
+                JointConstraint link = new JointConstraint(result[i], thispos, parent, parentpos);
+                parent.links.add(link);
+                result[i].links.add(link);
+                makeRotationConstraint(limb.getBone().getXAxis(), new Vector3D(1,0,0), parent, result[i]);
+                makeRotationConstraint(limb.getBone().getYAxis(), new Vector3D(0,1,0), parent, result[i]);
+                makeRotationConstraint(limb.getBone().getZAxis(), new Vector3D(0,0,1), parent, result[i]);
+            }
+        }
         return result;
+    }
+    
+    private static void makeRotationConstraint(AxisConstraint info, Vector3D axis, Limb parent, Limb child) {
+        if (info == null) return;
+        RotationConstraint constr = null;
+        if (Math.abs(info.getMaxExtreme() - info.getMinExtreme()) < 1e-6) {
+            constr = new RotationConstraint(null, child, axis, parent, 0);
+            parent.links.add(constr); child.links.add(constr);
+        } else {
+            constr = new RotationConstraint(null, child, axis, parent, info.getMaxExtreme());
+            parent.links.add(constr); child.links.add(constr);
+            constr = new RotationConstraint(null, child, axis, parent, info.getMinExtreme());
+            parent.links.add(constr); child.links.add(constr);
+        }
     }
 
     @Override
@@ -79,9 +121,11 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
                     partner.collide((GeneralizedBody.State) partnerState, limb, result);
                 } else body.interaction(bstate, partnerState, result, true);
                 // If interacting with the world, we also test for collision amongst the limbs
+                // and include the joint links
                 if (partnerState.getOwner() == world) {
                     for (Integer testLimb : collisionTestLimbs.get(limb))
                         body.interaction(bstate, me.getSlice(testLimb), result, true);
+                    for (Interaction link : links.get(body)) result.addInteraction(link);
                 }
             } catch (ClassCastException e) {
                 throw new IllegalStateException(e);
@@ -101,6 +145,16 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
             }
         } catch (ClassCastException e) {
             throw new IllegalStateException(e);
+        }
+    }
+    
+    
+    private static class Limb extends MeshBody {
+        private Set<Interaction> links;
+        
+        public Limb(World world, AnimateMesh mesh) {
+            super(world, mesh);
+            links = new java.util.HashSet<Interaction>();
         }
     }
 }
