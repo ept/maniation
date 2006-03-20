@@ -43,6 +43,10 @@ public class MeshTriangle {
         return body;
     }
     
+    void setBody(Body body) {
+        this.body = body;
+    }
+    
     public void updateBBox() {
         bbox = new BoundingBox(
             vertices[0].max3(vertices[1], vertices[2], MeshVertex.Component.X),
