@@ -2,10 +2,24 @@ package de.kleppmann.maniation.dynamics;
 
 public class CompoundBody implements GeneralizedBody {
     
+    private World world;
     private GeneralizedBody[] bodies;
     
-    public CompoundBody(GeneralizedBody[] bodies) {
+    public CompoundBody(World world, GeneralizedBody[] bodies) {
         this.bodies = bodies;
+        this.world = world;
+    }
+    
+    public GeneralizedBody getBody(int index) {
+        return bodies[index];
+    }
+    
+    public int getBodies() {
+        return bodies.length;
+    }
+    
+    GeneralizedBody[] getBodyArray() {
+        return bodies;
     }
 
     public StateVector getInitialState() {
@@ -28,8 +42,11 @@ public class CompoundBody implements GeneralizedBody {
             GeneralizedBody body = bodies[i];
             GeneralizedBody.State bstate = state.getSlice(i);
             body.interaction(bstate, partnerState, result, true);
-            for (int j=i+1; j<bodies.length; j++)
-                body.interaction(bstate, state.getSlice(j), result, true);
+            // If interacting with the world, we also let all bodies interact amongst each other
+            if (partnerState.getOwner() == world) {
+                for (int j=i+1; j<bodies.length; j++)
+                    body.interaction(bstate, state.getSlice(j), result, true);
+            }
         }
     }
 }
