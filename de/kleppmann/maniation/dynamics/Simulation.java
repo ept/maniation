@@ -41,7 +41,7 @@ public class Simulation {
     
     public void run(double time) {
         // Set up compound body
-        compoundBody = new CompoundBody(bodies.toArray(new GeneralizedBody[bodies.size()]));
+        compoundBody = new CompoundBody(world, bodies.toArray(new GeneralizedBody[bodies.size()]));
         GeneralizedBody.State initialState = compoundBody.getInitialState();
         log.clear();
         log.add("0.0 " + initialState.toString());
