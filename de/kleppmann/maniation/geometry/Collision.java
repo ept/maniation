@@ -26,8 +26,12 @@ public class Collision {
     
     public Collision(AnimateMesh mesh1, AnimateMesh mesh2) {
         this.mesh1 = mesh1; this.mesh2 = mesh2;
-        this.body1 = mesh1.getDynamicBody();
-        this.body2 = mesh2.getDynamicBody();
+        try {
+            this.body1 = (Body) mesh1.getDynamicBody();
+            this.body2 = (Body) mesh2.getDynamicBody();
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
     }
     
     public void addIntersection(Vector3D lineFrom, Vector3D lineTo, MeshTriangle tri1, MeshTriangle tri2) {
@@ -119,8 +123,14 @@ public class Collision {
         // Try to determine which side of the plane is the 'bad' one by considering the
         // locations of the centres of masses relative to the plane.
         double dist;
-        double com = mesh2.getDynamicState().getCoMPosition().subtract(
-                mesh1.getDynamicState().getCoMPosition()).mult(planeNormal);
+        Body.State state1, state2;
+        try {
+            state1 = (Body.State) mesh1.getDynamicState();
+            state2 = (Body.State) mesh2.getDynamicState();
+        } catch (ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
+        double com = state2.getCoMPosition().subtract(state1.getCoMPosition()).mult(planeNormal);
         if (com > 0.0) {
             planeBody = body1; dist = dmin;
         } else {

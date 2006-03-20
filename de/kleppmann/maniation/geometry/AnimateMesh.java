@@ -9,6 +9,7 @@ import javax.media.j3d.IndexedTriangleArray;
 import javax.media.j3d.Node;
 import javax.media.j3d.Shape3D;
 
+import de.kleppmann.maniation.dynamics.GeneralizedBody;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Face;
@@ -39,23 +40,39 @@ public class AnimateMesh implements AnimateObject {
         return sceneBody;
     }
     
-    public de.kleppmann.maniation.dynamics.Body getDynamicBody() {
+    public GeneralizedBody getDynamicBody() {
         return dynamicBody;
     }
     
-    public de.kleppmann.maniation.dynamics.Body.State getDynamicState() {
-        return dynamicState;
-    }
-    
-    public void setDynamicBody(de.kleppmann.maniation.dynamics.Body dynamicBody) {
-        this.dynamicBody = dynamicBody;
+    public void setDynamicBody(GeneralizedBody dynamicBody) {
+        if (dynamicBody != null) {
+            if (!(dynamicBody instanceof de.kleppmann.maniation.dynamics.Body))
+                throw new IllegalArgumentException();
+            this.dynamicBody = (de.kleppmann.maniation.dynamics.Body) dynamicBody;
+        }
         buildArrays();
         buildJava3D();
         volume = new CollisionVolume(triangles);
     }
     
-    public CollisionVolume getCollisionVolume() {
-        return volume;
+    public GeneralizedBody.State getDynamicState() {
+        return dynamicState;
+    }
+    
+    public void setDynamicState(GeneralizedBody.State state, Vector3D com) {
+        if (!(state instanceof de.kleppmann.maniation.dynamics.Body.State))
+            throw new IllegalArgumentException();
+        this.dynamicState = (de.kleppmann.maniation.dynamics.Body.State) state;
+        Vector3D location = dynamicState.getCoMPosition();
+        location = location.subtract(dynamicState.getOrientation().transform(com));
+        sceneBody.getLocation().setX(location.getComponent(0));
+        sceneBody.getLocation().setY(location.getComponent(1));
+        sceneBody.getLocation().setZ(location.getComponent(2));
+        sceneBody.getOrientation().setW(dynamicState.getOrientation().getW());
+        sceneBody.getOrientation().setX(dynamicState.getOrientation().getX());
+        sceneBody.getOrientation().setY(dynamicState.getOrientation().getY());
+        sceneBody.getOrientation().setZ(dynamicState.getOrientation().getZ());
+        processStimulus();
     }
     
     public Vector3D getLocation() {
@@ -68,17 +85,12 @@ public class AnimateMesh implements AnimateObject {
                 sceneBody.getOrientation().getY(), sceneBody.getOrientation().getZ());
     }
     
-    public void setDynamicState(de.kleppmann.maniation.dynamics.Body.State state, Vector3D com) {
-        this.dynamicState = state;
-        Vector3D location = state.getCoMPosition().subtract(state.getOrientation().transform(com));
-        sceneBody.getLocation().setX(location.getComponent(0));
-        sceneBody.getLocation().setY(location.getComponent(1));
-        sceneBody.getLocation().setZ(location.getComponent(2));
-        sceneBody.getOrientation().setW(state.getOrientation().getW());
-        sceneBody.getOrientation().setX(state.getOrientation().getX());
-        sceneBody.getOrientation().setY(state.getOrientation().getY());
-        sceneBody.getOrientation().setZ(state.getOrientation().getZ());
-        processStimulus();
+    public CollisionVolume getCollisionVolume() {
+        return volume;
+    }
+    
+    public MeshTriangle[] getTriangles() {
+        return triangles;
     }
     
     private void updateVertex(Vertex vert, int offset, Quaternion orient, Vector3D loc) {
@@ -146,13 +158,12 @@ public class AnimateMesh implements AnimateObject {
         shape = new Shape3D(geometry, appearance);
     }
 
-
-    public void processStimulus() {
-        if (geometry != null) geometry.updateData(myUpdater);
-    }
-
     public Node getJava3D() {
         return shape;
+    }
+
+    public void processStimulus() {
+        if (geometry != null) geometry.updateData(myUpdater); else myUpdater.updateData(null);
     }
 
     
