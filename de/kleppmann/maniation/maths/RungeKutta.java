@@ -6,7 +6,7 @@ public class RungeKutta implements ODESolver {
     
     private ODE ode;
     private double time;
-    private double h, hnew, hmin = 0.00002, hmax = 0.1, eps = 1e-5 /*10e-18*/, safety = 0.9;
+    private double h, hnew, hmin = 0.00002, hmax = 0.1, eps = 1e-7, errorOffset = 0.01, safety = 0.9;
     private double shrinkPower = -0.25, growPower = -0.2;
     private Vector status, error;
     private boolean colliding = false;
@@ -66,20 +66,20 @@ public class RungeKutta implements ODESolver {
         while (true) {
             System.out.print("Time " + format.format(time) + " plus " + format.format(h) + ": ");
             newstatus = cashKarp(allowBacktrack);
-            errmax = 0.0;
+            errmax = 0.0; int errIndex = -1;
             for (int i=0; i<newstatus.getDimension(); i++) {
-                double scale = Math.abs(newstatus.getComponent(i)) + eps;
+                double scale = Math.abs(newstatus.getComponent(i)) + errorOffset;
                 double e = Math.abs(error.getComponent(i)/scale);
-                if (e > errmax) errmax = e;
+                if (e > errmax) { errmax = e; errIndex = i; }
             }
             errmax /= eps;
             if (errmax <= 1.0) break;
             if (h < 1.3*hmin) {
-                System.out.print("error too large, but continuing anyway: ");
+                System.out.print("error too large (component " + errIndex + "), but continuing anyway: ");
                 hnew = hmin;
                 return newstatus;
             }
-            System.out.println("error too large.");
+            System.out.println("error too large in component " + errIndex + ".");
             hnew = safety*h*Math.pow(errmax, shrinkPower);
             if (hnew < 0.1*h) hnew = 0.1*h;
             if (hnew < hmin) hnew = hmin;
