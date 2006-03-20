@@ -12,6 +12,7 @@ import de.kleppmann.maniation.scene.Bone;
 public class ArticulatedLimb extends AnimateMesh {
     
     private MeshTriangle[] triangles;
+    private Bone bone;
     private ArticulatedLimb parent;
     private CollisionVolume volume;
     private MeshBody dynamicBody;
@@ -23,6 +24,7 @@ public class ArticulatedLimb extends AnimateMesh {
             ArticulatedMesh wholeMesh) {
         super(null);
         this.triangles = triangles.toArray(new MeshTriangle[triangles.size()]);
+        this.bone = bone;
         this.parent = parent;
         this.volume = new CollisionVolume(this.triangles);
         // Determine rest position and orientation
@@ -63,9 +65,9 @@ public class ArticulatedLimb extends AnimateMesh {
         if (!(state instanceof Body.State)) throw new IllegalArgumentException();
         com = dynamicBody.getCentreOfMass();
         this.dynamicState = (Body.State) state;
-        this.baseCurrent = dynamicState.getCoMPosition().subtract(
-                dynamicState.getOrientation().transform(com));
         this.orientCurrent = dynamicState.getOrientation();
+        this.baseCurrent = dynamicState.getCoMPosition().subtract(
+                orientCurrent.transform(com));
     }
     
     @Override
@@ -86,6 +88,10 @@ public class ArticulatedLimb extends AnimateMesh {
     @Override
     public MeshTriangle[] getTriangles() {
         return triangles;
+    }
+    
+    public Bone getBone() {
+        return bone;
     }
 
     public ArticulatedLimb getParent() {
