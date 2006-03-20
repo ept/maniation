@@ -38,7 +38,8 @@ public class SparseMatrix implements Matrix {
         for (Slice s : slices) {
             Matrix m = s.getMatrix();
             if (m instanceof SparseMatrix) {
-                for (Slice s2 : ((SparseMatrix) m).slices) sList.add(s2);
+                for (Slice s2 : ((SparseMatrix) m).slices)
+                    sList.add(new SliceOffset(s2, s.getStartRow(), s.getStartColumn()));
             } else sList.add(s);
         }
         this.slices = sList.toArray(new Slice[sList.size()]);
@@ -225,6 +226,25 @@ public class SparseMatrix implements Matrix {
         }
         public int getStartRow() {
             return row;
+        }
+    }
+    
+    
+    private static class SliceOffset implements Slice {
+        private Slice original;
+        private int rowOffset, colOffset;
+        public SliceOffset(Slice original, int rowOffset, int colOffset) {
+            this.original = original;
+            this.rowOffset = rowOffset; this.colOffset = colOffset;
+        }
+        public Matrix getMatrix() {
+            return original.getMatrix();
+        }
+        public int getStartColumn() {
+            return original.getStartColumn()+colOffset;
+        }
+        public int getStartRow() {
+            return original.getStartRow()+rowOffset;
         }
     }
 }
