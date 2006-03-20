@@ -6,8 +6,10 @@ import java.util.Set;
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryUpdater;
 
-import de.kleppmann.maniation.maths.Vector;
-import de.kleppmann.maniation.scene.Body;
+import de.kleppmann.maniation.dynamics.ArticulatedBody;
+import de.kleppmann.maniation.dynamics.GeneralizedBody;
+import de.kleppmann.maniation.dynamics.StateVector;
+import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Bone;
 import de.kleppmann.maniation.scene.Deform;
 import de.kleppmann.maniation.scene.Face;
@@ -18,17 +20,53 @@ public class ArticulatedMesh extends AnimateMesh {
     
     private Map<MeshVertex, Bone> vertexBoneMap;
     private Map<MeshTriangle, Bone> triangleBoneMap;
-    private Map<Bone, CollisionVolume> boneVolumeMap;
-    private Map<Bone, Set<Bone>> collisionTestBones;
-    private AnimateSkeleton skeleton;
-    private MyUpdater myUpdater;
+    private Map<Bone, ArticulatedLimb> boneLimbMap;
+    private Map<Bone, Set<MeshTriangle>> boneTrianglesMap;
+    private Map<Bone, Set<MeshVertex>> boneVerticesMap;
+    private ArticulatedLimb[] limbList;
+    private MyUpdater myUpdater = new MyUpdater();
+    private ArticulatedBody dynamicBody;
 
-    public ArticulatedMesh(Body sceneBody) {
+    public ArticulatedMesh(de.kleppmann.maniation.scene.Body sceneBody) {
         super(sceneBody);
-        this.skeleton = new AnimateSkeleton(sceneBody.getMesh().getSkeleton());
+        super.setDynamicBody(null);
         compile();
     }
     
+    public Map<MeshVertex, Bone>        getVertexBoneMap()    { return vertexBoneMap; }
+    public Map<MeshTriangle, Bone>      getTriangleBoneMap()  { return triangleBoneMap; }
+    public Map<Bone, ArticulatedLimb>   getBoneLimbMap()      { return boneLimbMap; }
+    public Map<Bone, Set<MeshTriangle>> getBoneTrianglesMap() { return boneTrianglesMap; }
+    public Map<Bone, Set<MeshVertex>>   getBoneVerticesMap()  { return boneVerticesMap; }
+    public ArticulatedLimb[]            getLimbList()         { return limbList; }
+
+    @Override
+    public CollisionVolume getCollisionVolume() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ArticulatedBody getDynamicBody() {
+        return dynamicBody;
+    }
+
+    @Override
+    public void setDynamicBody(GeneralizedBody dynamicBody) {
+        if (!(dynamicBody instanceof ArticulatedBody)) throw new IllegalArgumentException();
+        this.dynamicBody = (ArticulatedBody) dynamicBody;
+    }
+
+    @Override
+    public void setDynamicState(GeneralizedBody.State state, Vector3D com) {
+        if (!(state instanceof StateVector)) throw new IllegalArgumentException();
+        StateVector sv = (StateVector) state;
+        for (int i=0; i<limbList.length; i++) {
+            limbList[i].setDynamicState(sv.getSlice(i), dynamicBody.getBody(i).getCentreOfMass());
+        }
+        processStimulus();
+        for (ArticulatedLimb limb : limbList) limb.getCollisionVolume().updateBBox();
+    }
+
     private void compile() {
         Mesh mesh = sceneBody.getMesh();
         // Associate each vertex with the bone which affects it most
@@ -47,8 +85,8 @@ public class ArticulatedMesh extends AnimateMesh {
         }
         // Associate each face with the bone which affects the face's vertices most on average
         triangleBoneMap = new java.util.HashMap<MeshTriangle, Bone>();
-        Map<Bone, Set<MeshTriangle>> boneTrianglesMap = new java.util.HashMap<Bone, Set<MeshTriangle>>();
-        Map<Bone, Set<MeshVertex>> boneVerticesMap = new java.util.HashMap<Bone, Set<MeshVertex>>();
+        boneTrianglesMap = new java.util.HashMap<Bone, Set<MeshTriangle>>();
+        boneVerticesMap = new java.util.HashMap<Bone, Set<MeshVertex>>();
         for (Bone bone : mesh.getSkeleton().getBones()) {
             boneTrianglesMap.put(bone, new java.util.HashSet<MeshTriangle>());
             boneVerticesMap.put(bone, new java.util.HashSet<MeshVertex>());
@@ -78,64 +116,58 @@ public class ArticulatedMesh extends AnimateMesh {
             for (MeshVertex mv : triangles[triangleIndex].getVertices()) mvs.add(mv);
             triangleIndex++;
         }
-        // Take the list of triangles for each bone and bake them together into a
-        // collision/bounding volume.
-        boneVolumeMap = new java.util.HashMap<Bone, CollisionVolume>();
-        for (Bone bone : mesh.getSkeleton().getBones()) {
-            Set<MeshTriangle> triangles = boneTrianglesMap.get(bone);
-            MeshTriangle[] triArray = new MeshTriangle[triangles.size()];
-            triArray = triangles.toArray(triArray);
-            boneVolumeMap.put(bone, new CollisionVolume(triArray));
-        }
-        // Determine which bones should be tested for collision against each other.
-        // Tests should not be symmetric (if A is tested against B, B should not be tested
-        // against A), and any two bones whose triangle sets share a vertex (i.e. they are
-        // directly adjacent parts of the mesh) should not be tested against each other.
-        collisionTestBones = new java.util.HashMap<Bone, Set<Bone>>();
-        for (int i=0; i<mesh.getSkeleton().getBones().size(); i++) {
-            Bone bone = mesh.getSkeleton().getBones().get(i);
-            Set<Bone> boneSet = new java.util.HashSet<Bone>();
-            for (int j=0; j<i; j++) {
-                Bone other = mesh.getSkeleton().getBones().get(j);
-                Set<MeshVertex> intersect = new java.util.HashSet<MeshVertex>();
-                intersect.addAll(boneVerticesMap.get(bone));
-                intersect.retainAll(boneVerticesMap.get(other));
-                if (intersect.size() == 0) boneSet.add(other);
+        // Take the set of triangles for each bone and bake them together into an
+        // ArticulatedLimb object.
+        boneLimbMap = new java.util.HashMap<Bone, ArticulatedLimb>();
+        limbList = new ArticulatedLimb[mesh.getSkeleton().getBones().size()];
+        int limbNumber = 0;
+        while (limbNumber < limbList.length) {
+            for (Bone bone : mesh.getSkeleton().getBones()) {
+                if (boneLimbMap.get(bone) == null) {
+                    ArticulatedLimb parent = null;
+                    if (bone.getParentBone() != null) parent = boneLimbMap.get(bone.getParentBone());
+                    if ((parent != null) || (bone.getParentBone() == null)) {
+                        ArticulatedLimb limb = new ArticulatedLimb(boneTrianglesMap.get(bone), bone, parent, this);
+                        boneLimbMap.put(bone, limb);
+                        limbList[limbNumber] = limb;
+                        limbNumber++;
+                    }
+                }
             }
-            collisionTestBones.put(bone, boneSet);
         }
+    }
+
+    public Vector3D currentVertexPosition(Vertex vert) {
+        Vector3D pos = new Vector3D(vert.getPosition().getX(), vert.getPosition().getY(),
+                vert.getPosition().getZ());
+        Vector3D deformed = new Vector3D(0.0, 0.0, 0.0);
+        for (Deform deform : vert.getDeforms()) {
+            Vector3D world = boneLimbMap.get(deform.getBone()).currentVertexPosition(pos);
+            deformed = deformed.add(world.mult(deform.getWeight()));
+        }
+        return deformed;
+    }
+
+    @Override
+    public void processStimulus() {
+        if (geometry != null) geometry.updateData(myUpdater); else myUpdater.updateData(null);
     }
     
     @Override
-    public void processStimulus() {
-        geometry.updateData(myUpdater);
-        super.processStimulus();
+    public String toString() {
+        String result = "";
+        for (int i=0; i<limbList.length; i++) result += limbList[i] + " ";
+        return result;
     }
     
     
     private class MyUpdater implements GeometryUpdater {
         public void updateData(Geometry geometry) {
-            skeleton.processStimulus();
             int coordIndex = 0;
             for (Vertex vert : sceneBody.getMesh().getVertices()) {
-                Vector deformed = skeleton.currentVertexPosition(vert);
-                deformed.toDoubleArray(coordinates, 3*coordIndex);
-                coordIndex++;
+                currentVertexPosition(vert).toDoubleArray(coordinates, coordIndex);
+                coordIndex += 3;
             }
-            /*for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet())
-                entry.getValue().updateBBox();
-            for (Map.Entry<Bone, CollisionVolume> entry : boneVolumesMap.entrySet()) {
-                CollisionVolume vol1 = entry.getValue();
-                for (Bone target : collisionTestBones.get(entry.getKey())) {
-                    Collision c = new Collision();
-                    //System.out.print(entry.getKey().getName() + " vs. " + target.getName() + ": ");
-                    boneVolumesMap.get(target).intersect(vol1, c);
-                    if (c.isColliding()) {
-                        System.out.println(c.collisions + " collisions between " + 
-                                entry.getKey().getName() + " and " + target.getName());
-                    }
-                }
-            }*/
         }
     }
 }
