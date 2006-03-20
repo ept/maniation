@@ -10,21 +10,28 @@ import de.kleppmann.maniation.maths.Vector;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.maths.VectorImpl;
 
-public class RotationConstraint implements Constraint {
+public class RotationConstraint implements InequalityConstraint {
     
     private final World world;
     private final Body body1, body2;
     private Body.State body1State, body2State;
     private final Vector3D normal;
+    private final double limit;
+    private final Quaternion restDifference;
     private double n1, n2, n3, pw, px, py, pz, v1, v2, v3, qw, qx, qy, qz, w1, w2, w3;
 
     // normal is given in local coordinates of body1.
     // if body1State is null, normal is in world coordinates
-    public RotationConstraint(World world, Body body1, Vector3D normal, Body body2) {
+    public RotationConstraint(World world, Body body1, Vector3D normal, Body body2, double limit) {
         this.world = world;
         this.body1 = body1;
         this.body2 = body2;
         this.normal = normal.normalize();
+        this.limit = limit;
+        if (body1 != null)
+            this.restDifference = body1.getInitialState().getOrientation().getInverse().mult(
+                    body2.getInitialState().getOrientation());
+        else this.restDifference = new Quaternion();
     }
     
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
@@ -40,7 +47,7 @@ public class RotationConstraint implements Constraint {
         w2 = body2State.getAngularVelocity().getComponent(1);
         w3 = body2State.getAngularVelocity().getComponent(2);
         if (body1State != null) {
-            Quaternion p = body1State.getOrientation();
+            Quaternion p = body1State.getOrientation().mult(restDifference);
             pw = p.getW(); px = p.getX(); py = p.getY(); pz = p.getZ();
             v1 = body1State.getAngularVelocity().getComponent(0);
             v2 = body1State.getAngularVelocity().getComponent(1);
@@ -52,6 +59,9 @@ public class RotationConstraint implements Constraint {
         n1 = normal.getComponent(0);
         n2 = normal.getComponent(1);
         n3 = normal.getComponent(2);
+        if ((pw*qw + px*qx + py*qy + pz*qz < 0) ^ (limit > 0)) {
+            n1 *= -1; n2 *= -1; n3 *= -1;
+        }
     }
 
     public List<SimulationObject> getObjects() {
@@ -65,11 +75,20 @@ public class RotationConstraint implements Constraint {
         return 1;
     }
 
+    public boolean isInequality() {
+        return (limit != 0.0);
+    }
+
+    public Map<Body, Vector3D> setToZero() {
+        return new java.util.HashMap<Body, Vector3D>();
+    }
+
     public Vector getPenalty() {
         double[] arr = new double[1];
         arr[0] = n1*(py*qz - pz*qy - pw*qx + px*qw) +
                  n2*(pz*qx - px*qz - pw*qy + py*qw) +
                  n3*(px*qy - py*qx - pw*qz + pz*qw);
+        arr[0] = Math.abs(limit) + arr[0];
         return new VectorImpl(arr);
     }
 
@@ -105,7 +124,6 @@ public class RotationConstraint implements Constraint {
         result.put(body2, new MatrixImpl(m2));
         return result;
     }
-
 
     public Map<GeneralizedBody, Matrix> getJacobianDot() {
         double x1 = n1*w1 + n2*w2 + n3*w3;
