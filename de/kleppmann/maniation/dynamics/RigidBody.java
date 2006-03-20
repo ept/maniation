@@ -46,6 +46,10 @@ public abstract class RigidBody implements Body {
         return me;
     }
     
+    protected boolean allowPositionChange() {
+        return true;
+    }
+    
     
     class State implements Body.State {
         // Primary quantities
@@ -175,6 +179,7 @@ public abstract class RigidBody implements Body {
         }
 
         public State applyPosition(Map<Body, Vector3D> newPositions) {
+            if (!allowPositionChange()) return this;
             Vector3D pos = newPositions.get(RigidBody.this);
             if (pos == null) return this;
             return new State(this, pos, rateOfChange);

@@ -123,6 +123,12 @@ public class MeshBody extends RigidBody implements Collideable {
         collision.process(result);
     }
     
+    @Override
+    protected boolean allowPositionChange() {
+        if (mesh.getSceneBody() == null) return false;
+        return mesh.getSceneBody().isMobile();
+    }
+
     public AnimateMesh getMesh() {
         return mesh;
     }
