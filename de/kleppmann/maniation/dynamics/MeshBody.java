@@ -4,10 +4,11 @@ import java.util.List;
 
 import de.kleppmann.maniation.geometry.AnimateMesh;
 import de.kleppmann.maniation.geometry.Collision;
+import de.kleppmann.maniation.geometry.MeshTriangle;
+import de.kleppmann.maniation.geometry.MeshVertex;
 import de.kleppmann.maniation.maths.Matrix33;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
-import de.kleppmann.maniation.scene.Vertex;
 
 public class MeshBody extends RigidBody implements Collideable {
     
@@ -24,9 +25,11 @@ public class MeshBody extends RigidBody implements Collideable {
     public MeshBody(World world, AnimateMesh mesh) {
         this.world = world;
         this.mesh = mesh;
-        this.info = new MeshInfo(mesh);
+        this.mesh.setDynamicBody(this);
+        this.info = new MeshInfo(mesh, mesh.getTriangles());
         this.initialLocation = mesh.getLocation();
         this.initialOrientation = mesh.getOrientation();
+        info.com = initialOrientation.getInverse().transform(info.com.subtract(initialLocation));
         nail1 = getInitialPosition();
         nail2 = initialOrientation.transform(new Vector3D(1,0,0)).add(nail1);
         nail3 = initialOrientation.transform(new Vector3D(0,1,0)).add(nail1);
@@ -84,6 +87,10 @@ public class MeshBody extends RigidBody implements Collideable {
         return new Vector3D();
     }
     
+    public Vector3D getCentreOfMass() {
+        return info.com;
+    }
+    
     @Override
     public void interaction(SimulationObject.State ownState, SimulationObject.State partnerState,
             InteractionList result, boolean allowReverse) {
@@ -94,10 +101,11 @@ public class MeshBody extends RigidBody implements Collideable {
             if (partnerState.getOwner() instanceof Collideable) {
                 mesh.setDynamicState(me, info.com);
                 Collideable partner = (Collideable) partnerState.getOwner();
-                partner.collide((Body.State) partnerState, mesh, result);
+                partner.collide((GeneralizedBody.State) partnerState, mesh, result);
             } else super.interaction(me, partnerState, result, allowReverse);
             // If this body is immobile, also nail it to the world
-            if (!mesh.getSceneBody().isMobile() && (partnerState.getOwner() == world)) {
+            if ((mesh.getSceneBody() != null) && !mesh.getSceneBody().isMobile() &&
+                    (partnerState.getOwner() == world)) {
                 result.addInteraction(new NailConstraint(world, me.getOwner(), new Vector3D(0,0,0), nail1));
                 result.addInteraction(new NailConstraint(world, me.getOwner(), new Vector3D(1,0,0), nail2));
                 result.addInteraction(new NailConstraint(world, me.getOwner(), new Vector3D(0,1,0), nail3));
@@ -107,7 +115,7 @@ public class MeshBody extends RigidBody implements Collideable {
         }
     }
 
-    public void collide(Body.State ownState, AnimateMesh partner, InteractionList result) {
+    public void collide(GeneralizedBody.State ownState, AnimateMesh partner, InteractionList result) {
         if (ownState.getOwner() != this) throw new IllegalArgumentException();
         mesh.setDynamicState(ownState, info.com);
         Collision collision = new Collision(mesh, partner);
@@ -122,21 +130,28 @@ public class MeshBody extends RigidBody implements Collideable {
     
     private static class MeshInfo {
 
-        double radius, length, mass;
+        double radius, length, mass, density;
         Vector3D axis, com;
         
-        MeshInfo(AnimateMesh mesh) {
-            de.kleppmann.maniation.scene.Vector vaxis = mesh.getSceneBody().getAxis();
-            axis = new Vector3D(vaxis.getX(), vaxis.getY(), vaxis.getZ());
-            axis = axis.normalize();
+        MeshInfo(AnimateMesh mesh, MeshTriangle triangles[]) {
+            if (mesh.getSceneBody() != null) {
+                de.kleppmann.maniation.scene.Vector vaxis = mesh.getSceneBody().getAxis();
+                axis = new Vector3D(vaxis.getX(), vaxis.getY(), vaxis.getZ());
+                axis = axis.normalize();
+                density = mesh.getSceneBody().getMesh().getMaterial().getDensity();
+            } else {
+                axis = new Vector3D(1,0,0);
+                density = 1.0;
+            }
             List<Vector3D> points = new java.util.ArrayList<Vector3D>();
             // Approximate location of the centre of mass by averaging all vertex positions
             com = new Vector3D();
-            for (Vertex vert : mesh.getSceneBody().getMesh().getVertices()) {
-                Vector3D pos = new Vector3D(vert.getPosition().getX(), vert.getPosition().getY(),
-                        vert.getPosition().getZ());
-                points.add(pos);
-                com = com.add(pos);
+            for (MeshTriangle tri : triangles) {
+                for (MeshVertex v : tri.getVertices()) {
+                    Vector3D pos = v.getPosition();
+                    points.add(pos);
+                    com = com.add(pos);
+                }
             }
             com = com.mult(1.0/points.size());
             // Radius is the maximum distance from the axis (straight line through CoM).
@@ -154,7 +169,7 @@ public class MeshBody extends RigidBody implements Collideable {
             }
             length = lmax - lmin;
             // Calculate mass based on volume and density
-            mass = mesh.getSceneBody().getMesh().getMaterial().getDensity()*Math.PI*radius*radius*length;
+            mass = density*Math.PI*radius*radius*length;
         }
     }
 }
