@@ -29,7 +29,11 @@ public class MeshBody extends RigidBody implements Collideable {
         this.info = new MeshInfo(mesh, mesh.getTriangles());
         this.initialLocation = mesh.getLocation();
         this.initialOrientation = mesh.getOrientation();
-        info.com = initialOrientation.getInverse().transform(info.com.subtract(initialLocation));
+        if (info.com != null) {
+            info.com = initialOrientation.getInverse().transform(info.com.subtract(initialLocation));
+        } else {
+            info.com = new Vector3D();
+        }
         nail1 = getInitialPosition();
         nail2 = initialOrientation.transform(new Vector3D(1,0,0)).add(nail1);
         nail3 = initialOrientation.transform(new Vector3D(0,1,0)).add(nail1);
@@ -140,6 +144,10 @@ public class MeshBody extends RigidBody implements Collideable {
         Vector3D axis, com;
         
         MeshInfo(AnimateMesh mesh, MeshTriangle triangles[]) {
+            if (triangles.length == 0) {
+                mass = 0.01; axis = new Vector3D(); com = null;
+                return;
+            }
             if (mesh.getSceneBody() != null) {
                 de.kleppmann.maniation.scene.Vector vaxis = mesh.getSceneBody().getAxis();
                 axis = new Vector3D(vaxis.getX(), vaxis.getY(), vaxis.getZ());
