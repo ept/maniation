@@ -29,11 +29,12 @@ public class InteractionList {
         equalities = new java.util.HashSet<Constraint>();
         colliding = new java.util.HashSet<InequalityConstraint>();
         resting = new java.util.HashSet<InequalityConstraint>();
+        Set<Constraint> notIgnored = new java.util.HashSet<Constraint>();
         for (Constraint c : constraints) {
             c.setStateMapping(state.getStateMap());
             // If it's an inequality...
             if ((c instanceof InequalityConstraint) && (((InequalityConstraint) c).isInequality())) {
-                // Ignore positive inequalities
+                // Discard positive inequalities
                 boolean positive = true;
                 for (int i=0; i<c.getDimension(); i++)
                     if (c.getPenalty().getComponent(i) < Simulation.PENETRATION_TOLERANCE)
@@ -49,7 +50,9 @@ public class InteractionList {
                 if (isColliding) colliding.add((InequalityConstraint) c); else
                 if (!isSeparating) resting.add((InequalityConstraint) c); 
             } else equalities.add(c);
+            notIgnored.add(c); // does not get added if continue has been called
         }
+        constraints = notIgnored;
     }
     
     public void compileConstraints(StateVector state, Collection<Constraint> constraintList) {
@@ -97,6 +100,7 @@ public class InteractionList {
     public SparseMatrix getJacobian() { return jacobian; }
     public SparseMatrix getJacobianDot() { return jacobianDot; }
     public Set<Interaction> getNonConstraints() { return other; }
+    public Set<Constraint> getAllConstraints() { return constraints; }
     public Set<Constraint> getEqualityConstraints() { return equalities; }
     public Set<InequalityConstraint> getCollidingContacts() { return colliding; }
     public Set<InequalityConstraint> getRestingContacts() { return resting; }
