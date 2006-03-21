@@ -19,11 +19,11 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Simulation {
     
-    public static final double RESTING_TOLERANCE = 0.0005;
-    public static final double PENETRATION_TOLERANCE = 0.0001;
-    public static final double ELASTICITY = 1.0;
+    public static final double RESTING_TOLERANCE = 0.001;
+    public static final double PENETRATION_TOLERANCE = 0.005;
+    public static final double ELASTICITY = 0.3;
     public static final double FRAMES_PER_SECOND = 120.0;
-    public static final boolean ENABLE_FUDGE = true;
+    public static final boolean ENABLE_FUDGE = false;
     
     private World world = new World();
     private SimulationObject.State worldState = world.getInitialState();
@@ -147,9 +147,12 @@ public class Simulation {
         Vector lambda;
         Set<Constraint> constrs = new java.util.HashSet<Constraint>();
         Set<Constraint> contacts = new java.util.HashSet<Constraint>();
-        constrs.addAll(il.getEqualityConstraints());
+        constrs.addAll(il.getAllConstraints());
+        contacts.addAll(il.getAllConstraints());
+        contacts.removeAll(il.getEqualityConstraints());
+        /*constrs.addAll(il.getEqualityConstraints());
         constrs.addAll(il.getRestingContacts());
-        contacts.addAll(il.getRestingContacts());
+        contacts.addAll(il.getRestingContacts());*/
         boolean lambdaNegative;
         do {
             il.compileConstraints(state, constrs);
