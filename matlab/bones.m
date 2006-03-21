@@ -8,12 +8,10 @@ function retval = bones(b)
         v = b(i, 1:3)' - p0;
         p0 = b(i, 1:3)';
         a = -b(i, 4);
-        if (i > 1)
-            q1 = vectortoq(boneaxis, v, a);
-            q = qmult(qinv(q0), q1);
-            q0 = q1;
-            orientation = q'
-        endif
+        q1 = vectortoq(boneaxis, v, a);
+        orientation = qmult(qinv(q0), q1)';
+        q0 = q1;
+        printf("<orientation w=\"%+1.6f\" x=\"%+1.6f\" y=\"%+1.6f\" z=\"%+1.6f\"/>  <base x=\"0.00000\" y=\"%1.5f\" z=\"0.00000\"/>\n", orientation, sqrt(sumsq(v)));
     endfor
 
     retval = 0;
