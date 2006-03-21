@@ -5,9 +5,8 @@ public class ConjugateGradient {
     private int size;
     private Matrix[] alist;
     private Vector b;
-    private double tolerance = 1e-6;
+    private double tolerance = 1e-5;
     private int maxIter;
-    //private Vector diagInv;
     private Method method = Method.SIMPLE;
     
     public enum Method { SIMPLE, PRECONDITION, MAGNITUDE, MAXIMUM };
@@ -39,44 +38,15 @@ public class ConjugateGradient {
             this.b = new VectorImpl(bnew);
         } else this.b = b;
         // Other stuff
-        //calcDiagonal();
         maxIter = 100*size;
     }
     
-    /*private void calcDiagonal() {
-        // Get the diagonal of the product of all matrices a
-        double[] diag = new double[size];
-        if (alist.length == 1) {
-            for (int i=0; i<size; i++) diag[i] = alist[0].getComponent(i,i);
-        } else if (alist.length == 2) {
-            for (int i=0; i<size; i++) {
-                diag[i] = 0.0;
-                for (int j=0; j<size; j++)
-                    diag[i] += alist[0].getComponent(i,j)*alist[1].getComponent(j,i);
-            }                    
-        } else {
-            Matrix middle = alist[1], end = alist[alist.length-1];
-            for (int i=2; i<alist.length-1; i++) middle = middle.mult(alist[i]);
-            for (int i=0; i<size; i++) {
-                diag[i] = 0.0;
-                for (int j=0; j<size; j++)
-                    for (int k=0; k<size; k++)
-                        diag[i] += alist[0].getComponent(i,j)*middle.getComponent(j,k)*
-                                end.getComponent(k,i);
-            }
-        }
-        // Calculate inverse
-        for (int i=0; i<size; i++)
-            if ((diag[i] < 1e-16) && (diag[i] > -1e-16)) diag[i] = 1.0;
-            else diag[i] = 1.0/diag[i];
-        diagInv = new VectorImpl(diag);
-    }*/
-
     public Vector solve() {
-        //System.out.println("*** Conjugate gradient solver started");
+        //System.err.println("*** Conjugate gradient solver started");
         int iter = 0;
-        double ak, bk, bkDen = 1.0, bkNum, bNorm, xNorm, zm1Norm, zNorm, err;
-        Vector x = new VectorImpl(size), r = b, rr = b, z = b/*.multComponents(diagInv)*/;
+        double ak, bk, bkDen = 1.0, bkNum, bNorm, xNorm, zm1Norm, zNorm, err, minerr = 1e20;
+        Vector minx = null;
+        Vector x = new VectorImpl(size), r = b, rr = b, z = b;
         Vector zz = z, p = z, pp = z;
         if (this.method == Method.SIMPLE) bNorm = zNorm = norm(b); else bNorm = zNorm = norm(z);
         if (Math.abs(bNorm) < 1e-15) return x;
@@ -84,7 +54,7 @@ public class ConjugateGradient {
             iter++;
             bkNum = z.mult(rr);
             if (iter > 1) {
-                zz = rr/*.multComponents(diagInv)*/;
+                zz = rr;
                 bk = bkNum / bkDen;
                 p = p.mult(bk).add(z);
                 pp = pp.mult(bk).add(zz);
@@ -99,7 +69,7 @@ public class ConjugateGradient {
             x = x.add(p.mult(ak));
             r = r.subtract(z.mult(ak));
             rr = rr.subtract(zz.mult(ak));
-            z = r/*.multComponents(diagInv)*/;
+            z = r;
             if (this.method == Method.SIMPLE) err = norm(r)/bNorm; else
             if (this.method == Method.PRECONDITION) err = norm(z)/bNorm;
             else {
@@ -111,10 +81,15 @@ public class ConjugateGradient {
                 xNorm = norm(x);
                 if (err <= 0.5*xNorm) err /= xNorm; else continue;
             }
-            //System.out.println("Iteration " + iter + ": error " + err);
+            //System.err.println("Iteration " + iter + ": error " + err);
+            if (err <= minerr) { minx = x; minerr = err; }
+            if (err > 10000*minerr) {
+                System.err.println("*** Divergence detected ***");
+                return minx; // catch algorithm if it's diverging
+            }
             if (err <= tolerance) break;
         }
-        //System.out.print("(" + iter + ")");
+        //System.err.print("(" + iter + ")");
         return x;
     }
     
