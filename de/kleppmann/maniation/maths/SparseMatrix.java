@@ -138,12 +138,13 @@ public class SparseMatrix implements Matrix {
     public String toString() {
         DecimalFormat format = new DecimalFormat("#####0.0000000000");
         String result = "[";
-        for (int i=0; i<getRows(); i++)
+        for (int i=0; i<getRows(); i++) {
             for (int j=0; j<getColumns(); j++) {
                 result += format.format(getComponent(i,j));
                 if (j < getColumns() - 1) result += ", "; else
-                if (i < getRows() - 1) result += "; "; else result += "]";
+                if (i < getRows() - 1) result += "; "; else result += "];";
             }
+        }
         return result;
     }
 
