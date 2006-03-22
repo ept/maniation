@@ -93,8 +93,9 @@
         </optional>
         <element name="base"><ref name="vector"/></element>
         <element name="orientation"><ref name="quaternion"/></element>
-        <element name="translation-to-local"><ref name="vector"/></element>
-        <element name="rotation-to-local"><ref name="quaternion"/></element>
+        <element name="pose"><ref name="quaternion"/></element>
+        <!--element name="translation-to-local"><ref name="vector"/></element>
+        <element name="rotation-to-local"><ref name="quaternion"/></element-->
         <optional><element name="x-axis"><ref name="axis-constraint"/></element></optional>
         <optional><element name="y-axis"><ref name="axis-constraint"/></element></optional>
         <optional><element name="z-axis"><ref name="axis-constraint"/></element></optional>
