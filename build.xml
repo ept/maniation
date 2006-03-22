@@ -6,7 +6,7 @@
 
     <!-- settings for penpen -->
     <property name="root" location="/home/martin"/>
-    <property name="jre" location="/usr/java/jdk1.5.0_04/jre"/>
+    <property name="jre" location="/usr/java/jdk1.5.0_06/jre"/>
 
     <!-- derived settings -->
     <property name="bin" location="${root}/.bin"/>
@@ -45,7 +45,7 @@
     </target>
 
     <target name="run" depends="init,compile">
-        <java classname="de.kleppmann.maniation.jointlimit.JointLimit" fork="true" jvm="${jre}/bin/java">
+        <java classname="de.kleppmann.maniation.TestDynamics" fork="true" jvm="${jre}/bin/java">
             <classpath refid="classpath"/>
         </java>
     </target>
