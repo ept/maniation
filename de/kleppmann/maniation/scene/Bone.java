@@ -12,6 +12,8 @@ public interface Bone {
     void setBase(de.kleppmann.maniation.scene.Vector base);
     de.kleppmann.maniation.scene.Quaternion getOrientation();
     void setOrientation(de.kleppmann.maniation.scene.Quaternion orientation);
+    de.kleppmann.maniation.scene.Quaternion getPose();
+    void setPose(de.kleppmann.maniation.scene.Quaternion pose);
     de.kleppmann.maniation.scene.Vector getTranslationToLocal();
     void setTranslationToLocal(de.kleppmann.maniation.scene.Vector translationToLocal);
     de.kleppmann.maniation.scene.Quaternion getRotationToLocal();

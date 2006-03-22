@@ -57,6 +57,7 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
     private boolean parentBoneUpToDate = false;
     private de.kleppmann.maniation.scene.Vector base;
     private de.kleppmann.maniation.scene.Quaternion orientation;
+    private de.kleppmann.maniation.scene.Quaternion pose;
     private de.kleppmann.maniation.scene.Vector translationToLocal;
     private de.kleppmann.maniation.scene.Quaternion rotationToLocal;
     private de.kleppmann.maniation.scene.AxisConstraint xAxis;
@@ -106,6 +107,14 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
     
     public void setOrientation(de.kleppmann.maniation.scene.Quaternion orientation) {
         this.orientation = orientation;
+    }
+    
+    public de.kleppmann.maniation.scene.Quaternion getPose() {
+        return pose;
+    }
+    
+    public void setPose(de.kleppmann.maniation.scene.Quaternion pose) {
+        this.pose = pose;
     }
     
     public de.kleppmann.maniation.scene.Vector getTranslationToLocal() {
@@ -264,6 +273,10 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                     if (index == 0) return (XMLChild) getOrientation();
                     index--;
                 }
+                if (getPose() != null) {
+                    if (index == 0) return (XMLChild) getPose();
+                    index--;
+                }
                 if (getTranslationToLocal() != null) {
                     if (index == 0) return (XMLChild) getTranslationToLocal();
                     index--;
@@ -313,6 +326,14 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                     if (index == 0) {
                         _result = (de.kleppmann.maniation.scene.XMLChild) getOrientation();
                         setOrientation((de.kleppmann.maniation.scene.QuaternionImpl) element);
+                        return _result;
+                    }
+                    index--;
+                }
+                if (getPose() != null) {
+                    if (index == 0) {
+                        _result = (de.kleppmann.maniation.scene.XMLChild) getPose();
+                        setPose((de.kleppmann.maniation.scene.QuaternionImpl) element);
                         return _result;
                     }
                     index--;
@@ -384,6 +405,12 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
                     return;
                 }
             }
+            if (element instanceof de.kleppmann.maniation.scene.QuaternionImpl) {
+                if (((de.kleppmann.maniation.scene.QuaternionImpl) element).getTagName().equals(_handler._poseChild)) {
+                    setPose((de.kleppmann.maniation.scene.QuaternionImpl) element);
+                    return;
+                }
+            }
             if (element instanceof de.kleppmann.maniation.scene.VectorImpl) {
                 if (((de.kleppmann.maniation.scene.VectorImpl) element).getTagName().equals(_handler._translationToLocalChild)) {
                     setTranslationToLocal((de.kleppmann.maniation.scene.VectorImpl) element);
@@ -435,6 +462,7 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
         
         javax.xml.namespace.QName _baseChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "base");
         javax.xml.namespace.QName _orientationChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "orientation");
+        javax.xml.namespace.QName _poseChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "pose");
         javax.xml.namespace.QName _translationToLocalChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "translation-to-local");
         javax.xml.namespace.QName _rotationToLocalChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "rotation-to-local");
         javax.xml.namespace.QName _xAxisChild = new javax.xml.namespace.QName("http://kleppmann.de/maniation/scene", "x-axis");
@@ -448,6 +476,8 @@ class BoneImpl implements de.kleppmann.maniation.scene.Bone, de.kleppmann.maniat
             if (namespaceURI.equals(_baseChild.getNamespaceURI()) && localName.equals(_baseChild.getLocalPart()))
                 _el = new de.kleppmann.maniation.scene.VectorImpl(_document, BoneImpl.this);
             if (namespaceURI.equals(_orientationChild.getNamespaceURI()) && localName.equals(_orientationChild.getLocalPart()))
+                _el = new de.kleppmann.maniation.scene.QuaternionImpl(_document, BoneImpl.this);
+            if (namespaceURI.equals(_poseChild.getNamespaceURI()) && localName.equals(_poseChild.getLocalPart()))
                 _el = new de.kleppmann.maniation.scene.QuaternionImpl(_document, BoneImpl.this);
             if (namespaceURI.equals(_translationToLocalChild.getNamespaceURI()) && localName.equals(_translationToLocalChild.getLocalPart()))
                 _el = new de.kleppmann.maniation.scene.VectorImpl(_document, BoneImpl.this);
