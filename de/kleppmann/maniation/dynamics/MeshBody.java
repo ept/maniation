@@ -27,16 +27,18 @@ public class MeshBody extends RigidBody implements Collideable {
         this.mesh = mesh;
         this.mesh.setDynamicBody(this);
         this.info = new MeshInfo(mesh, mesh.getTriangles());
-        this.initialLocation = mesh.getLocation();
-        this.initialOrientation = mesh.getOrientation();
+        this.initialLocation = mesh.getCurrentLocation();
+        this.initialOrientation = mesh.getCurrentOrientation();
+        Vector3D restLocation = mesh.getRestLocation();
+        Quaternion restOrientation = mesh.getRestOrientation();
         if (info.com != null) {
-            info.com = initialOrientation.getInverse().transform(info.com.subtract(initialLocation));
+            info.com = restOrientation.getInverse().transform(info.com.subtract(restLocation));
         } else {
             info.com = new Vector3D();
         }
         nail1 = getInitialPosition();
-        nail2 = initialOrientation.transform(new Vector3D(1,0,0)).add(nail1);
-        nail3 = initialOrientation.transform(new Vector3D(0,1,0)).add(nail1);
+        nail2 = restOrientation.transform(new Vector3D(1,0,0)).add(nail1);
+        nail3 = restOrientation.transform(new Vector3D(0,1,0)).add(nail1);
 
         /*this.toPrincipalAxes = Quaternion.fromDirectionRoll(info.axis, new Vector3D(0,0,1), 0.0);
         this.radial = (info.length*info.length + 3.0*info.radius*info.radius)*info.mass/12.0;

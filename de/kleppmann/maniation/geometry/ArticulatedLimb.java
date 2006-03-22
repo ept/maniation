@@ -30,13 +30,18 @@ public class ArticulatedLimb extends AnimateMesh {
         // Determine rest position and orientation
         if (parent != null) {
             baseRest = parent.baseRest; orientRest = parent.orientRest;
+            baseCurrent = parent.baseCurrent; orientCurrent = parent.orientCurrent;
         } else {
-            baseRest = wholeMesh.getLocation(); orientRest = wholeMesh.getOrientation();
+            baseRest = new Vector3D(); orientRest = new Quaternion();
+            baseCurrent = wholeMesh.getCurrentLocation();
+            orientCurrent = wholeMesh.getCurrentOrientation();
         }
         Vector3D local = new Vector3D(bone.getBase().getX(), bone.getBase().getY(), bone.getBase().getZ());
         baseRest = baseRest.add(orientRest.transform(local));
         orientRest = orientRest.mult(bone.getOrientation().getValue());
-        baseCurrent = baseRest; orientCurrent = orientRest;
+        baseCurrent = baseCurrent.add(orientCurrent.transform(local));
+        orientCurrent = orientCurrent.mult(bone.getOrientation().getValue());
+        if (bone.getPose() != null) orientCurrent = orientCurrent.mult(bone.getPose().getValue());
     }
     
     public Vector3D currentVertexPosition(Vector3D pos) {
@@ -71,13 +76,23 @@ public class ArticulatedLimb extends AnimateMesh {
     }
     
     @Override
-    public Vector3D getLocation() {
+    public Vector3D getRestLocation() {
         return baseRest;
     }
 
     @Override
-    public Quaternion getOrientation() {
+    public Quaternion getRestOrientation() {
         return orientRest;
+    }
+
+    @Override
+    public Vector3D getCurrentLocation() {
+        return baseCurrent;
+    }
+
+    @Override
+    public Quaternion getCurrentOrientation() {
+        return orientCurrent;
     }
 
     @Override

@@ -65,9 +65,9 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
                 Limb parent = bodyMap.get(limb.getParent());
                 if (parent == null) throw new IllegalStateException();
                 Vector3D thispos = result[i].getInitialOrientation().getInverse().transform(
-                        limb.getLocation().subtract(result[i].getInitialPosition()));
+                        limb.getCurrentLocation().subtract(result[i].getInitialPosition()));
                 Vector3D parentpos = parent.getInitialOrientation().getInverse().transform(
-                        limb.getLocation().subtract(parent.getInitialPosition()));
+                        limb.getCurrentLocation().subtract(parent.getInitialPosition()));
                 JointConstraint link = new JointConstraint(result[i], thispos, parent, parentpos);
                 parent.links.add(link);
                 result[i].links.add(link);

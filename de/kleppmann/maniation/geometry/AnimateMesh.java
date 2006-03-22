@@ -75,12 +75,20 @@ public class AnimateMesh implements AnimateObject {
         processStimulus();
     }
     
-    public Vector3D getLocation() {
+    public Vector3D getRestLocation() {
+        return new Vector3D();
+    }
+    
+    public Quaternion getRestOrientation() {
+        return new Quaternion();
+    }
+    
+    public Vector3D getCurrentLocation() {
         return new Vector3D(sceneBody.getLocation().getX(), 
                 sceneBody.getLocation().getY(), sceneBody.getLocation().getZ());
     }
     
-    public Quaternion getOrientation() {
+    public Quaternion getCurrentOrientation() {
         return new Quaternion(sceneBody.getOrientation().getW(), sceneBody.getOrientation().getX(), 
                 sceneBody.getOrientation().getY(), sceneBody.getOrientation().getZ());
     }
@@ -106,11 +114,14 @@ public class AnimateMesh implements AnimateObject {
         normals = new float[3*mesh.getVertices().size()];
         vertices = new MeshVertex[mesh.getVertices().size()];
         int i = 0;
-        Quaternion orient = getOrientation(); Vector3D loc = getLocation();
+        //Quaternion orient = getCurrentOrientation(); Vector3D loc = getCurrentLocation();
         Map<VertexPosition, MeshVertex> uniqueVertices = new java.util.HashMap<VertexPosition, MeshVertex>();
         vertexMap = new java.util.HashMap<Vertex, MeshVertex>();
         for (Vertex v : mesh.getVertices()) {
-            updateVertex(v, 3*i, orient, loc);
+            //updateVertex(v, 3*i, orient, loc);
+            coordinates[3*i+0] = v.getPosition().getX();
+            coordinates[3*i+1] = v.getPosition().getY();
+            coordinates[3*i+2] = v.getPosition().getZ();
             normals[3*i+0] = (float) v.getNormal().getX();
             normals[3*i+1] = (float) v.getNormal().getY();
             normals[3*i+2] = (float) v.getNormal().getZ();
@@ -169,7 +180,7 @@ public class AnimateMesh implements AnimateObject {
     
     private class MyUpdater implements GeometryUpdater {
         public void updateData(Geometry geometry) {
-            Quaternion orient = getOrientation(); Vector3D loc = getLocation();
+            Quaternion orient = getCurrentOrientation(); Vector3D loc = getCurrentLocation();
             int coordIndex = 0;
             for (Vertex vert : sceneBody.getMesh().getVertices()) {
                 updateVertex(vert, coordIndex, orient, loc);
