@@ -1,10 +1,12 @@
-\documentclass[twoside]{report}
+\documentclass[twoside,notitlepage]{report}
+\usepackage{a4}
 \usepackage{bm}
+\usepackage[british]{babel}
 \usepackage{ifthen}
 \bibliographystyle{plain}
-\newcommand{\diff}{\mbox{$\mathrm{d}$}}     % Differential d (for differential operators)
-\newcommand{\norm}[1]{\mbox{$||#1||$}}      % Magnitude/Norm
-\newcommand{\ve}[1]{\mbox{$\ifthenelse{     % Vector
+\newcommand{\diff}{\ensuremath{\mathrm{d}}}     % Differential d (for differential operators)
+\newcommand{\norm}[1]{\ensuremath{|#1|}}        % Magnitude/Norm
+\newcommand{\ve}[1]{\ensuremath{\ifthenelse{    % Vector
     \equal{#1}{\alpha}\or\equal{#1}{\beta}\or\equal{#1}{\gamma}\or\equal{#1}{\delta}\or
     \equal{#1}{\epsilon}\or\equal{#1}{\varepsilon}\or\equal{#1}{\zeta}\or\equal{#1}{\eta}\or
     \equal{#1}{\theta}\or\equal{#1}{\vartheta}\or\equal{#1}{\iota}\or\equal{#1}{\kappa}\or
@@ -15,15 +17,18 @@
     \equal{#1}{\omega}\or\equal{#1}{\Gamma}\or\equal{#1}{\Delta}\or\equal{#1}{\Theta}\or
     \equal{#1}{\Lambda}\or\equal{#1}{\Xi}\or\equal{#1}{\Pi}\or\equal{#1}{\Sigma}\or
     \equal{#1}{\Upsilon}\or\equal{#1}{\Phi}\or\equal{#1}{\Psi}\or\equal{#1}{\Omega}}
-    {\bm{#1}}{\mathbf{#1}}$}}
-\newcommand{\m}[1]{\ve{#1}}                 % Matrix
-\newcommand{\dual}[1]{\mbox{$#1^*$}}        % Dual tensor
-\newcommand{\q}[1]{\mbox{$#1$}}             % Quaternion
-\newcommand{\qi}{\mbox{$\mathrm{i}$}}       % Quaternion i component
-\newcommand{\qj}{\mbox{$\mathrm{j}$}}       % Quaternion j component
-\newcommand{\qk}{\mbox{$\mathrm{k}$}}       % Quaternion k component
-\newcommand{\zerobox}[1]{%
-    \setbox0 = \hbox{\parbox[t][\height][b]{20cm}{#1}}%
+    {\bm{#1}}{\mathbf{#1}}}}
+\newcommand{\m}[1]{\ve{#1}}                     % Matrix
+\newcommand{\dual}[1]{{\ensuremath{#1^*}}}      % Dual tensor
+\newcommand{\q}[1]{\ensuremath{#1}}             % Quaternion
+\newcommand{\qi}{\ensuremath{\mathrm{i}}}       % Quaternion i component
+\newcommand{\qj}{\ensuremath{\mathrm{j}}}       % Quaternion j component
+\newcommand{\qk}{\ensuremath{\mathrm{k}}}       % Quaternion k componenta
+%%%%%%
+%%%%%% Flickbook and headers stuff
+%%%%%%
+\newcommand{\zerobox}[2]{%
+    \setbox0 = \hbox{\parbox[#1][\height][b]{20cm}{#2}}%
     \dp0 = 0pt
     \ht0 = 0pt
     \noindent
@@ -36,7 +41,7 @@
 \newcommand{\flickbook}{%
     \fancyhf{}
     \fancyfoot[RO]{\stepcounter{flickframe}
-        \zerobox{\rule{2cm}{1.5cm}\\Frame \arabic{flickframe}}}
+        \zerobox{t}{\rule{2cm}{1.5cm}\\Frame \arabic{flickframe}}}
     \fancyfoot[LE]{y}
 }
 \flickbook
@@ -47,12 +52,75 @@
     \fancyfoot[CO,CE]{\thepage}
 }
 \renewcommand{\headrulewidth}{0pt}
+%%%%%%
+%%%%%% Title page & proforma
+%%%%%%
 \begin{document}
+\thispagestyle{empty}
+\hspace{100mm}\zerobox{b}{\raisebox{20mm}{\large\bf Martin Kleppmann}}
+\vspace*{50mm}
+\begin{center}
+{\Huge\bf Rigid body simulation for 3D character animation} \\\vspace*{20mm}
+\Large
+Computer Science Tripos \\\vspace*{5mm}
+Corpus Christi College \\\vspace*{5mm}
+\today
+\end{center}
+\cleardoublepage\setcounter{page}{1}
+
+\chapter*{Proforma}
+\begin{tabular}{@{}ll}
+Name:               & Martin Kleppmann \\
+College:            & Corpus Christi College \\
+Project Title:      & Rigid body simulation for 3D character animation \\
+Examination:        & Computer Science Tripos, June 2006 \\
+Word Count:         & 6798%WORDCOUNT%
+\footnotemark[1]\\
+Project Originator: & Martin Kleppmann \\
+Supervisor:         & Dr Neil Dodgson \\
+\end{tabular}
+\footnotetext[1]{According to
+{\tt detex -e appendix,equation,eqnarray,eqnarray* diss.tex | wc -w}}
+\stepcounter{footnote}
+\vspace{10mm}
+
+\section*{Original Aims of the Project}
+\section*{Work Completed}
+\section*{Special Difficulties}
+None.
+
+\newpage
+\vspace*{60mm}
+\section*{Declaration}
+
+I, Martin Kleppmann of Corpus Christi College, being a candidate for Part~II of the Computer
+Science Tripos, hereby declare that this dissertation and the work described in it are my own
+work, unaided except as may be specified below, and that the dissertation does not contain
+material that has already been used to any substantial extent for a comparable purpose.
+
+\vspace{20mm}
+\leftline{Signed}
+\vspace{12mm}
+\leftline{Date}
+\cleardoublepage
+
+\addcontentsline{toc}{chapter}{Contents}
+\tableofcontents
+%%%%%%
+%%%%%% Content
+%%%%%%
+\chapter{Introduction}
+\input{intro}
 \chapter{Preparation}
 \input{simulation}
 \input{quaternions}
 \input{constraints}
 \input{collision}
+\chapter{Implementation}
+\chapter{Evaluation}
+\chapter{Conclusions}
+\newpage\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{diss}
 \begin{appendix}
 \chapter{Proofs and derivations}
 All work presented in this appendix, unless otherwise specified, is the sole work
@@ -60,12 +128,17 @@ of the author and is not given in any of the literature which the author is awar
 \input{quatProofs}
 \input{rigidBody}
 \input{constrEx}
-\chapter*{Organography\markboth{Organography}{}}
-The word \emph{organography} is derived from the Greek
-$\mbox{\makebox[0pt]{\raisebox{1.5pt}{\hspace{6pt}'$'$}}} o\rho\gamma\breve{\alpha}\nu o\nu$,
-which means \emph{instrument}, \emph{tool} or \emph{engine}\footnote{Thank you to Fabian Meinel
-and Jamie Sutherland for this translation.}. Hence this appendix contains an overview of all
-software tools used in the implementation of this project.
+% \chapter*{Organography\markboth{Organography}{}}
+% The word \emph{organography} is derived from the Greek
+% $\mbox{\makebox[0pt]{\raisebox{1.5pt}{\hspace{6pt}'$'$}}} o\rho\gamma\breve{\alpha}\nu o\nu$,
+% which means \emph{instrument}, \emph{tool} or \emph{engine}\footnote{Thank you to Fabian Meinel
+% and Jamie Sutherland for this translation.}. Hence this appendix contains an overview of all
+% software tools used in the implementation of this project.
+\cleardoublepage
+\stepcounter{chapter}
+\addcontentsline{toc}{chapter}{Original project proposal}
+\chaptermark{Original project proposal}
+\thispagestyle{plain}
+\input{proposal}
 \end{appendix}
-\bibliography{diss}
 \end{document}
