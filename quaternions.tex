@@ -50,15 +50,6 @@ complex numbers, these are given respectively by
     \sqrt{q_w^2 + q_x^2 + q_y^2 + q_z^2}
 \end{eqnarray}
 
-On the other hand, as there is a similarity to 4D vectors, we also define a
-quaternion dot product as
-\begin{equation}
-\q{p}\cdot\q{q} =
-    (p_w + p_x\qi + p_y\qj + p_z\qk)\cdot (q_w + q_x\qi + q_y\qj + q_z\qk) =
-    p_w q_w + p_x q_x + p_y q_y + p_z q_z
-\end{equation}
-The dot product is commutative, contrary to the `normal' quaternion product.
-
 Sometimes we will need to relate a 3D vector to a quaternion with zero real part.
 For a given vector $\ve{u} = (u_1, u_2, u_3)^T$ we define the corresponding
 quaternion to be
@@ -68,11 +59,11 @@ quaternion to be
 \end{equation}
 
 The complex constants \qi{}, \qj{} and \qk{} are required for the algebra
-only, therefore we can represent a quaternion as four numbers $(w,x,y,z)$. It turns out that
-quaternions neatly represent a rotation in 3D space (similarly to the way that ordinary complex
-numbers represent a rotation in the 2D Argand diagram) if we require them to have unit
-magnitude ($\norm{\q{q}} = 1$).  This condition reduces the number of degrees of freedom to three,
-as required.
+only, therefore we can represent a quaternion as four numbers $(w,x,y,z)$. It turns out that a
+quaternion neatly represents an arbitrary rotation in 3D space (similarly to the way that an
+ordinary complex number represents a rotation in the 2D Argand diagram) if we require it to have
+unit magnitude ($\norm{\q{q}} = 1$).  This condition reduces the number of degrees of freedom to
+three, as required.
 
 Every unit quaternion represents a rotation of angle $\theta$ about an arbitrary axis.
 If the axis passes through the origin and has a direction given by the vector
@@ -163,11 +154,12 @@ in the literature as
 \dot{\q{q}}(t) = \frac{1}{2}\tilde{\ve{\omega}}(t)\q{q}(t)
 \end{equation}
 where $\tilde{\ve{\omega}}$ is the quaternion corresponding to the angular velocity
-vector $\ve{\omega}$. The space of all possible values of $\dot{\q{q}}$ is
-conceptually a hyperplane (a three-dimensional subspace) tangential to the sphere at the point
-$\q{q}$ in 4D space (proof in appendix~\ref{quatRateOfChangeOrthogonal}). Therefore adding an
-infinitessimal amount of $\dot{\q{q}}$ to $\q{q}$ will preserve the property of
-unit magnitude; this is exactly what we should expect of the derivative.
+vector $\ve{\omega}$. Appendix~\ref{quatIntegrationMagnitude} proves that $\dot{\q{q}}$ is
+always orthogonal to $\q{q}$. Geometrically, the space of all possible values of $\dot{\q{q}}$ is
+a hyperplane (a three-dimensional subspace) tangential to the sphere at the point $\q{q}$ in
+4D space. Thus if $\q{q}$ is a point on the unit sphere, it will still have unit magnitude after
+adding an infinitessimal amount $\diff\dot{\q{q}}$; this is exactly what we should expect of the
+derivative.
 
 Unfortunately this formula fails in practice since simulations use finite time steps. This
 shall be demonstrated using Euler's method; it should, however, be pointed out that more
@@ -245,7 +237,7 @@ use component-by-component integration to determine angular momentum:
 like angular velocity, it is a differential of rotation.) Here, $\Delta\q{q}_1$ to
 $\Delta\q{q}_4$ are also weighted differentials, and therefore subject to
 conventional summation. Finally observe that each of $\Delta\q{q}_1$ to
-$\Delta\q{q}_4$ is orthogonal to \q{q} (appendix~\ref{quatRateOfChangeOrthogonal}),
+$\Delta\q{q}_4$ is orthogonal to \q{q} (appendix~\ref{quatIntegrationMagnitude}),
 and that therefore the weighted sum of all of these, expressed as a vector, also
 lies in the hyperplane which is tangential to the unit sphere at the point \q{q},
 and is therefore a valid derivative.
