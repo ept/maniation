@@ -1,5 +1,13 @@
 \section{Quaternion integration\label{quatProofs}}
-\subsection{Instantaneous rate of change\label{quatRateOfChangeOrthogonal}}
+\subsection{Conservation of magnitude\label{quatIntegrationMagnitude}}
+Define the quaternion dot product, in analogy to the 4D vector dot product, to be
+\begin{equation}
+\q{p}\cdot\q{q} =
+    (p_w + p_x\qi + p_y\qj + p_z\qk)\cdot (q_w + q_x\qi + q_y\qj + q_z\qk) =
+    p_w q_w + p_x q_x + p_y q_y + p_z q_z
+\end{equation}
+The dot product is commutative, contrary to the `normal' quaternion product.
+
 The instantaneous rate of change is given to be
 \begin{eqnarray*}
 \dot{\q{q}} & = & \frac{1}{2}\ve{\omega}\q{q} =
@@ -32,6 +40,19 @@ require $\q{q}$ to be a unit quaternion, we can reduce this to
 \label{quatRateOfChangeMagnitude}
 \norm{\dot{\q{q}}} = \frac{1}{2}\norm{\ve{\omega}}.
 \end{equation}
+
+Now let us determine what happens if we calculate $\q{q} + h\dot{\q{q}}$ for some finite $h$.
+Note that this operation is required by all common numerical solvers of differential equations.
+Consider the magnitude of the result:
+\begin{eqnarray*}
+\norm{\q{q} + h\dot{\q{q}}}^2 & = & (\q{q} + h\dot{\q{q}})\cdot(\q{q} + h\dot{\q{q}}) \\
+&=& \q{q}\cdot\q{q} + 2h\q{q}\cdot\dot{\q{q}} + h^2\dot{\q{q}}\cdot\dot{\q{q}} \\
+&=& 1 + 0 + \frac{h^2}{4}\norm{\ve{\omega}}^2 \\
+&>& 1 \quad\quad\mbox{whenever}\quad \norm{\ve{\omega}} > 0.
+\end{eqnarray*}
+
+Hence, if the body in question is rotating, it is not possible for a standard numerical ODE solver
+to preserve a quaternion's property of unit magnitude.
 
 \subsection{Corrected quaternion integration\label{quatIntegrationDerivation}}
 
