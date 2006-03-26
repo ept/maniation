@@ -1,0 +1,50 @@
+\begin{figure}
+\renewcommand{\baselinestretch}{1.3}\small\normalsize
+\newcommand{\spx}{\vspace*{\baselineskip}\\}
+\begin{tabular}{|l|l|l|l|@{}l}
+\multicolumn{5}{r}{explained in section $\downarrow$}\\\cline{1-4}
+\multicolumn{4}{|l|}{Load scene and initial state from XML file}&\hspace*{0.5cm}\\\cline{1-4}
+\multicolumn{4}{|l|}{Compute initial set of interactions and constraints}\\\cline{1-4}
+\multicolumn{4}{|l|}{Choose initial time step length $h$}\\\cline{1-4}
+\multicolumn{4}{|l|}{Repeat:}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{\texttt{Time step:}}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{For each time and state required by Runge-Kutta/Cash-Karp:}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Apply non-constraint forces (e.g.\ gravity)}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{$\mbox{\textit{constraints}} = \mbox{\textit{equality constraints}}
+        \cup \mbox{\textit{contact constraints}}$}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Repeat:}\\\cline{4-4}
+            &&&Solve \textit{constraints} for Lagrange multipliers (equation~\ref{lagrangeEquation})\\\cline{4-4}
+            &&&$\mbox{\textit{separating}} = \mbox{contact constraints with a component } \lambda_i < 0$&
+            \zerobox{b}{\mbox{$\left\}\ref{restingContact}\begin{array}{l}
+            \spx\spx\spx\spx\spx\spx\spx\end{array}\right.$}}\\\cline{4-4}
+            &&&$\mbox{\textit{constraints}} = \mbox{\textit{constraints}} \;\backslash\;
+            \mbox{\textit{separating}}$\\\cline{4-4}
+        &&\multicolumn{2}{|l|}{Until $\mbox{\textit{separating}} = \{\}$}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Apply constraint forces $\m{J}^T\ve{\lambda}$ to bodies}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Compute derivative of state vector}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{Compute $O(h^4)$ and $O(h^5)$ approximations of new state vector}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{$\mbox{\textit{error}} = \mbox{difference between the approximations}$}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{If \textit{error} too large:}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Estimate new (smaller) value for $h$}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Goto \texttt{Time step}}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{Otherwise if error is small:}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Estimate new (larger) value for $h$, applicable in the next time step}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{Compute interactions (e.g.\ collisions) in new state}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{If penetration has occurred:}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Estimate new (smaller) value for $h$ by Newton-Raphson method}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Goto \texttt{Time step}}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{While there are colliding contacts:}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{$\mbox{\textit{constraints}} = \mbox{\textit{equality constraints}}
+        \cup \mbox{\textit{colliding contacts}}$}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Solve \textit{constraints} for Lagrange multipliers
+        (equation~\ref{collisionLagrange})}&
+        \zerobox{b}{\mbox{$\left\}\ref{collidingContact}\begin{array}{l}
+        \spx\spx\spx\spx\spx\end{array}\right.$}}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Apply constraint impulses $\m{J}^T\ve{\lambda}$ to bodies}\\\cline{3-4}
+        &&\multicolumn{2}{|l|}{Re-classify contact types according to new velocities}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{$\mbox{\textit{time}} = \mbox{\textit{time}} + h$}\\\cline{2-4}
+    &\multicolumn{3}{|l|}{Output the simulation state for the current time}\\\cline{2-4}
+\multicolumn{4}{|l|}{Until a predefined simulation time has been reached}\\\cline{1-4}
+\end{tabular}
+\caption{Overall (slightly simplified) structure of the simulation algorithm.}
+\end{figure}
