@@ -31,7 +31,7 @@ the bodies in question are in contact. We also assume that we know the place at 
 occurs. Algorithms for finding both the time and place of contact are discussed elsewhere in this
 report.
 
-\subsection{Resting contact}
+\subsection{Resting contact\label{restingContact}}
 
 To keep things manageable, let us assume that we are dealing only with polyhedral bodies~-- bodies
 whose exterior consists of flat polygon faces, delimited by vertices, joined by straight edges.
@@ -117,7 +117,7 @@ because in each iteration we either reduce the number of active constraints or e
 I have not yet been successful in proving this algorithm correct, but despite extensive pondering
 I have not found any examples in which it fails either.
 
-\subsection{Colliding contact}
+\subsection{Colliding contact\label{collidingContact}}
 
 A similar method using Lagrange multipliers can be formulated to handle colliding contact. As in
 the previous section, we can write down constraint functions \ve{c} for all points of contact.
