@@ -1,8 +1,8 @@
 This project is concerned with the dynamics, i.e.\ the behaviour over time, of a general class
-of mechanical systems. In this report I describe the development and evaluation of a program to
-simulate such physical systems. The primary domain of this work is computer graphics, where
-physically-based modelling is a useful tool for creating realistic animations, although a wider
-range of applications in robotics and engineering can be envisaged.
+of mechanical systems in three-dimensional space. In this report I describe the development and
+evaluation of a program to simulate such physical systems. The primary domain of this work is
+computer graphics, where physically-based modelling is a useful tool for creating realistic
+animations, although a wider range of applications in robotics and engineering can be envisaged.
 
 \section{Motivation}
 
@@ -36,7 +36,16 @@ requirements.
 Rigid body dynamics, which will form the basis for physically based character animation, is well
 understood and has a solid theoretical underpinning against which the simulation results can be
 checked. Hence physically-based modelling lends itself more to an objective evaluation than
-most other areas of computer graphics, making it well suited as a Part~II project.
+many other areas of computer graphics, making it well suited as a Part~II project.
+
+While a simulation of a single rigid body can be fairly simple, dealing with multiple
+non-penetrating and interacting bodies is surprisingly difficult. In fact, creating such
+simulations was a subject of PhD theses only 10--15 years
+ago~\cite{Baraff:PhD,Mirtich:PhD,Saunders:PhD} and the topic has not yet settled enough to be
+described in textbooks\footnote{Some books \cite{Shabana:01,Eberly:04} give an introduction to
+the subject, but not to the depth that the reader could actually implement a simulation.}. This
+means that a project in this area will inevitably involve a research component as well as software
+engineering, which, in my opinion, is an exciting challenge.
 
 \section{Scope and requirements}
 
@@ -82,7 +91,8 @@ This list of requirements differs slightly from those stated in the proposal:
 \item Muscular forces are easy to implement but involve a large amount of manual effort to
     control, so I shifted the emphasis towards ``passive'' systems with no external forces apart
     from gravity.
-\item The requirements were extended from one body to multiple bodies.
+\item The requirements were extended from one body to multiple bodies~-- not many interesting
+    simulations involve just a single body.
 \item Output of the results to a file was added to ease evaluation.
 \end{itemize}
 
@@ -90,7 +100,7 @@ This list of requirements differs slightly from those stated in the proposal:
 
 The dynamics of rigid bodies are physically described by ordinary differential equations (ODEs),
 and a simulation essentially comes down to numerically finding their solution, given a set of
-initial conditions. Hence this project can be broken into five components:
+initial conditions and a set of constraints. Hence this project can be broken into five components:
 
 \begin{enumerate}
 \item A numerical solver for ordinary differential equations. This is a well-researched area, and
