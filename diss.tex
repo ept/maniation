@@ -2,6 +2,7 @@
 \usepackage{a4}
 \usepackage{bm}
 \usepackage[british]{babel}
+\usepackage{graphicx}
 \usepackage{ifthen}
 \bibliographystyle{plain}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}     % Differential d (for differential operators)
@@ -42,7 +43,7 @@
     \fancyhf{}
     \fancyfoot[RO]{\stepcounter{flickframe}
         \zerobox{t}{\rule{2cm}{1.5cm}\\Frame \arabic{flickframe}}}
-    \fancyfoot[LE]{y}
+    \fancyfoot[LE]{}
 }
 \flickbook
 \fancyhead[RO,LE]{\thepage}
@@ -74,7 +75,7 @@ Name:               & Martin Kleppmann \\
 College:            & Corpus Christi College \\
 Project Title:      & Rigid body simulation for 3D character animation \\
 Examination:        & Computer Science Tripos, June 2006 \\
-Word Count:         & 8114%WORDCOUNT%
+Word Count:         & 8548%WORDCOUNT%
 \footnotemark[1]\\
 Project Originator: & Martin Kleppmann \\
 Supervisor:         & Dr Neil Dodgson \\
@@ -115,10 +116,13 @@ material that has already been used to any substantial extent for a comparable p
 \input{simulation}
 \input{quaternions}
 \input{constraints}
-\input{collision}
 \input{software}
 \chapter{Implementation}
 \input{implement}
+\input{collision}
+
+TODO cite \cite{Mirtich:96,Moeller:97}
+
 \chapter{Evaluation}
 \chapter{Conclusions}
 \newpage\addcontentsline{toc}{chapter}{Bibliography}
