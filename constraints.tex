@@ -5,21 +5,18 @@ interact in some way. We will primarily be interested in articulated bodies, tha
 of individual rigid bodies held together by joints. Joints allow rotation but cannot be
 separated. (The human body is a good example of such an articulated body.)
 
-There are various strategies for implementing articulated bodies. \emph{Lagrangian mechanics}
-is a commonplace method in physics and engineering, in which the state of the system is expressed
-in terms of a set of \emph{generalised coordinates}. The position and orientation of each sub-body
-is then a function of these generalised coordinates, and outside forces can be transformed
-back into the generalised coordinates, where they are handled. For example, consider two rigid
-bodies which are held together by a ball-and-socket joint~\cite{Kalra:95}. Without the joint,
-the system would have 12 degrees of freedom at rest: three translational and three rotational
-degrees for each of the bodies. In a Lagrangian formulation, the two connected bodies would be
-expressed in nine coordinates: six for translation and rotation of the first body, and three
-for the rotation of the second body with respect to the first.
-
-Lagrangian mechanics has the advantage that if formulated correctly, the system will always in a
-legal state, no matter what the values of the coordinates are. It also allows very fast
-computation. On the downside, the functions to transform the coordinates become very hard or
-impossible to find for complicated systems, so the method does not scale well.
+There are various strategies for implementing articulated bodies. \emph{Lagrangian
+mechanics}~\cite{Hand:98,Goldstein:80} is a commonplace method in physics and engineering, in
+which the state of the system is expressed in terms of a set of \emph{generalized coordinates}.
+The number of generalized coordinates equals the number of degrees of freedom, and they are
+chosen such that the system will always in a legal state, no matter what the values of the
+coordinates are. Outside interactions can be transformed into generalized coordinates. Apart
+from the Lagrangian formulation, there are other generalized-coordinate algorithms described
+in~\cite{Wilhelms:91} and~\cite{Featherstone:87}. These algorithms have in common that they
+allow very fast computation. However, they are limited to so-called \emph{holonomic
+constraints}~\cite{Hand:98} (separable contact points between bodies, for example, are
+non-holonomic). Also, the functions to transform the coordinates become very hard or
+impossible to find for complicated systems, so the method does not scale or generalize well.
 
 An alternative approach to the problem is to initially grant each sub-body its full number of
 degrees of freedom, and then to impose constraints on the system. We can then ensure that the
