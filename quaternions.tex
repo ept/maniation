@@ -15,7 +15,7 @@ which are extensively discussed in the literature~\cite{Saunders:PhD,Shoemake:85
 things, it is possible that rotation about one of the axes freezes during an animation
 (``Gimbal lock'') unless all special cases are handled very carefully.
 
-\emph{Rotation matrices} are commonly used because they are well understood, easily generalise
+\emph{Rotation matrices} are commonly used because they are well understood, easily generalize
 to other dimensions and allow efficient combination with other linear transformations (scaling
 and shearing~-- translation may also be included if homogeneous coordinates are employed).
 Unfortunately, many operations required for animation of rotations are awkward to implement
@@ -140,7 +140,7 @@ radians per second). As we have seen, such a concise representation is not possi
 orientation, which leads to some complications.
 
 At this point it might be helpful to consider a geometric view on quaternions. Let us treat
-the four components of a quaternion as cartesian coordinates of a four-dimensional vector
+the four components of a quaternion as Cartesian coordinates of a four-dimensional vector
 space. The set of unit quaternions is then the surface of a unit hypersphere (also called a
 ``glome''\cite{MathWorld:4D}) in this vector space. Each point on this hypersphere
 corresponds to a particular rotation. It also turns out that each pair of
@@ -158,7 +158,7 @@ vector $\ve{\omega}$. Appendix~\ref{quatIntegrationMagnitude} proves that $\dot{
 always orthogonal to $\q{q}$. Geometrically, the space of all possible values of $\dot{\q{q}}$ is
 a hyperplane (a three-dimensional subspace) tangential to the sphere at the point $\q{q}$ in
 4D space. Thus if $\q{q}$ is a point on the unit sphere, it will still have unit magnitude after
-adding an infinitessimal amount $\diff\dot{\q{q}}$; this is exactly what we should expect of the
+adding an infinitesimal amount $\diff\dot{\q{q}}$; this is exactly what we should expect of the
 derivative.
 
 Unfortunately this formula fails in practice since simulations use finite time steps. This
@@ -202,7 +202,7 @@ discontinuities are reached whenever a body performs an odd multiple of half
 revolutions during a single time step.
 
 Quergs implements one step of Euler's method for solving an ODE over a quaternion.
-Where for Euler's method over an euclidian vector we would write
+Where for Euler's method over an Euclidean vector we would write
 $\ve{a}(t + \Delta t) = \ve{a}(t) + \Delta t\,\dot{\ve{a}}(t,\;\ve{a}(t))$,
 for quaternions we simply use
 $\q{q}(t + \Delta t) = \mathrm{Quergs}(\q{q}(t),\; \Delta t\,\dot{\q{q}}(t)) =
