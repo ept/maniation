@@ -6,12 +6,17 @@ their geometry and initial configuration in a scene, and an output file for the 
 results.
 
 \subsubsection{Input data}
-The input data has a graph structure which is visually represented in figure~XXX.
+The input data has a graph structure which is visually represented in figure~\ref{sceneSchema}.
 Geometric objects are represented as \emph{meshes} of triangles. Each triangle (or \emph{face})
 of the object's surface is delimited by three \emph{vertices}. This simple structure is sufficient
 to represent a great variety of shapes, and although a large number of vertices is necessary to
 adequately approximate curved surfaces, the ease of handling this data outweighs the costs caused
 by its quantity.
+
+\begin{figure}
+\centerline{\scalebox{0.35}{\includegraphics{figures/schema}}}
+\caption{Structure of the input data to a simulation, using UML syntax.\label{sceneSchema}}
+\end{figure}
 
 Several \emph{bodies} in the scene may share the same mesh if they are identical up to rotation
 and translation. A mesh is also associated with a \emph{material} which is used to determine the
@@ -21,7 +26,8 @@ If the scene contains articulated bodies, \emph{skeletons} must be defined in th
 is a tree of \emph{bones} in which each bone has an offset and a rotation relative to its parent.
 If one bone~-- say an upper arm~-- in this structure moves while all other relative rotations stay
 unchanged, then all children of this bone~-- up to the tip of the little finger~-- will be rotated
-equally. This matches the natural behaviour of a skeleton.
+equally. This matches the natural behaviour of a skeleton. There can also be limits on the maximum
+angles of rotation for each bone; these are discussed in more detail later.
 
 In an articulated mesh, each vertex is associated with one or more bones of a particular skeleton.
 Normally it will be associated with one bone, but a weighted sum of two or even three adjacent
@@ -68,6 +74,8 @@ mostly compatible to \textsc{Matlab}~-- \texttt{http://www.mathworks.com/product
 which is optimized for numerical matrix and vector-based computation. I implemented nearly all
 numerical algorithms in this project in \textsl{Octave} first; this version was too slow to be
 of much practical use, but was extremely useful to guide the subsequent Java implementation.
+Octave was also used for processing of simulation output, for example to generate plots of the
+simulation behaviour.
 
 \subsubsection{Libraries}
 Rendered output is specified in the project requirements, and the most common choice for
@@ -79,9 +87,9 @@ and is also quite well documented.
 Processing of the input file was done using an \textsl{XML data-binding tool} which I had
 developed independently in summer 2005. This tool takes a grammar for an \textsl{XML} schema in
 \textsl{RELAX NG}\footnote{\texttt{http://www.relaxng.org/}} format and generates a set of
-Java classes for a run-time representation of that schema. The actual low-level parsing is done
-by the \textsl{SAX}\footnote{Simple API for XML, \texttt{http://www.saxproject.org/}} parser
-implementation in \textsl{Xerces}\footnote{Apache Xerces2 Java,
+Java classes implementing a run-time representation of that schema. The actual low-level parsing
+is done by the \textsl{SAX}\footnote{Simple API for XML, \texttt{http://www.saxproject.org/}}
+parser implementation in \textsl{Xerces}\footnote{Apache Xerces2 Java,
 \texttt{http://xerces.apache.org/xerces2-j/}}.
 
 Some of the numerical algorithms required by the simulation could have been obtained through
@@ -91,11 +99,46 @@ to implement the algorithms myself, giving me the freedom to incorporate enhance
 equation~\ref{quergs}.
 
 \subsubsection{Tool chain}
+For Java development, the \textsl{Eclipse}\footnote{\texttt{http://www.eclipse.org/}} was set up,
+and a dual build system using the \textsl{Ant}\footnote{\texttt{http://ant.apache.org/}} tool
+was kept as fallback in case there were problems with \textsl{Eclipse}. To profile the Java
+implementation, \textsl{EJP}\footnote{Extensible Java Profiler, \texttt{http://ejp.sourceforge.org/}}
+was used.
 
-\textsl{Blender}, a 3D modelling application described below, supports internal scripting in
-\textsl{Python}\footnote{\texttt{http://www.python.org/}}. In order to import simulated animations
-into this application for checking and rendering I had to write some short \textsl{Python} scripts
-as an interface.
+I created input data for the simulation using \textsl{Blender}\footnote{\texttt{http://www.blender.org/}},
+an open source 3D modelling/animation/rendering application. \textsl{Blender} supports internal
+scripting in \textsl{Python}\footnote{\texttt{http://www.python.org/}} to extend its functionality.
+This allowed me to write some short \textsl{Python} scripts which imported the results of a
+simulation as animation back into \textsl{Blender}, acting on the original models. This was useful
+to review simulation results separately from the internal \textsl{Java3D} output. \textsl{Blender}
+can also export animations to the \textsl{YafRay}\footnote{\texttt{http://www.yafray.org/}}
+raytracer to produce high-quality video files. These AVI files were converted to MPEG-1 video
+streams using \textsl{FFmpeg}\footnote{\texttt{http://ffmpeg.sourceforge.net/}}.
 
-\subsubsection{Input data}
+Some types of constraint, which will be described later, involve very messy algebraic expressions.
+I found it useful to automatically generate optimized source code for these expressions
+using \textsl{Maple}\footnote{\texttt{http://www.maplesoft.com/products/maple/}}.
 
+\subsubsection{Backup strategy}
+All work was done either on PWF machines or my own computer. All project files were kept under
+version control using \textsl{CVS}\footnote{\texttt{http://www.nongnu.org/cvs/}}, and regular
+snapshots of the whole repository were transferred to the \textsl{Pelican} backup service.
+A working build environment was maintained both on the PWF and my computer so that work could
+continue seamlessly in case of desaster.
+
+\subsubsection{Example scenes}
+\begin{figure}
+\centerline{
+    \raisebox{2mm}{\scalebox{0.72}{\includegraphics{figures/alfred-mesh}}}\hspace{1.3cm}
+    \includegraphics{figures/alfred-rendered}
+    \includegraphics{figures/alfred-skeleton}}
+\caption{Alfred, one of the meshes used as input data. From left to right: The triangle mesh in
+    wireframe view; a raytraced perspective view; and the skeleton in its rest position.
+    \label{alfredFigure}}
+\end{figure}
+I modelled all input data for the simulations in \textsl{Blender}. The most interesting mesh
+is that of \emph{Alfred}, a humanoid articulated body (figure~\ref{alfredFigure}), which I created
+using human anatomical data~\cite{Anatomy:03}. It is bound to a skeleton of 25 bones, also shown
+in figure~\ref{alfredFigure}. There are some bugs in this mesh~-- for example, strange cracks
+appear at the shoulders when the arms are lifted high~-- but since creating good example data
+is not a primary objective of this project, these problems should be disregarded.
