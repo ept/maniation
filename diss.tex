@@ -3,6 +3,7 @@
 \usepackage{bm}
 \usepackage[british]{babel}
 \usepackage{graphicx}
+\usepackage{psfrag}
 \usepackage{ifthen}
 \bibliographystyle{plain}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}     % Differential d (for differential operators)
@@ -75,13 +76,13 @@ Name:               & Martin Kleppmann \\
 College:            & Corpus Christi College \\
 Project Title:      & Rigid body simulation for 3D character animation \\
 Examination:        & Computer Science Tripos, June 2006 \\
-Word Count:         & 8751%WORDCOUNT%
+Word Count:         & 8028%WORDCOUNT%
 \footnotemark[1]\\
 Project Originator: & Martin Kleppmann \\
 Supervisor:         & Dr Neil Dodgson \\
 \end{tabular}
 \footnotetext[1]{According to
-{\tt detex -e appendix,equation,eqnarray,eqnarray* diss.tex | wc -w}}
+{\tt detex -e appendix,equation,eqnarray,figure diss.tex | wc -w}}
 \stepcounter{footnote}
 \vspace{10mm}
 
@@ -144,8 +145,8 @@ TO DO cite \cite{Mirtich:96,Moeller:97}
 \bibliography{diss}
 \begin{appendix}
 \chapter{Proofs and derivations}
-All work presented in this appendix, unless otherwise specified, is the sole work
-of the author and is not given in any of the literature which the author is aware of.
+All work presented in this appendix is my original work. I am not aware of similar derivations
+having been published already, except where bibliographical references are given.
 \input{quatProofs}
 \input{rigidBody}
 \input{constrEx}
