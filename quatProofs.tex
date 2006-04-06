@@ -1,4 +1,13 @@
 \section{Quaternion integration\label{quatProofs}}
+
+Let us first consider a geometric view on quaternions, taken from~\cite{Shoemake:85}. Treat
+the four components of a quaternion as Cartesian coordinates of a four-dimensional vector
+space. The set of unit quaternions is then the surface of a unit hypersphere (also called a
+\emph{glome}~\cite{MathWorld:4D}) in this vector space. Each point on this hypersphere
+corresponds to a particular rotation. It also turns out that each pair of
+opposite points on this sphere represent exactly the same rotation; hence all possible
+rotations are contained in one hemisphere, no matter where the sphere is cut in half.
+
 \subsection{Conservation of magnitude\label{quatIntegrationMagnitude}}
 Define the quaternion dot product, in analogy to the 4D vector dot product, to be
 \begin{equation}
@@ -6,9 +15,9 @@ Define the quaternion dot product, in analogy to the 4D vector dot product, to b
     (p_w + p_x\qi + p_y\qj + p_z\qk)\cdot (q_w + q_x\qi + q_y\qj + q_z\qk) =
     p_w q_w + p_x q_x + p_y q_y + p_z q_z
 \end{equation}
-The dot product is commutative, contrary to the `normal' quaternion product.
+The dot product is commutative, contrary to the `standard' quaternion product.
 
-The instantaneous rate of change is given to be
+The instantaneous rate of change is given~\cite{BaraffWitkin:97,Eberly:04,Saunders:PhD} to be
 \begin{eqnarray*}
 \dot{\q{q}} & = & \frac{1}{2}\ve{\omega}\q{q} =
     \frac{1}{2}(\omega_1\qi + \omega_2\qj + \omega_3\qk)
@@ -30,7 +39,9 @@ their dot product:
 & = & 0.
 \end{eqnarray*}
 The rate of change is orthogonal to \q{q}, and therefore it is always
-a tangent to the sphere, touching it at the point corresponding to \q{q}.
+a tangent to the sphere, touching it at the point corresponding to \q{q}. The set of all possible
+values of $\dot{\q{q}}$ is thus a hyperplane (a three-dimensional subspace) tangential to the
+sphere at the point \q{q} in 4D space.
 
 We can determine the magnitude $\norm{\dot{\q{q}}}$ from the sum of squares of the
 components given above and find it to be
@@ -54,13 +65,56 @@ Consider the magnitude of the result:
 Hence, if the body in question is rotating, it is not possible for a standard numerical ODE solver
 to preserve a quaternion's property of unit magnitude.
 
+
+\subsection{Normalization is not enough\label{quatNormalization}}
+
+One should think that given the derivative of a quaternion \q{q} (equation~\ref{quatRateOfChange},
+page~\pageref{quatRateOfChange}) that we can find $\q{q}(t + h)$ for some time step $h$ within
+the accuracy of the ODE solver employed ($O(h^5)$ error for fourth-order Runge-Kutta).
+Unfortunately this is not the case. This shall be demonstrated using Euler's method; it should,
+however, be pointed out that more sophisticated methods like RK4 are also affected. Consider the
+value of \q{q} at the next time step, $\q{q}(t + h) = \q{q}(t) + h \dot{\q{q}}(t)$. For any
+non-zero $h$ and $\dot{\q{q}}$ this point will always lie outside the unit quaternion sphere due
+to the orthogonality of \q{q} and $\dot{\q{q}}$. This is usually compensated by re-normalizing
+the quaternion after the ODE solving step. Geometrically, this re-normalization can be understood
+as drawing a straight line through the origin and the point $\q{q}(t) + h \dot{\q{q}}(t)$,
+intersecting this line with the unit sphere and replacing $\q{q}(t + h)$ by this point of
+intersection (see figure~\ref{quatNormalizationFigure}).
+
+\begin{figure}
+\psfrag{frag:q}{\q{q}}
+\psfrag{frag:qdot}{$\dot{\q{q}}$}
+\psfrag{frag:qplusqdot}{$\q{q} + h\dot{\q{q}}$}
+\centerline{\includegraphics[width=6cm]{figures/quaternion1}}
+\caption{Normalizing a quaternion after performing an ODE solving step.
+    \label{quatNormalizationFigure}}
+\end{figure}
+
+Following the tangent to the sphere is a reasonable approximation to following its curve if the
+magnitude of $h \dot{\q{q}}(t)$ is small compared to the curvature of the sphere.
+For large time steps or large magnitudes of \ve{\omega}, however, this gets increasingly
+erroneous. Consider the limiting case, a body rotating infinitely fast
+($\norm{\ve{\omega}} \rightarrow \infty$): after re-normalisation, $\q{q}$ will have moved merely
+a quarter of the way around the unit sphere, which equates to concatenating the rotation of
+quaternion \q{q} with a rotation by $180^\circ$. This is a strictly finite amount of rotation
+per time step, while it would actually have been correct to perform an infinite number of
+revolutions around the quaternion sphere.
+
+If a polynomial approximation method like RK4 had been used instead of Euler's method, a
+polynomial space curve would have been fitted to the surface of the sphere instead of a straight
+line. Note however that the Taylor series of the $\sin$ and $\cos$ functions are nonterminating,
+and that it is therefore not possible for a finite polynomial curve to lie exactly in the surface
+of a sphere. These ODE solvers will therefore suffer the same problems, albeit less pronounced.
+
+
 \subsection{Corrected quaternion integration\label{quatIntegrationDerivation}}
 
 Assume that the body we are simulating is rotating at a constant angular velocity.
 (This assumption is later weakened by the use of a more sophisticated ODE solver,
 but for now we will stick with Euler's method.) Furthermore assume without loss of
 generality that the body is rotating clockwise about its $x$ axis, which corresponds
-to the world's $x$ axis. Then the orientation of the body (the quaternion describing
+to the world's $x$ axis, and that at time $t=0$ the body's frame and the world frame
+coincide. Then the orientation of the body (the quaternion describing
 the linear transformation to get from the body's frame of reference into the world
 frame) is given as a function of time by
 \begin{equation}
@@ -68,100 +122,122 @@ frame) is given as a function of time by
 \q{q}(t) = \cos\left(\frac{\norm{\ve{\omega}}t}{2}\right) +
     \sin\left(\frac{\norm{\ve{\omega}}t}{2}\right)\qi
 \end{equation}
-(cf.\ equation~\ref{quatRotation}) and its angular velocity is
+(cf.\ equation~\ref{quatRotation}, figure~\ref{quatIntFig1}) and its angular velocity is
 \begin{equation}
 \ve{\omega} = (\omega_1, \omega_2, \omega_3)^T = (\norm{\ve{\omega}}, 0, 0)^T
 \end{equation}
 for some arbitrary $\norm{\ve{\omega}}$, measured in radians per unit time.
 
-Now assume w.l.o.g. that we take a time step from $t = 0$ to $t = \Delta t$.
-Then we require that the result returned by Euler's method for $\q{q}(\Delta t)$
+\begin{figure}
+\psfrag{frag:omegat}{$\frac{\norm{\ve{\omega}} t}{2}$}
+\psfrag{frag:qdotoft}{$\dot{\q{q}}(t)$}
+\psfrag{frag:real}{Re}
+\psfrag{frag:iimag}{i-Im}
+\centerline{\includegraphics[width=6cm]{figures/quaternion2}}
+\caption{Assumed situation for the derivation in
+section~\ref{quatIntegrationDerivation}.\label{quatIntFig1}}
+\end{figure}
+
+Now assume w.l.o.g.\ that we take a time step from $t = 0$ to $t = h$.
+Then we require that the result returned by Euler's method for $\q{q}(h)$
 after re-normalization be equal to its exact value in equation~\ref{quatDerivationExact}:
 \begin{equation}
 \label{quatDerivationSetup}
-\cos\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) +
-    \sin\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)\qi =
-    \frac{\q{q}(0) + \Delta t \dot{\q{q}}(0)}
-        {\norm{\q{q}(0) + \Delta t \dot{\q{q}}(0)}}
+\cos\left(\frac{\norm{\ve{\omega}} h}{2}\right) +
+    \sin\left(\frac{\norm{\ve{\omega}} h}{2}\right)\qi =
+    \frac{\q{q}(0) + h \dot{\q{q}}(0)}
+        {\norm{\q{q}(0) + h \dot{\q{q}}(0)}}
 \end{equation}
 
 We know from examining the 4D geometry that the value assigned to $\dot{\q{q}}$
 in equation~\ref{quatRateOfChange} has the correct direction and merely needs to be
 corrected in magnitude. In other words, we are searching for a scalar function
-$f(\Delta t, \norm{\ve{\omega}})$ which will allow $\dot{\q{q}}$ to satisfy
+$f(h, \norm{\ve{\omega}})$ which will allow $\dot{\q{q}}$ to satisfy
 equation~\ref{quatDerivationSetup}:
 \begin{equation}
-\dot{\q{q}}_{\Delta t}(t) = f\tilde{\ve{\omega}}(t)\q{q}(t)
+\dot{\q{q}}_h(t) = f\tilde{\ve{\omega}}(t)\q{q}(t)
 \end{equation}
 
 Observe that under the above assumptions $\q{q}(0) = 1$, and thus
-$\dot{\q{q}}_{\Delta t}(0) = f \norm{\ve{\omega}} \qi$. Substituting this
+$\dot{\q{q}}_h(0) = f \norm{\ve{\omega}} \qi$. Substituting this
 into equation~\ref{quatDerivationSetup} and considering only the real part:
 \begin{eqnarray*}
-&& \cos\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) =
-    \left[1 + \left( f \norm{\ve{\omega}}\Delta t \right)^2 \right]^{-\frac{1}{2}} \\
+&& \cos\left(\frac{\norm{\ve{\omega}} h}{2}\right) =
+    \left[1 + \left( f \norm{\ve{\omega}} h \right)^2 \right]^{-\frac{1}{2}} \\
 &\Leftrightarrow&
-    \left( f \norm{\ve{\omega}}\Delta t \right)^2 =
-    \frac{1}{\cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)} - 1 \\
+    \left( f \norm{\ve{\omega}} h \right)^2 =
+    \frac{1}{\cos^2\left(\frac{\norm{\ve{\omega}} h}{2}\right)} - 1 \\
 &\Leftrightarrow&
-    f(\Delta t, \norm{\ve{\omega}}) =
-    \frac{1}{\norm{\ve{\omega}}\Delta t} \sqrt{\frac{
-        1 - \cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)}{
-        \cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)}} =
-    \frac{1}{\norm{\ve{\omega}}\Delta t}
-        \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
+    f(h, \norm{\ve{\omega}}) =
+    \frac{1}{\norm{\ve{\omega}} h} \sqrt{\frac{
+        1 - \cos^2\left(\frac{\norm{\ve{\omega}} h}{2}\right)}{
+        \cos^2\left(\frac{\norm{\ve{\omega}} h}{2}\right)}} =
+    \frac{1}{\norm{\ve{\omega}} h}
+        \tan\left(\frac{\norm{\ve{\omega}} h}{2}\right)
 \end{eqnarray*}
 
 To check, we substitute this result into the $\qi$-imaginary part of
 equation~\ref{quatDerivationSetup}:
 \begin{eqnarray*}
-\sin\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) & = &
-    \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
-    \left[ 1 + \tan^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
+\sin\left(\frac{\norm{\ve{\omega}} h}{2}\right) & = &
+    \tan\left(\frac{\norm{\ve{\omega}} h}{2}\right)
+    \left[ 1 + \tan^2\left(\frac{\norm{\ve{\omega}} h}{2}\right)
     \right]^{-\frac{1}{2}} \\
-&=& \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
-    \left[ \frac{\cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) +
-    \sin^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) }{
-    \cos^2\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) }
+&=& \tan\left(\frac{\norm{\ve{\omega}} h}{2}\right)
+    \left[ \frac{\cos^2\left(\frac{\norm{\ve{\omega}} h}{2}\right) +
+    \sin^2\left(\frac{\norm{\ve{\omega}} h}{2}\right) }{
+    \cos^2\left(\frac{\norm{\ve{\omega}} h}{2}\right) }
     \right]^{-\frac{1}{2}} \\
-&=& \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
-    \cos\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) \\
-&=& \sin\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right)
+&=& \tan\left(\frac{\norm{\ve{\omega}} h}{2}\right)
+    \cos\left(\frac{\norm{\ve{\omega}} h}{2}\right) \\
+&=& \sin\left(\frac{\norm{\ve{\omega}} h}{2}\right)
 \end{eqnarray*}
 
 Thus we establish the validity of this expression for $f$. Observe that by using 
 L'Hospital's rule, we can find value of $f$ for an infinitesimally small time step:
 $$
-\lim_{\Delta t \to 0} f = \lim_{\Delta t \to 0} \frac{ \frac{\norm{\ve{\omega}}}{2}
-    \cos^{-2}\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) }{ \norm{\ve{\omega}} } =
+\lim_{h \to 0} f = \lim_{h \to 0} \frac{ \frac{\norm{\ve{\omega}}}{2}
+    \cos^{-2}\left(\frac{\norm{\ve{\omega}} h}{2}\right) }{ \norm{\ve{\omega}} } =
     \frac{1}{2}
 $$
 i.e.\ we obtain the original equation~\ref{quatRateOfChange} for the
 instantaneous rate of change.
 
-Now let $\Delta \q{q} = \Delta t \dot{\q{q}} =
-    \frac{\Delta t}{2} \tilde{\ve{\omega}} \q{q}$.
+Now let $\Delta \q{q} = h \dot{\q{q}} =
+    \frac{h}{2} \tilde{\ve{\omega}} \q{q}$.
 From equation~\ref{quatRateOfChangeMagnitude} we find that
-$\norm{\Delta\q{q}} = \frac{\norm{\ve{\omega}}\Delta t}{2}$.
+$\norm{\Delta\q{q}} = \frac{\norm{\ve{\omega}} h}{2}$.
 Hence we can simplify the expression for the quaternion correcting factor by expressing it
 in terms of $\Delta \q{q}$ as follows:
 $$
-\Delta t f \tilde{\ve{\omega}}\q{q} = \frac{\Delta t}{\norm{\ve{\omega}}\Delta t}
-    \tan\left(\frac{\norm{\ve{\omega}}\Delta t}{2}\right) \tilde{\ve{\omega}} \q{q} =
+h f \tilde{\ve{\omega}}\q{q} = \frac{h}{\norm{\ve{\omega}} h}
+    \tan\left(\frac{\norm{\ve{\omega}} h}{2}\right) \tilde{\ve{\omega}} \q{q} =
     \tan\left(\norm{\Delta\q{q}}\right) \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}
 $$
 
-This expression now has a clear geometric interpretation with respect to the 4D geometry:
+This expression now has a clear geometric interpretation with respect to the 4D geometry
+(see figure~\ref{quatIntFig2}):
 $\norm{\Delta\q{q}}$ is measured in radians, and it corresponds to the \emph{correct}
 angle between the old and the new vector $\q{q}$. Since $\q{q}$ and
 $\dot{\q{q}}$ are orthogonal, we have a right-angled triangle between the origin,
 the old and the new points $\q{q}$, and hence we can use the $\tan$ function to
 evaluate the required length of the side in direction $\Delta\q{q}$.
 
+\begin{figure}
+\psfrag{frag:real}{Re}
+\psfrag{frag:iimag}{i-Im}
+\psfrag{frag:q}{\q{q}}
+\psfrag{frag:deltaq}{$\Delta\q{q}$}
+\psfrag{frag:quergs1}{$\q{q}+\tan(\norm{\Delta\q{q}})\frac{\Delta\q{q}}{\norm{\Delta\q{q}}}$}
+\psfrag{frag:quergs2}{$\mathrm{Quergs}(\q{q},\,\Delta\q{q})$}
+\centerline{\includegraphics[width=7.7cm]{figures/quaternion3}}
+\caption{Illustration of the operation of Quergs.\label{quatIntFig2}}
+\end{figure}
+
 Finally we can combine this correction and the subsequent quaternion normalisation into
 a single function:
 \begin{eqnarray*}
-\q{q}(t+\Delta t) = \mathrm{Quergs}(\q{q}(t), \Delta\q{q}) &=&
+\q{q}(t+h) = \mathrm{Quergs}(\q{q}(t), \Delta\q{q}) &=&
     \frac{\q{q}(t) + \tan\left(\norm{\Delta\q{q}}\right)
         \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}}{
     \norm{\q{q}(t) + \tan\left(\norm{\Delta\q{q}}\right)
@@ -174,5 +250,53 @@ a single function:
     \cos\left(\norm{\Delta\q{q}}\right)
 \end{eqnarray*}
 The last expression is simplest (and again allows geometric interpretation), but probably
-the penultimate expression is more useful for numerical evaluation, since it involves only
-one trigonometric function.
+the first of the three expressions is more useful for numerical evaluation, since it involves
+only one trigonometric function and minimizes numerical errors.
+
+When implementing this formula, care must be taken around the discontinuities of the $\tan$
+function, where numerical instability may occur. These discontinuities are reached whenever a
+body performs an odd multiple of half revolutions during a single time step.
+
+
+\subsection{Applying Quergs to Runge-Kutta\label{quergsRK4}}
+
+Quergs implements one step of Euler's method for solving an ODE over a quaternion.
+Where for Euler's method over an Euclidean vector we would write
+$\ve{a}(t + h) = \ve{a}(t) + h\,\dot{\ve{a}}(t,\;\ve{a}(t))$,
+for quaternions we simply use
+$\q{q}(t + h) = \mathrm{Quergs}(\q{q}(t),\; h\,\dot{\q{q}}(t)) =
+    \mathrm{Quergs}(\q{q}(t),\; \frac{h}{2}\,\tilde{\ve{\omega}}(t)\q{q}(t))$.
+
+We can apply Quergs to polynomial ODE solvers by following the same pattern: wherever the solver
+computes the sum of a quantity and a delta of that quantity (a delta being a derivative
+scaled with the time step size and other factors), we substitute Quergs in place of that
+addition. Assume we have a function $\dot{\q{q}}(t,\; \q{q}(t))$ which computes the
+instantaneous rate of change at time $t$, given the state $\q{q}(t)$ at that time. Then we can
+define the formulae for the fourth-order Runge-Kutta solver (RK4, based on the definition
+in~\cite{NRinC}) over quaternions as follows:
+\begin{eqnarray}
+\Delta\q{q}_1 & = & h\;\dot{\q{q}}\left(t,\;\q{q}(t)\right) \nonumber\\
+\Delta\q{q}_2 & = & h\;\dot{\q{q}}\left(t + \frac{h}{2},\;
+    \mathrm{Quergs}\left(\q{q}(t),\; \frac{1}{2}\Delta\q{q}_1\right)\right) \nonumber\\
+\Delta\q{q}_3 & = & h\;\dot{\q{q}}\left(t + \frac{h}{2},\;
+    \mathrm{Quergs}\left(\q{q}(t),\; \frac{1}{2}\Delta\q{q}_2\right)\right) \nonumber\\
+\Delta\q{q}_4 & = & h\;\dot{\q{q}}\left(t + h,\;
+    \mathrm{Quergs}\left(\q{q}(t),\; \Delta\q{q}_3\right)\right) \nonumber\\
+\q{q}(t + h) & = & \mathrm{Quergs}\left(\q{q}(t),\;
+    \frac{1}{6}\Delta\q{q}_1 + \frac{1}{3}\Delta\q{q}_2 +
+    \frac{1}{3}\Delta\q{q}_3 + \frac{1}{6}\Delta\q{q}_4\right)
+\end{eqnarray}
+
+Why is it correct to compute the weighted sum over $\Delta\q{q}_1$ to
+$\Delta\q{q}_4$ in the last formula, when we have replaced all other quaternion additions
+by calls to Quergs? Remember that finite movements on the quaternion hypersphere are
+equivalent to rotations in 4D, and that these are not commutative. Differential
+rotations are, however, commutative~-- like in 3D. (This is the reason why we can
+use component-by-component integration to determine angular momentum:
+like angular velocity, it is a differential of rotation.) Here, $\Delta\q{q}_1$ to
+$\Delta\q{q}_4$ are also weighted differentials, and therefore subject to
+conventional summation. Finally observe that each of $\Delta\q{q}_1$ to
+$\Delta\q{q}_4$ is orthogonal to \q{q} (appendix~\ref{quatIntegrationMagnitude}),
+and that therefore the weighted sum of all of these, expressed as a vector, also
+lies in the hyperplane which is tangential to the unit sphere at the point \q{q},
+and is therefore a valid derivative.
