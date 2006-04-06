@@ -1,12 +1,13 @@
 The preparatory work for this project splits into two parts:
 \begin{itemize}
+\item Surveying literature, learning the theoretical background and understanding the existing
+    algorithms for my task. The outcome of this preparation shall be discussed in
+    sections~\ref{rigidBodyDynamics} to~\ref{constraints}.
 \item Setting up and learning to use the software environment for development. This is described
     in section~\ref{softwarePreparation}.
-\item Surveying literature, learning the theoretical background and understanding the existing
-    algorithms for my task. The outcome of this preparation shall be discussed first.
 \end{itemize}
 
-\section{Rigid body dynamics}
+\section{Rigid body dynamics\label{rigidBodyDynamics}}
 On a most theoretical level, a rigid body is a collection of $k$ point masses ($k \ge 3$) subject
 to the constraint that the distance between any pair of masses must remain constant. More
 conveniently, we can regard a rigid body as an object with a three-dimensional shape, a non-zero
@@ -58,7 +59,7 @@ linear and angular velocities, which are in turn integrated to find the position
 over the course of time. It is important that we integrate over torques (and not angular
 accelerations), otherwise the simulation will not correctly conserve angular momentum.
 
-\section{Solving ordinary differential equations (ODEs)}
+\section{Solving ordinary differential equations (ODEs)\label{solvingODEs}}
 
 Undergraduate mathematics courses provide the sufficiently patient student with a range of
 different methods for solving ODEs analytically. These work well for simple systems and deliver

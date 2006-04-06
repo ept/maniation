@@ -44,8 +44,8 @@ simulations was a subject of PhD theses only 10--15 years
 ago~\cite{Baraff:PhD,Mirtich:PhD,Saunders:PhD} and the topic has not yet settled enough to be
 described in textbooks\footnote{Some books \cite{Shabana:01,Eberly:04} give an introduction to
 the subject, but not to the depth that the reader could actually implement a simulation.}. This
-means that a project in this area will inevitably involve a research component as well as software
-engineering, which, in my opinion, is an exciting challenge.
+means that a project in this area will inevitably involve a research component in addition to
+the software engineering. This constitutes an exciting challenge.
 
 \section{Scope and requirements}
 
@@ -100,20 +100,22 @@ This list of requirements differs slightly from those stated in the proposal:
 
 The dynamics of rigid bodies are physically described by ordinary differential equations (ODEs),
 and a simulation essentially comes down to numerically finding their solution, given a set of
-initial conditions and a set of constraints. Hence this project can be broken into five components:
+initial conditions and a set of constraints. Hence this project can be broken into six components:
 
 \begin{enumerate}
 \item A numerical solver for ordinary differential equations. This is a well-researched area, and
-    a range of good standard algorithms exist.
+    a range of good standard algorithms exist. This component is described in
+    section~\ref{solvingODEs}.
 \item An implementation of the equations of motion for rigid bodies. This is standard physics but
-    has some implementation quirks.
+    has some implementation quirks. See sections~\ref{rigidBodyDynamics} and~\ref{quaternions}.
 \item Algorithms to ensure the correct handling of articulated bodies. This is by far the most
-    challenging part of the project.
+    challenging part of the project. See sections~\ref{constraints} and~\ref{articulatedBodies}.
 \item Detection of collision between bodies. A vast amount of research has been done in this area,
     and most algorithms are concerned with speed. However, since run-time efficiency is not my
-    primary concern, this part was kept quite simple.
+    primary concern, this part was kept quite simple. See section~\ref{collisionDetection}.
 \item Handling of collisions, that is computation of the correct impulses between colliding
     bodies. This must also work in the context of articulated bodies!
+    See section~\ref{collidingContact}.
+\item Handling of resting contact, that is the computation of forces between bodies which are in
+    contact but not colliding. See section~\ref{restingContact}.
 \end{enumerate}
-
-Each of these components will be discussed in detail in the following chapters.
