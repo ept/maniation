@@ -3,10 +3,10 @@
 all:	wordcount diss.pdf
 	@echo ''
 	@echo -n 'Word count: '
-	@$(HOME)/tools/detex/detex -e appendix,equation,eqnarray,eqnarray* diss.tex | wc -w
+	@$(HOME)/tools/detex/detex -e appendix,equation,eqnarray,figure diss.tex | wc -w
 
 wordcount:
-	sed -i~ -e "s/[0-9]*%WORDCOUNT%/"`~/tools/detex/detex -e appendix,equation,eqnarray,eqnarray* diss.tex | wc -w | tr -d '\n'`"%WORDCOUNT%/" diss.tex
+	sed -i~ -e "s/[0-9]*%WORDCOUNT%/"`~/tools/detex/detex -e appendix,equation,eqnarray,figure diss.tex | wc -w | tr -d '\n'`"%WORDCOUNT%/" diss.tex
 
 diss.pdf:	diss.ps
 	gs -sDEVICE=pdfwrite -sOutputFile=diss.pdf -dBATCH -dNOPAUSE diss.ps
