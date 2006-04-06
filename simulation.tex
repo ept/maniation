@@ -8,10 +8,11 @@ The preparatory work for this project splits into two parts:
 \end{itemize}
 
 \section{Rigid body dynamics\label{rigidBodyDynamics}}
-On a most theoretical level, a rigid body is a collection of $k$ point masses ($k \ge 3$) subject
-to the constraint that the distance between any pair of masses must remain constant. More
-conveniently, we can regard a rigid body as an object with a three-dimensional shape, a non-zero
-volume and some mass distribution, and constrain it not to change shape.
+On the most theoretical level, a rigid body is a collection of $k$ point masses ($k \ge 3$,
+can be infinite) subject to the constraint that the distance between any pair of masses must
+remain constant. More conveniently, we can regard a rigid body as an object with a
+three-dimensional shape, a non-zero volume and some mass distribution, and constrain it not to
+change shape.
 
 At a particular point in time, a rigid body is fully determined by four quantities: the
 \emph{position} of its centre of mass, its \emph{orientation}, and its \emph{linear} and
@@ -28,11 +29,12 @@ body's \emph{principal axes}~\cite{Feynman:63,Goldstein:80}.
 Angular velocity appears to be a straightforward way of describing the body's rotation: the
 direction of the vector gives the axis of rotation, while its magnitude is the rate of rotation
 (most commonly given in radians per second). Unfortunately, in an asymmetric body, the angular
-velocity may vary over time even if there are no external influences on the body. It is therefore
-sometimes more convenient to use \emph{angular momentum} instead, which is conserved in the
-absence of torques.
+velocity may vary over time even if there are no external influences on the body, due to an effect
+known as \emph{free precession} or \emph{Poinsot motion}~\cite{Goldstein:80}. It is therefore
+more convenient to use \emph{angular momentum} instead, which is conserved in the absence of
+torques.
 
-\begin{table}
+\begin{figure}
 \renewcommand{\baselinestretch}{1.3}\small\normalsize
 \centerline{\begin{tabular}{|l|l|l|}\hline
 & \emph{Linear} & \emph{Angular} \\\hline
@@ -44,10 +46,10 @@ Momentum & Linear momentum     & Angular momentum           \\
 External influence & Force $\ve{F} = \dot{\ve{p}}$ & Torque $\ve{\tau} = \dot{\ve{L}}$ \\\hline
 \end{tabular}}
 \caption{Summary of the physical quantities describing a rigid body\label{rigidBodySummary}}
-\end{table}
+\end{figure}
 
 Forces and torques acting on a body may change the momenta of a body as described in
-table~\ref{rigidBodySummary}. A force \ve{F} may be applied to any point $\ve{r}'$ of
+figure~\ref{rigidBodySummary}. A force \ve{F} may be applied to any point $\ve{r}'$ of
 a body. We can treat this as if the force had been applied to the centre of mass \ve{r}, and add
 an additional torque given by $\ve{\tau} = (\ve{r}' - \ve{r})\times\ve{F}$. If multiple
 forces and torques are applied, all forces (applied to the centre of mass) may be added into
@@ -64,11 +66,10 @@ accelerations), otherwise the simulation will not correctly conserve angular mom
 Undergraduate mathematics courses provide the sufficiently patient student with a range of
 different methods for solving ODEs analytically. These work well for simple systems and deliver
 an exact answer. For example, if a constant force is applied to a body, its displacement is a
-quadratic (parabolic) function of time; if the force is inversely proportional to the
-displacement, we get simple harmonic oscillation. Unfortunately, when it the systems become
+quadratic (parabolic) function of time; if the force is negatively proportional to the
+displacement, we observe simple harmonic oscillation. Unfortunately, when systems become
 only slightly more complicated, the equations become intractable~-- even a simple pendulum
-already falls in this category. Solutions for these systems can in general only be approximated
-numerically.
+already falls in this category. General solutions can then only be approximated numerically.
 
 \begin{figure}
 \centerline{\includegraphics{figures/euler}}
@@ -84,6 +85,24 @@ simplest, most frequently-quoted and worst algorithm for this purpose is Euler's
 \begin{equation}
 f(t'+h) = f(t') + h\frac{\diff f}{\diff t}(t'),
 \end{equation}
-which performs linear extrapolation. Figure~\ref{eulersMethod} illustrates its operation. The
-errors become smaller for tiny time steps, but the method still has a tendency of gaining energy
-and is therefore unreliable.
+which performs linear extrapolation. Figure~\ref{eulersMethod} illustrates its operation and the
+errors introduced in the solution.
+
+A popular and robust alternative is given by the \emph{Runge-Kutta} family of ODE solvers, which
+evaluate $\frac{\diff f}{\diff t}$ at different times and use these values to fit a polynomial
+curve to the exact solution over the range of one time step. For example, fourth-order Runge-Kutta
+(RK4)~\cite{NRinC} uses four values of the derivative to fit a fourth-order polynomial~-- contrast
+this to the first-order polynomial (linear function) used by Euler's method. This amounts to using
+the first five terms of the Taylor expansion of the exact solution, including the $h^4$ term, so
+we expect the error in each time step to be $O(h^5)$~-- a minute error even if $h$ is only
+moderately small. The step size can be much longer than in Euler's method while achieving the same
+accuracy, which makes Runge-Kutta significantly more efficient.
+
+Further improvements can be made by adapting the step size $h$ to the situation. In this project
+I chose to use the embedded Cash-Karp/Runge-Kutta method described in~\cite{NRinC}, which uses
+six evaluations of the derivative to calculate both a fourth-order and a fifth-order
+extrapolation. If the difference between them is small, the total error is likely to be small,
+and the next step taken will be longer. If the difference lies above a threshold, the current
+time step is discarded and re-tried with a smaller $h$. Thus the ODE solver can rapidly skip over
+periods in which there is little happening, without sacrificing accuracy in moments of sudden
+change.
