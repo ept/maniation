@@ -125,7 +125,7 @@ To confine the axis of rotation, we use the fact that the axis is contained in t
 parts of a quaternion (equation~\ref{quatRotation}, page~\pageref{quatRotation}). We want the dot
 product of this axis and the normal vector \ve{n} to be zero. Conveniently, the dot product
 happens to be implicitly present in the real part of the quaternion product
-(equation~\ref{quatProduct2}, page~\pageref{quatProduct2}). Hence we can define our constraint
+(see equation~\ref{quatProduct2} below). Hence we can define our constraint
 function as follows:
 \begin{equation}
 \ve{c} = \Re(\tilde{\ve{n}}\, \q{p}^{-1}\q{q})
@@ -137,6 +137,20 @@ Since the real part of $\tilde{\ve{n}}$ is zero by definition, this is just the 
 front~(cf.\ equation~\ref{quatProduct2}). The constraint function is actually a scalar because
 we are only losing one degree of freedom, but for consistency's sake, we will write it as a
 one-component vector.
+
+For this derivation I will use an alternative notation for quaternions, which is used by
+Shoemake~\cite{Shoemake:85}, amongst others. Instead of using the complex constants \qi{}, \qj{}
+and \qk{}, a quaternion is written as a pair consisting of a scalar (the real part) and a 3D
+vector (the three imaginary parts):
+\begin{equation}
+\q{q} = q_w + q_x\qi + q_y\qj + q_z\qk = [q_w, (q_x, q_y, q_z)^T] = [q_w, \ve{q}_v]
+\end{equation}
+Using this notation, we can write the quaternion product in terms of vector dot and cross products:
+\begin{equation}\label{quatProduct2}
+\q{p}\q{q} = [p_w,\; \ve{p}_v]\;[q_w,\; \ve{q}_v] =
+    [p_w q_w - \ve{p}_v \cdot \ve{q}_v,\;
+    p_w \ve{q}_v + q_w \ve{p}_v + \ve{p}_v \times \ve{q}_v]
+\end{equation}
 
 The derivative of \q{q} with respect to time is
 $\dot{\q{q}} = \frac{1}{2}\tilde{\ve{\omega}}\q{q}$, as usual. Pushing the differential operator
@@ -161,8 +175,7 @@ We now have everything in place to calculate the constraint function derivatives
     \nonumber
 \end{eqnarray}
 
-To manipulate these equations into the form required to find \m{J} we use the scalar/vector
-pair notation for quaternions~-- see page~\pageref{quatProduct2}.
+We manipulate these equations into the form required to find \m{J}:
 \begin{eqnarray*}
 \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\q{q}) & = &
     \Re\big( [0,\:\ve{n}]\: [p_w,\:-\ve{p}_v]\: [0,\:\ve{\omega}]\: [q_w,\:\ve{q}_v] \big) \\*
