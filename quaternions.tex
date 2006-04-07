@@ -5,7 +5,7 @@ three degrees of freedom (three independent axes to rotate about).
 While the position of a body can be neatly represented using Cartesian coordinates, there is
 no obvious best way of describing an orientation. The most common schemes describe
 it in terms of a rotation operation which transforms a vector in the body's local
-coordinates into world coordinates (or vice-versa). But again, there are various different
+coordinates into world coordinates (or \textsl{vice versa}). But again, there are various different
 approaches to representing this rotation, all of which have advantages and disadvantages.
 
 \emph{Euler angles} are probably the most intuitive representation of a 3D rotation, describing
@@ -19,7 +19,7 @@ to higher dimensions and allow efficient combination with other linear transform
 and shearing~-- also translation if homogeneous coordinates are employed). However, ODEs over
 rotation matrices are difficult to implement correctly, since this representation uses nine
 numbers (a $3\times3$ matrix) to represent three degrees of freedom, thus introducing six
-additional side-conditions which must be maintained. Not doing so causes skew through numerical
+additional side conditions which must be maintained. Not doing so causes skew through numerical
 drift~\cite{Saunders:PhD}.
 
 \emph{Quaternions}~\cite{Shoemake:85,Eberly:01,MathWorld:Quaternion} are a popular alternative
@@ -142,8 +142,8 @@ is `solved' by normalizing the quaternion:
     \q{q}' = \q{q}(t) + h\dot{\q{q}}(t)
 \end{equation}
 (using Euler's method for clarity; $\q{q}'$ would be appropriately redefined when using e.g.\ RK4).
-This `solution' seemed quite ad-hoc to me, and I indeed showed that it returns a completely wrong
-result if the angular velocity is large (see appendix~\ref{quatNormalization}).
+This `solution' seemed quite \textsl{ad hoc} to me, and I indeed showed that it returns a
+completely wrong result if the angular velocity is large (see appendix~\ref{quatNormalization}).
 
 To obtain the correct result, the ODE solver must be modified. Whenever it calculates the sum of
 a quaternion and a scaled derivative, as in $\q{q}(t) + h\dot{\q{q}}(t)$, we replace the summation

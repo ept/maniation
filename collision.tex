@@ -80,7 +80,7 @@ to the bodies such that in total we have $\ddot{\ve{c}} = \ve{0}$. But when
 $\ddot{\ve{c}} \ge \ve{0}$, no force is applied (otherwise we would be glueing the book to the
 table). But how do we solve this inequality in practise? At this point we diverge from Baraff's
 method~\cite{BaraffWitkin:97}, who expresses equation~\ref{constrInequality} and additional
-side-conditions as a ``quadratic program'' and uses a specialised numerical solver.
+side conditions as a ``quadratic program'' and uses a specialised numerical solver.
 
 Let us take a much simpler approach and pretend for now that equation~\ref{constrInequality}
 contained an equals sign. Then this is a constraint like any other, which we can satisfy by using
@@ -101,8 +101,8 @@ product $\m{J}^T\ve{\lambda}$ can be directly interpreted as scaling a unit amou
 torques by a scalar~-- the scalar being the component of \ve{\lambda} corresponding to this
 constraint. Hence we can deduce that a positive value of the $\ve{\lambda}$ component generates
 forces and torques which push the bodies apart, while a negative value pulls them together (or
-vice versa, whichever sign convention is used). It is such a negative $\ve{\lambda}$ component
-that we must avoid.
+\textsl{vice versa}, whichever sign convention is used). It is such a negative $\ve{\lambda}$
+component that we must avoid.
 
 This gives us a basis for an algorithm which turns equation~\ref{constrInequality} back into what
 it actually is~-- an inequality: set up constraint functions for all contact points, and solve the

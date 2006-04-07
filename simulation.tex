@@ -103,6 +103,6 @@ I chose to use the embedded Cash-Karp/Runge-Kutta method described in~\cite{NRin
 six evaluations of the derivative to calculate both a fourth-order and a fifth-order
 extrapolation. If the difference between them is small, the total error is likely to be small,
 and the next step taken will be longer. If the difference lies above a threshold, the current
-time step is discarded and re-tried with a smaller $h$. Thus the ODE solver can rapidly skip over
+time step is discarded and retried with a smaller $h$. Thus the ODE solver can rapidly skip over
 periods in which there is little happening, without sacrificing accuracy in moments of sudden
 change.

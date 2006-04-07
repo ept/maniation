@@ -75,8 +75,8 @@ Unfortunately this is not the case. This shall be demonstrated using Euler's met
 however, be pointed out that more sophisticated methods like RK4 are also affected. Consider the
 value of \q{q} at the next time step, $\q{q}(t + h) = \q{q}(t) + h \dot{\q{q}}(t)$. For any
 non-zero $h$ and $\dot{\q{q}}$ this point will always lie outside the unit quaternion sphere due
-to the orthogonality of \q{q} and $\dot{\q{q}}$. This is usually compensated by re-normalizing
-the quaternion after the ODE solving step. Geometrically, this re-normalization can be understood
+to the orthogonality of \q{q} and $\dot{\q{q}}$. This is usually compensated by renormalizing
+the quaternion after the ODE solving step. Geometrically, this renormalization can be understood
 as drawing a straight line through the origin and the point $\q{q}(t) + h \dot{\q{q}}(t)$,
 intersecting this line with the unit sphere and replacing $\q{q}(t + h)$ by this point of
 intersection (see figure~\ref{quatNormalizationFigure}).
@@ -94,7 +94,7 @@ Following the tangent to the sphere is a reasonable approximation to following i
 magnitude of $h \dot{\q{q}}(t)$ is small compared to the curvature of the sphere.
 For large time steps or large magnitudes of \ve{\omega}, however, this gets increasingly
 erroneous. Consider the limiting case, a body rotating infinitely fast
-($\norm{\ve{\omega}} \rightarrow \infty$): after re-normalisation, $\q{q}$ will have moved merely
+($\norm{\ve{\omega}} \rightarrow \infty$): after renormalisation, $\q{q}$ will have moved merely
 a quarter of the way around the unit sphere, which equates to concatenating the rotation of
 quaternion \q{q} with a rotation by $180^\circ$. This is a strictly finite amount of rotation
 per time step, while it would actually have been correct to perform an infinite number of
@@ -102,7 +102,7 @@ revolutions around the quaternion sphere.
 
 If a polynomial approximation method like RK4 had been used instead of Euler's method, a
 polynomial space curve would have been fitted to the surface of the sphere instead of a straight
-line. Note however that the Taylor series of the $\sin$ and $\cos$ functions are nonterminating,
+line. Note however that the Taylor series of the $\sin$ and $\cos$ functions are non-terminating,
 and that it is therefore not possible for a finite polynomial curve to lie exactly in the surface
 of a sphere. These ODE solvers will therefore suffer the same problems, albeit less pronounced.
 
@@ -140,7 +140,7 @@ section~\ref{quatIntegrationDerivation}.\label{quatIntFig1}}
 
 Now assume w.l.o.g.\ that we take a time step from $t = 0$ to $t = h$.
 Then we require that the result returned by Euler's method for $\q{q}(h)$
-after re-normalization be equal to its exact value in equation~\ref{quatDerivationExact}:
+after renormalization be equal to its exact value in equation~\ref{quatDerivationExact}:
 \begin{equation}
 \label{quatDerivationSetup}
 \cos\left(\frac{\norm{\ve{\omega}} h}{2}\right) +
