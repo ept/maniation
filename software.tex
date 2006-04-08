@@ -7,11 +7,14 @@ results.
 
 \subsubsection{Input data}
 The input data has a graph structure which is visually represented in figure~\ref{sceneSchema}.
-Geometric objects are represented as \emph{meshes} of triangles. Each triangle (or \emph{face})
-of the object's surface is delimited by three \emph{vertices}. This simple structure is sufficient
-to represent a great variety of shapes, and although a large number of vertices is necessary to
-adequately approximate curved surfaces, the ease of handling this data outweighs the costs caused
-by its quantity.
+Geometric objects are represented as \emph{meshes} of triangles. (Polygons with a larger number of
+sides must first be split into triangles; this is always possible~\cite{Skiena:98}.) Each triangle
+(or \emph{face}) of the object's surface is delimited by three \emph{vertices}. To make the
+geometric algorithms work nicely, we also require the mesh to be closed (to have a well-defined
+interior) and contain no unnecessary triangles on its inside; in other words, it must describe the
+surface of a polyhedron. This simple structure is sufficient to represent a great variety of
+shapes, and although a large number of vertices is necessary to adequately approximate curved
+surfaces, the ease of handling this data outweighs the costs caused by its quantity.
 
 \begin{figure}
 \centerline{\scalebox{0.35}{\includegraphics{figures/schema}}}
@@ -144,3 +147,10 @@ a skeleton of 25 bones, also shown in figure~\ref{alfredFigure}. There are some 
 mesh~-- for example, strange cracks appear at the shoulders when the arms are lifted high~-- but
 since creating good example data is not a primary objective of this project, these problems
 should be disregarded.
+
+\subsubsection{Dissertation}
+\LaTeX{} was the definite choice for writing this dissertation because of its reliability,
+good handling of cross-references, beautiful layout and many other benefits. I created the
+figures using \textsl{Dia}\footnote{\texttt{http://www.gnome.org/projects/dia/}},
+\textsl{Gnuplot}\footnote{\texttt{http://www.gnuplot.info/}} and the
+\textsl{GIMP}\footnote{\texttt{http://www.gimp.org/}}.
