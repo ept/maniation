@@ -64,11 +64,11 @@ which equals \ve{0}, the three-dimensional null vector, iff the constraint is sa
     therefore rotate according to their respective body's orientation.\label{ballAndSocketFigure}}
 \end{figure}
 
-\subsection{Rotation constraints}
+\subsection{Rotation constraints\label{rotationConstraints}}
 
 In the case of an elbow or a knee, we also need to prohibit the rotation about particular axes.
 After some thought I came up with the constraint function
-\begin{equation}
+\begin{equation}\label{rotationConstraintEqn}
 c = \Re(\tilde{\ve{n}}\q{p}^{-1}\q{q})
 \end{equation}
 in which \q{p} is the quaternion of orientation for body~A, \q{q} the quaternion for body~B, and
@@ -77,7 +77,7 @@ that no rotation occurs about the axis~\ve{n}. If two different axes are prohibi
 separate constraints, then rotation is only possible about a single axis orthogonal to the two
 prohibited axes. Further details on this constraint are given in appendix~\ref{constrJoystick}.
 
-\subsection{Angle limitation}
+\subsection{Angle limitation\label{angleLimitation}}
 
 The constraints described so far capture most of the features of the human skeleton, with one
 exception: if rotation is permitted about some axis, there is no limit to the amount of rotation
