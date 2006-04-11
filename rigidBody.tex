@@ -44,13 +44,13 @@ body is defined as
 \ve{L} = \m{I}\ve{\omega}
 \end{equation}
 where $\m{I}$ is the inertia tensor and $\ve{\omega}$ is the angular velocity vector.
-Torque is the rate of change of angular momentum over time. Using the chain rule,
+Torque is the rate of change of angular momentum over time:
 \begin{equation}
 \label{correctBrett2}
 \ve{\tau} = \dot{\ve{L}} = \dot{\m{I}}\ve{\omega} + \m{I}\dot{\ve{\omega}}
 \end{equation}
 
-We can further evaluate $\dot{\m{I}}$ by writing it as a product with a rotation matrix
+We can further evaluate $\dot{\m{I}}$ by writing \m{I} as a product with some rotation matrix
 $\m{R}$ and its transpose:
 \begin{equation}
 \label{correctBrett3}
@@ -104,12 +104,11 @@ only for purposes of computing constraint forces and torques.
 \subsection{Lagrange multiplier constraints}
 
 Both~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD} omit details of how to derive the Jacobians
-$\m{J}$ and $\dot{\m{J}}$ for a custom constraint. The following procedure was deduced
-by the author after pondering over some source code implementing one type of constraint
+$\m{J}$ and $\dot{\m{J}}$ for a custom constraint. I deduced the following procedure
+after pondering over some source code implementing one type of constraint
 (specifically equations~\ref{constrEx1J} and~\ref{constrEx1JDot} below). The source code
-was kindly provided by Brett Saunders. (It should be emphasized that the code was used only
-for this derivation and not copied otherwise. The implementation in this project is based
-on the following derivation, not the original code.)
+was kindly provided by Brett Saunders. It was used only for this derivation and not copied
+otherwise. The implementation in this project is based on the following derivations.
 
 We start by defining a function $\ve{c}$ which evaluates to zero (or the null vector) for
 all states which satisfy the constraint, and any non-zero value for all other states. 
