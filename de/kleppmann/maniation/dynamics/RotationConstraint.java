@@ -19,6 +19,7 @@ public class RotationConstraint implements InequalityConstraint {
     private final double limit;
     private final Quaternion restDifference;
     private double n1, n2, n3, pw, px, py, pz, v1, v2, v3, qw, qx, qy, qz, w1, w2, w3;
+    private Map<GeneralizedBody, Matrix> jacMap, jacDotMap;
 
     // normal is given in local coordinates of body1.
     // if body1State is null, normal is in world coordinates
@@ -35,6 +36,7 @@ public class RotationConstraint implements InequalityConstraint {
     }
     
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+        jacMap = jacDotMap = null;
         try {
             body1State = (Body.State) states.get(body1);
             body2State = (Body.State) states.get(body2);
@@ -108,6 +110,7 @@ public class RotationConstraint implements InequalityConstraint {
     }
 
     public Map<GeneralizedBody, Matrix> getJacobian() {
+        if (jacMap != null) return jacMap;
         double[][] m1 = {{0, 0, 0,
             0.5*(n1*(px*qx + pw*qw - pz*qz - py*qy) +
                  n2*(py*qx - pz*qw - pw*qz + px*qy) +
@@ -118,14 +121,15 @@ public class RotationConstraint implements InequalityConstraint {
             0.5*(n1*(px*qz - pw*qy + pz*qx - py*qw) +
                  n2*(py*qz + pz*qy + pw*qx + px*qw) +
                  n3*(pz*qz - py*qy - px*qx + pw*qw)) }};
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        if (body1State != null) result.put(body1, new MatrixImpl(m1));
+        jacMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        if (body1State != null) jacMap.put(body1, new MatrixImpl(m1));
         double[][] m2 = {{0, 0, 0, -m1[0][3], -m1[0][4], -m1[0][5]}};
-        result.put(body2, new MatrixImpl(m2));
-        return result;
+        jacMap.put(body2, new MatrixImpl(m2));
+        return jacMap;
     }
 
     public Map<GeneralizedBody, Matrix> getJacobianDot() {
+        if (jacDotMap != null) return jacDotMap;
         double x1 = n1*w1 + n2*w2 + n3*w3;
         double x2 = py*w3 - pz*w2;
         double x3 = pz*w1 - px*w3;
@@ -144,7 +148,7 @@ public class RotationConstraint implements InequalityConstraint {
         double x16 = n1*v1 + n2*v2 + n3*v3;
         double x17 = n1*x5 + n2*x6 + n3*x7;
         double x18 = n1*(qy*v3 - qz*v2) + n2*(qz*v1 - qx*v3) + n3*(qx*v2 - qy*v1);
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacDotMap = new java.util.HashMap<GeneralizedBody, Matrix>();
         if (body1State != null) {
             double[][] m1 = {{0, 0, 0,
                 0.5 *(qw*x1*px - x8*px) +
@@ -153,7 +157,7 @@ public class RotationConstraint implements InequalityConstraint {
                 0.25*(pw*x16*qy - x17*qy + x13*qz + x14*qw - x15*qx - qw*x16*py + x18*py),
                 0.5 *(qw*x1*pz - x8*pz) +
                 0.25*(pw*x16*qz - x17*qz - x13*qy + x14*qx + x15*qw - qw*x16*pz + x18*pz) }};
-            result.put(body1, new MatrixImpl(m1));
+            jacDotMap.put(body1, new MatrixImpl(m1));
         }
         double[][] m2 = {{0, 0, 0,
             0.25*(pw*x1*qx - qw*x1*px - x9*qx + x10*qw - x11*qz + x12*qy + x8*px) +
@@ -162,7 +166,7 @@ public class RotationConstraint implements InequalityConstraint {
             0.5 *(x17*qy - x13*qz - x14*qw + x15*qx - x16*pw*qy),
             0.25*(pw*x1*qz - qw*x1*pz - x9*qz - x10*qy + x11*qx + x12*qw + x8*pz) +
             0.5 *(x17*qz + x13*qy - x14*qx - x15*qw - x16*pw*qz) }};
-        result.put(body2, new MatrixImpl(m2));
-        return result;
+        jacDotMap.put(body2, new MatrixImpl(m2));
+        return jacDotMap;
     }
 }

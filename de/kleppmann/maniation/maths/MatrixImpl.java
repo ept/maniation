@@ -72,14 +72,16 @@ public class MatrixImpl implements Matrix {
 
     public Vector mult(Vector vec) {
         if (this.getColumns() != vec.getDimension()) throw new IllegalArgumentException();
-        double[] v = new double[this.getRows()];
-        for (int i=0; i<getRows(); i++) {
-            v[i] = 0.0;
-            for (int j=0; j<getColumns(); j++)
-                v[i] += this.getComponent(i,j) * vec.getComponent(j);
+        double[] v = new double[vec.getDimension()];
+        vec.toDoubleArray(v, 0);
+        double[] result = new double[this.getRows()];
+        for (int i=getRows()-1; i>=0; i--) {
+            result[i] = 0.0;
+            for (int j=getColumns()-1; j>=0; j--)
+                result[i] += this.getComponent(i,j) * v[j];
         }
-        if (v.length == 3) return new Vector3D(v[0], v[1], v[2]);
-        return new VectorImpl(v);
+        if (result.length == 3) return new Vector3D(result[0], result[1], result[2]);
+        return new VectorImpl(result);
     }
 
     public Matrix add(Matrix other) {

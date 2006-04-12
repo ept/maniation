@@ -12,6 +12,7 @@ public class JointConstraint implements Constraint {
     private final Body body1, body2;
     private Body.State body1State, body2State;
     private final Vector3D localPos1, localPos2;
+    private Map<GeneralizedBody, Matrix> jacMap, jacDotMap;
 
     // All vectors are in local coordinates of the respective body.
     public JointConstraint(Body body1, Vector3D localPos1, Body body2, Vector3D localPos2) {
@@ -20,6 +21,7 @@ public class JointConstraint implements Constraint {
     }
 
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+        jacMap = jacDotMap = null;
         try {
             body1State = (Body.State) states.get(body1);
             body2State = (Body.State) states.get(body2);
@@ -53,6 +55,7 @@ public class JointConstraint implements Constraint {
     }
 
     public Map<GeneralizedBody, Matrix> getJacobian() {
+        if (jacMap != null) return jacMap;
         Vector3D s = body1State.getOrientation().transform(localPos1);
         Vector3D t = body2State.getOrientation().transform(localPos2);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
@@ -65,13 +68,14 @@ public class JointConstraint implements Constraint {
                 {-1,  0,   0,   0,  -t3,  t2},
                 {0,   -1,  0,   t3,  0,  -t1},
                 {0,   0,   -1, -t2,  t1,  0 }};
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1, new MatrixImpl(j1));
-        result.put(body2, new MatrixImpl(j2));
-        return result;
+        jacMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacMap.put(body1, new MatrixImpl(j1));
+        jacMap.put(body2, new MatrixImpl(j2));
+        return jacMap;
     }
 
     public Map<GeneralizedBody, Matrix> getJacobianDot() {
+        if (jacDotMap != null) return jacDotMap;
         Vector3D s = body1State.getOrientation().transform(localPos1);
         Vector3D t = body2State.getOrientation().transform(localPos2);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
@@ -90,9 +94,9 @@ public class JointConstraint implements Constraint {
                 {0, 0, 0,   0,              w2*t1-w1*t2,    w3*t1-w1*t3},
                 {0, 0, 0,   w1*t2-w2*t1,    0,              w3*t2-w2*t3},
                 {0, 0, 0,   w1*t3-w3*t1,    w2*t3-w3*t2,    0          }};
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1, new MatrixImpl(jdot1));
-        result.put(body2, new MatrixImpl(jdot2));
-        return result;
+        jacDotMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacDotMap.put(body1, new MatrixImpl(jdot1));
+        jacDotMap.put(body2, new MatrixImpl(jdot2));
+        return jacDotMap;
     }
 }

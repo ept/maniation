@@ -17,6 +17,7 @@ public class EdgeEdgeCollision implements InequalityConstraint {
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
             s1, s2, s3, t1, t2, t3, u1, u2, u3, v1, v2, v3, h;
     private Matrix jacB1, jacB2, jDotB1, jDotB2;
+    private Map<GeneralizedBody, Matrix> jacMap, jacDotMap;
     
     // All vectors are in world coordinates!
     public EdgeEdgeCollision(Body body1, Vector3D point1, Vector3D direction1,
@@ -30,6 +31,7 @@ public class EdgeEdgeCollision implements InequalityConstraint {
     }
     
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+        jacMap = jacDotMap = null;
         try {
             body1State = (Body.State) states.get(body1);
             body2State = (Body.State) states.get(body2);
@@ -390,19 +392,21 @@ public class EdgeEdgeCollision implements InequalityConstraint {
     }
 
     public Map<GeneralizedBody, Matrix> getJacobian() {
+        if (jacMap != null) return jacMap;
         generateJacobian();
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1, jacB1);
-        result.put(body2, jacB2);
-        return result;
+        jacMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacMap.put(body1, jacB1);
+        jacMap.put(body2, jacB2);
+        return jacMap;
     }
 
     public Map<GeneralizedBody, Matrix> getJacobianDot() {
+        if (jacDotMap != null) return jacDotMap;
         generateJacobianDot();
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body1, jDotB1);
-        result.put(body2, jDotB2);
-        return result;
+        jacDotMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacDotMap.put(body1, jDotB1);
+        jacDotMap.put(body2, jDotB2);
+        return jacDotMap;
     }
     
     public Map<Body, Vector3D> setToZero() {

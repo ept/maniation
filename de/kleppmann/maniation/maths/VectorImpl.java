@@ -78,6 +78,6 @@ public class VectorImpl implements Vector {
     }
     
     public void toDoubleArray(double[] array, int offset) {
-        for (int i=0; i<getDimension(); i++) array[offset+i] = getComponent(i);
+        for (int i=getDimension()-1; i>=0; i--) array[offset+i] = getComponent(i);
     }
 }

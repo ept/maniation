@@ -13,6 +13,7 @@ public class NailConstraint implements Constraint {
     private final Body body;
     private Body.State bodyState;
     private final Vector3D localPoint, target;
+    private Map<GeneralizedBody, Matrix> jacMap, jacDotMap;
 
     // localPoint is given in the body's local coordinates,
     // while target is given in world coordinates.
@@ -22,6 +23,7 @@ public class NailConstraint implements Constraint {
     }
 
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
+        jacMap = jacDotMap = null;
         try {
             bodyState = (Body.State) states.get(body);
         } catch (ClassCastException e) {
@@ -51,6 +53,7 @@ public class NailConstraint implements Constraint {
     }
 
     public Map<GeneralizedBody, Matrix> getJacobian() {
+        if (jacMap != null) return jacMap;
         Vector3D s = bodyState.getOrientation().transform(localPoint);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
         double[][] j = {
@@ -58,12 +61,13 @@ public class NailConstraint implements Constraint {
                 {0,   1,   0,  -s3,  0,   s1},
                 {0,   0,   1,   s2, -s1,  0}};     
         Matrix mat = new MatrixImpl(j);
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body, mat);
-        return result;
+        jacMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacMap.put(body, mat);
+        return jacMap;
     }
 
     public Map<GeneralizedBody, Matrix> getJacobianDot() {
+        if (jacDotMap != null) return jacDotMap;
         Vector3D s = bodyState.getOrientation().transform(localPoint);
         double s1 = s.getComponent(0), s2 = s.getComponent(1), s3 = s.getComponent(2);
         double w1 = bodyState.getAngularVelocity().getComponent(0);
@@ -74,8 +78,8 @@ public class NailConstraint implements Constraint {
                 {0, 0, 0,   w2*s1-w1*s2,    0,              w2*s3-w3*s2},
                 {0, 0, 0,   w3*s1-w1*s3,    w3*s2-w2*s3,    0          }};
         Matrix mat = new MatrixImpl(jdot);
-        Map<GeneralizedBody, Matrix> result = new java.util.HashMap<GeneralizedBody, Matrix>();
-        result.put(body, mat);
-        return result;
+        jacDotMap = new java.util.HashMap<GeneralizedBody, Matrix>();
+        jacDotMap.put(body, mat);
+        return jacDotMap;
     }
 }

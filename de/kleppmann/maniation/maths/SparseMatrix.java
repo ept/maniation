@@ -2,6 +2,9 @@ package de.kleppmann.maniation.maths;
 
 import java.text.DecimalFormat;
 import java.util.List;
+import java.util.Map;
+
+import de.realityinabox.util.Pair;
 
 public class SparseMatrix implements Matrix {
     
@@ -100,16 +103,27 @@ public class SparseMatrix implements Matrix {
 
     public Vector mult(Vector vec) {
         if (this.getColumns() != vec.getDimension()) throw new IllegalArgumentException();
+        double[] vecarray = new double[vec.getDimension()];
+        vec.toDoubleArray(vecarray, 0);
         double[] result = new double[this.getRows()];
         for (int i=0; i<result.length; i++) result[i] = 0.0;
+        Map<Pair<Integer,Integer>,Vector> vectorCache = new java.util.HashMap<Pair<Integer,Integer>,Vector>();
         for (Slice slice : slices) {
-            double[] subvec = new double[slice.getMatrix().getColumns()];
             int offs = slice.getStartColumn();
-            for (int i=0; i<subvec.length; i++) subvec[i] = vec.getComponent(offs+i);
-            Vector prod = slice.getMatrix().mult(new VectorImpl(subvec));
+            int len = slice.getMatrix().getColumns();
+            Pair<Integer,Integer> pair = new Pair<Integer,Integer>(offs, len);
+            Vector subvec = vectorCache.get(pair);
+            if (subvec == null) {
+                double[] subvecArray = new double[len];
+                for (int i=0; i<len; i++) subvecArray[i] = vecarray[offs+i];
+                subvec = new VectorImpl(subvecArray);
+                vectorCache.put(pair, subvec);
+            }
+            Vector prod = slice.getMatrix().mult(subvec);
+            double[] prodArray = new double[prod.getDimension()];
+            prod.toDoubleArray(prodArray, 0);
             offs = slice.getStartRow();
-            for (int i=prod.getDimension()-1; i>=0; i--)
-                result[i+offs] += prod.getComponent(i);
+            for (int i=0; i<prodArray.length; i++) result[i+offs] += prodArray[i];
         }
         return new VectorImpl(result);
     }
