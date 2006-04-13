@@ -149,12 +149,18 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
     }
     
     
-    private static class Limb extends MeshBody {
+    public static class Limb extends MeshBody {
         private Set<Interaction> links;
+        private ArticulatedLimb limb;
         
-        public Limb(World world, AnimateMesh mesh) {
+        private Limb(World world, ArticulatedLimb mesh) {
             super(world, mesh);
             links = new java.util.HashSet<Interaction>();
+            limb = mesh;
+        }
+        
+        public String toString() {
+            return limb.getBone().getName();
         }
     }
 }

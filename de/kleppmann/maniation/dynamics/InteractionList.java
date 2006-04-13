@@ -37,7 +37,7 @@ public class InteractionList {
                 // Discard positive inequalities
                 boolean positive = true;
                 for (int i=0; i<c.getDimension(); i++)
-                    if (c.getPenalty().getComponent(i) < Simulation.PENETRATION_TOLERANCE)
+                    if (c.getPenalty().getComponent(i) < 0 /*Simulation.PENETRATION_TOLERANCE*/)
                         positive = false;
                 if (positive) continue;
                 // Is the contact colliding, resting or separating?

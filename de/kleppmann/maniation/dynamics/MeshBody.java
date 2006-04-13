@@ -138,6 +138,10 @@ public class MeshBody extends RigidBody implements Collideable {
     public AnimateMesh getMesh() {
         return mesh;
     }
+    
+    public String toString() {
+        return mesh.getSceneBody().getName();
+    }
 
     
     private static class MeshInfo {
