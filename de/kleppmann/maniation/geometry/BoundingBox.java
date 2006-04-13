@@ -2,6 +2,8 @@ package de.kleppmann.maniation.geometry;
 
 import java.text.DecimalFormat;
 
+import de.kleppmann.maniation.maths.Vector3D;
+
 
 public class BoundingBox {
     
@@ -60,6 +62,35 @@ public class BoundingBox {
            (((this.minz >= other.minz) && (this.minz <= other.maxz)) ||
             ((this.maxz >= other.minz) && (this.maxz <= other.maxz)) ||
             ((this.maxz >= other.minz) && (this.minz <= other.minz)));
+    }
+    
+    public boolean intersects(Vector3D p1, Vector3D p2) {
+        Vector3D pl1 = new Vector3D(maxx, miny, minz);
+        Vector3D pl2 = new Vector3D(minx, maxy, minz);
+        Vector3D pl3 = new Vector3D(minx, miny, maxz);
+        Vector3D pl4 = new Vector3D(maxx, maxy, maxz);
+        Vector3D dir = p2.subtract(p1);
+        if (intersectQuad(p1, dir, 2, pl1, pl2)) return true;
+        if (intersectQuad(p1, dir, 1, pl1, pl3)) return true;
+        if (intersectQuad(p1, dir, 0, pl1, pl4)) return true;
+        if (intersectQuad(p1, dir, 0, pl2, pl3)) return true;
+        if (intersectQuad(p1, dir, 1, pl2, pl4)) return true;
+        if (intersectQuad(p1, dir, 2, pl3, pl4)) return true;
+        return false;
+    }
+    
+    private boolean intersectQuad(Vector3D line, Vector3D dir, int normal, Vector3D plane1, Vector3D plane2) {
+        double den = dir.getComponent(normal);
+        if ((den < 0.1) && (den > -0.1)) return false;
+        double lambda = plane1.subtract(line).getComponent(normal) / den;
+        if ((lambda < 0.0) || (lambda > 1.0)) return false;
+        Vector3D point = line.add(dir.mult(lambda));
+        for (int i=0; i<3; i++)
+            if (i != normal) {
+                double a = point.getComponent(i), b = plane1.getComponent(i), c = plane2.getComponent(i);
+                if (((a < b) && (a < c)) || ((a > b) && (a > c))) return false;
+            }
+        return true;
     }
     
     @Override

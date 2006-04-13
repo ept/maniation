@@ -102,6 +102,12 @@ public class AnimateMesh implements AnimateObject {
         return triangles;
     }
     
+    public boolean isInsideVolume(Vector3D point) {
+        Vector3D outside = new Vector3D(volume.getBBox().minx - volume.size(),
+                volume.getBBox().miny - volume.size(), volume.getBBox().minz - volume.size());
+        return (volume.intersections(point, outside) % 2) == 1;
+    }
+    
     private void updateVertex(Vertex vert, int offset, Quaternion orient, Vector3D loc) {
         Vector3D pos = new Vector3D(vert.getPosition().getX(),
                 vert.getPosition().getY(), vert.getPosition().getZ());

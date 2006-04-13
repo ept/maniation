@@ -1,5 +1,7 @@
 package de.kleppmann.maniation.geometry;
 
+import de.kleppmann.maniation.maths.Vector3D;
+
 
 /**
  * Using Axis-Aligned Bounding Boxes (AABBs).
@@ -23,11 +25,26 @@ public class CollisionVolume {
         tree.updateBBox();
     }
     
+    public BoundingBox getBBox() {
+        return tree.getBBox();
+    }
+    
+    public double size() {
+        double vx = tree.getBBox().maxx - tree.getBBox().minx;
+        double vy = tree.getBBox().maxy - tree.getBBox().miny;
+        double vz = tree.getBBox().maxz - tree.getBBox().minz;
+        return Math.sqrt(vx*vx + vy*vy + vz*vz);
+    }
+    
     public void intersect(CollisionVolume other, Collision result) {
         tests = 0;
         tree.intersect(other.tree, result);
         /*if (tests > 0) System.out.println(tests + " primitive tests out of " +
                 getTriangles().length*other.getTriangles().length);*/
+    }
+    
+    public int intersections(Vector3D p1, Vector3D p2) {
+        return tree.intersections(p1, p2);
     }
     
     private Tree newTree(MeshTriangle[] triangles) {
@@ -41,6 +58,7 @@ public class CollisionVolume {
         BoundingBox getBBox();
         void updateBBox();
         void intersect(Tree other, Collision result);
+        int intersections(Vector3D p1, Vector3D p2);
     }
     
     
@@ -49,6 +67,7 @@ public class CollisionVolume {
         public BoundingBox getBBox() { return bbox; }
         public void updateBBox() {}
         public void intersect(Tree other, Collision result) {}
+        public int intersections(Vector3D p1, Vector3D p2) { return 0; }
     }
     
     
@@ -72,6 +91,12 @@ public class CollisionVolume {
                 triangle.intersect(((TreeLeaf) other).triangle, result);
                 tests++;
             } else other.intersect(this, result);
+        }
+        
+        public int intersections(Vector3D p1, Vector3D p2) {
+            if (triangle.lineAgainstTriangle(p1.getComponent(0), p1.getComponent(1), p1.getComponent(2),
+                    p2.getComponent(0), p2.getComponent(1), p2.getComponent(2)) != null) return 1;
+            return 0;
         }
     }
     
@@ -144,6 +169,11 @@ public class CollisionVolume {
                 this.lower.intersect(other, result);
                 this.upper.intersect(other, result);
             }
+        }
+
+        public int intersections(Vector3D p1, Vector3D p2) {
+            if (!bbox.intersects(p1, p2)) return 0;
+            return upper.intersections(p1, p2) + lower.intersections(p1, p2);
         }
     }
 }

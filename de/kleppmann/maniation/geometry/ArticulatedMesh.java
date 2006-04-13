@@ -41,11 +41,6 @@ public class ArticulatedMesh extends AnimateMesh {
     public ArticulatedLimb[]            getLimbList()         { return limbList; }
 
     @Override
-    public CollisionVolume getCollisionVolume() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public ArticulatedBody getDynamicBody() {
         return dynamicBody;
     }
@@ -174,7 +169,8 @@ public class ArticulatedMesh extends AnimateMesh {
                 updateVertexPosition(vert, coordIndex);
                 coordIndex += 3;
             }
-            try {
+            ArticulatedMesh.super.getCollisionVolume().updateBBox();
+            /*try {
                 java.io.FileWriter fw = new java.io.FileWriter("debug.ps");
                 fw.write("0.01 setlinewidth 82.5 45 moveto 82.5 75 lineto stroke 82.5 75 moveto 120 75 lineto stroke ");
                 java.text.DecimalFormat format = new java.text.DecimalFormat("###0.00000");
@@ -188,7 +184,7 @@ public class ArticulatedMesh extends AnimateMesh {
                 fw.close();
             } catch (Exception e) {
                 System.err.println(e);
-            }
+            }*/
         }
     }
 }

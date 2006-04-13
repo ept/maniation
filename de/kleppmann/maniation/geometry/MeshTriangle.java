@@ -160,7 +160,7 @@ public class MeshTriangle {
      * (p1, p2, p3) is the beginning and (q1, q2, q3) the endpoint of the line.
      * @return Point vector of the intersection point if they intersect, null otherwise.
      */
-    private Vector3D lineAgainstTriangle(double p1, double p2, double p3,
+    public Vector3D lineAgainstTriangle(double p1, double p2, double p3,
             double q1, double q2, double q3) {
         // Intersect line with plane
         double t = (q1 - p1)*n1 + (q2 - p2)*n2 + (q3 - p3)*n3;

@@ -11,6 +11,7 @@ import de.kleppmann.maniation.scene.Bone;
 
 public class ArticulatedLimb extends AnimateMesh {
     
+    private ArticulatedMesh wholeMesh;
     private MeshTriangle[] triangles;
     private Bone bone;
     private ArticulatedLimb parent;
@@ -26,6 +27,7 @@ public class ArticulatedLimb extends AnimateMesh {
         this.triangles = triangles.toArray(new MeshTriangle[triangles.size()]);
         this.bone = bone;
         this.parent = parent;
+        this.wholeMesh = wholeMesh;
         this.volume = new CollisionVolume(this.triangles);
         // Determine rest position and orientation
         if (parent != null) {
@@ -47,6 +49,14 @@ public class ArticulatedLimb extends AnimateMesh {
     public Vector3D currentVertexPosition(Vector3D pos) {
         Vector3D local = orientRest.getInverse().transform(pos.subtract(baseRest));
         return orientCurrent.transform(local).add(baseCurrent);
+    }
+
+    @Override
+    public boolean isInsideVolume(Vector3D point) {
+        CollisionVolume vol = wholeMesh.getCollisionVolume();
+        Vector3D outside = new Vector3D(vol.getBBox().minx - vol.size(),
+                vol.getBBox().miny - vol.size(), vol.getBBox().minz - vol.size());
+        return (vol.intersections(point, outside) % 2) == 1;
     }
 
     @Override
