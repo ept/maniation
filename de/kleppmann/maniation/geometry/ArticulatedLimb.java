@@ -115,7 +115,8 @@ public class ArticulatedLimb extends AnimateMesh {
     
     @Override
     public String toString() {
-        return orientCurrent.getW() + " " + orientCurrent.getX() + " " + 
-                orientCurrent.getY() + " " + orientCurrent.getZ();
+        /*return orientCurrent.getW() + " " + orientCurrent.getX() + " " + 
+                orientCurrent.getY() + " " + orientCurrent.getZ();*/
+        return getDynamicBody().toString();
     }
 }
