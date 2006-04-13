@@ -47,6 +47,17 @@ public class MeshTriangle {
         this.body = body;
     }
     
+    public Vector3D getNormal() {
+        Vector3D direction = vertices[0].getNormal();
+        direction = direction.add(vertices[1].getNormal());
+        direction = direction.add(vertices[2].getNormal());
+        Vector3D e1 = vertices[1].getPosition().subtract(vertices[0].getPosition());
+        Vector3D e2 = vertices[2].getPosition().subtract(vertices[0].getPosition());
+        Vector3D norm = e1.cross(e2).normalize();
+        if (norm.mult(direction) < 0.0) norm = norm.mult(-1.0);
+        return norm;
+    }
+    
     public void updateBBox() {
         bbox = new BoundingBox(
             vertices[0].max3(vertices[1], vertices[2], MeshVertex.Component.X),

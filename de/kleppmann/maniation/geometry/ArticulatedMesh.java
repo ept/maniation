@@ -71,7 +71,6 @@ public class ArticulatedMesh extends AnimateMesh {
         Mesh mesh = sceneBody.getMesh();
         // Associate each vertex with the bone which affects it most
         vertexBoneMap = new java.util.HashMap<MeshVertex, Bone>();
-        int vertexIndex = 0;
         for (Vertex vert : mesh.getVertices()) {
             double max = 0.0; Bone maxBone = null;
             for (Deform deform : vert.getDeforms()) {
@@ -80,8 +79,7 @@ public class ArticulatedMesh extends AnimateMesh {
                     maxBone = deform.getBone();
                 }
             }
-            vertexBoneMap.put(vertices[vertexIndex], maxBone);
-            vertexIndex++;
+            vertexBoneMap.put(vertexMap.get(vert), maxBone);
         }
         // Associate each face with the bone which affects the face's vertices most on average
         triangleBoneMap = new java.util.HashMap<MeshTriangle, Bone>();
@@ -137,15 +135,23 @@ public class ArticulatedMesh extends AnimateMesh {
         }
     }
 
-    public Vector3D currentVertexPosition(Vertex vert) {
+    public void updateVertexPosition(Vertex vert, int offset) {
         Vector3D pos = new Vector3D(vert.getPosition().getX(), vert.getPosition().getY(),
                 vert.getPosition().getZ());
-        Vector3D deformed = new Vector3D(0.0, 0.0, 0.0);
+        Vector3D norm = (new Vector3D(vert.getNormal().getX(),
+                vert.getNormal().getY(), vert.getNormal().getZ())).normalize();
+        Vector3D newPos = new Vector3D(), newNorm = new Vector3D();
         for (Deform deform : vert.getDeforms()) {
-            Vector3D world = boneLimbMap.get(deform.getBone()).currentVertexPosition(pos);
-            deformed = deformed.add(world.mult(deform.getWeight()));
+            ArticulatedLimb limb = boneLimbMap.get(deform.getBone());
+            Vector3D limbPos = limb.currentVertexPosition(pos);
+            newPos = newPos.add(limbPos.mult(deform.getWeight()));
+            Vector3D limbNorm = limb.getCurrentOrientation().transform(
+                    limb.getRestOrientation().getInverse().transform(norm));
+            newNorm = newNorm.add(limbNorm.mult(deform.getWeight()));
         }
-        return deformed;
+        newPos.toDoubleArray(coordinates, offset);
+        newNorm = newNorm.normalize();
+        for (int i=0; i<3; i++) normals[offset+i] = (float) newNorm.getComponent(i);
     }
 
     @Override
@@ -165,8 +171,23 @@ public class ArticulatedMesh extends AnimateMesh {
         public void updateData(Geometry geometry) {
             int coordIndex = 0;
             for (Vertex vert : sceneBody.getMesh().getVertices()) {
-                currentVertexPosition(vert).toDoubleArray(coordinates, coordIndex);
+                updateVertexPosition(vert, coordIndex);
                 coordIndex += 3;
+            }
+            try {
+                java.io.FileWriter fw = new java.io.FileWriter("debug.ps");
+                fw.write("0.01 setlinewidth 82.5 45 moveto 82.5 75 lineto stroke 82.5 75 moveto 120 75 lineto stroke ");
+                java.text.DecimalFormat format = new java.text.DecimalFormat("###0.00000");
+                for (int i=0; i<coordinates.length/3; i++) {
+                    double x = 150*(0.5+coordinates[3*i+1]);
+                    double y = 150*(0.5+coordinates[3*i+2]);
+                    fw.write(format.format(x) + " " + format.format(y) + " moveto " +
+                            format.format(x-0.01) + " " + format.format(y) + " lineto stroke ");
+                }
+                fw.write("showpage");
+                fw.close();
+            } catch (Exception e) {
+                System.err.println(e);
             }
         }
     }

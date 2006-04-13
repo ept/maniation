@@ -1,6 +1,7 @@
 package de.kleppmann.maniation.geometry;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Geometry;
@@ -15,13 +16,13 @@ import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Face;
 import de.kleppmann.maniation.scene.Mesh;
 import de.kleppmann.maniation.scene.Vertex;
+import de.realityinabox.util.Pair;
 
 public class AnimateMesh implements AnimateObject {
 
     de.kleppmann.maniation.scene.Body sceneBody;
     double[] coordinates;
     float[] normals;
-    MeshVertex[] vertices;
     MeshTriangle[] triangles;
     Map<Vertex, MeshVertex> vertexMap;
     IndexedTriangleArray geometry = null;
@@ -104,35 +105,40 @@ public class AnimateMesh implements AnimateObject {
     private void updateVertex(Vertex vert, int offset, Quaternion orient, Vector3D loc) {
         Vector3D pos = new Vector3D(vert.getPosition().getX(),
                 vert.getPosition().getY(), vert.getPosition().getZ());
+        Vector3D norm = new Vector3D(vert.getNormal().getX(),
+                vert.getNormal().getY(), vert.getNormal().getZ());
         pos = orient.transform(pos).add(loc);
+        norm = orient.transform(norm.normalize());
         pos.toDoubleArray(coordinates, offset);
+        for (int i=0; i<3; i++) normals[offset+i] = (float) norm.getComponent(i);
     }
     
     private void buildArrays() {
         Mesh mesh = sceneBody.getMesh();
         coordinates = new double[3*mesh.getVertices().size()];
         normals = new float[3*mesh.getVertices().size()];
-        vertices = new MeshVertex[mesh.getVertices().size()];
         int i = 0;
-        //Quaternion orient = getCurrentOrientation(); Vector3D loc = getCurrentLocation();
-        Map<VertexPosition, MeshVertex> uniqueVertices = new java.util.HashMap<VertexPosition, MeshVertex>();
+        Map<VertexPosition, Pair<MeshVertex,Set<Integer>>> uniqueVertices =
+                new java.util.HashMap<VertexPosition, Pair<MeshVertex,Set<Integer>>>();
         vertexMap = new java.util.HashMap<Vertex, MeshVertex>();
         for (Vertex v : mesh.getVertices()) {
-            //updateVertex(v, 3*i, orient, loc);
             coordinates[3*i+0] = v.getPosition().getX();
             coordinates[3*i+1] = v.getPosition().getY();
             coordinates[3*i+2] = v.getPosition().getZ();
             normals[3*i+0] = (float) v.getNormal().getX();
             normals[3*i+1] = (float) v.getNormal().getY();
             normals[3*i+2] = (float) v.getNormal().getZ();
-            vertices[i] = new MeshVertex(coordinates, i);
             VertexPosition vp = new VertexPosition(v);
-            MeshVertex mv = uniqueVertices.get(vp);
-            if (mv != null) {
-                vertexMap.put(v, mv);
+            Pair<MeshVertex,Set<Integer>> pair = uniqueVertices.get(vp);
+            if (pair != null) {
+                vertexMap.put(v, pair.getLeft());
+                pair.getRight().add(i);
             } else {
-                uniqueVertices.put(vp, vertices[i]);
-                vertexMap.put(v, vertices[i]);
+                Set<Integer> indices = new java.util.HashSet<Integer>();
+                indices.add(i);
+                MeshVertex mv = new MeshVertex(coordinates, normals, indices);
+                vertexMap.put(v, mv);
+                uniqueVertices.put(vp, new Pair<MeshVertex,Set<Integer>>(mv, indices));
             }
             i++;
         }
@@ -160,9 +166,9 @@ public class AnimateMesh implements AnimateObject {
         geometry.setCoordRefDouble(coordinates);
         geometry.setNormalRefFloat(normals);
         for (int i=0; i<triangles.length; i++) {
-            MeshTriangle tri = triangles[i];
             for (int j=0; j<3; j++)
-                geometry.setCoordinateIndex(3*i+j, tri.vertices[j].index);
+                for (Integer k : triangles[i].vertices[j].getIndices())
+                    geometry.setCoordinateIndex(3*i+j, k);
         }
         Appearance appearance = new Appearance();
         appearance.setMaterial(sceneBody.getMesh().getMaterial().getJava3D());
