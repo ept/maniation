@@ -21,9 +21,9 @@ public class Simulation {
     
     public static final double RESTING_TOLERANCE = 0.001;
     public static final double PENETRATION_TOLERANCE = 0.005;
-    public static final double ELASTICITY = 0.3;
+    public static final double ELASTICITY = 0.2;
     public static final double FRAMES_PER_SECOND = 120.0;
-    public static final boolean ENABLE_FUDGE = false;
+    public static final boolean ENABLE_FUDGE = true;
     
     private World world = new World();
     private SimulationObject.State worldState = world.getInitialState();
@@ -39,6 +39,20 @@ public class Simulation {
         return world;
     }
     
+    private void writeLog(String filename, int dimension, List<String> log) {
+        try {
+            FileWriter writer = new FileWriter("/home/martin/graphics/maniation/matlab/" + filename);
+            writer.write("# name: data\n");
+            writer.write("# type: matrix\n");
+            writer.write("# rows: " + log.size() + "\n");
+            writer.write("# columns: " + dimension + "\n");
+            for (String line : log) writer.write(line + "\n");
+            writer.close();
+        } catch (IOException e) {
+            System.err.println(e);
+        }
+    }
+    
     public void run(double time) {
         // Set up compound body
         compoundBody = new CompoundBody(world, bodies.toArray(new GeneralizedBody[bodies.size()]));
@@ -51,23 +65,12 @@ public class Simulation {
         // Run simulation
         solver.solve(0.0, time);
         // Write results to file
-        try {
-            FileWriter writer = new FileWriter("/home/martin/graphics/maniation/matlab/javadata");
-            writer.write("# name: data\n");
-            writer.write("# type: matrix\n");
-            writer.write("# rows: " + log.size() + "\n");
-            writer.write("# columns: " + (initialState.getDimension() + 1) + "\n");
-            for (String line : log) writer.write(line + "\n");
-            writer.close();
-        } catch (IOException e) {
-            System.err.println(e);
-        }
+        writeLog("javadata", initialState.getDimension() + 1, log);
     }
     
     private void checkPenetration(StateVector state, InteractionList il, double time)
             throws ODEBacktrackException {
         // Check for colliding contacts and abort this simulation step if necessary
-        il.classifyConstraints(state);
         double penetrationTime = 0.0; boolean penetrated = false;
         Set<Constraint> contacts = new java.util.HashSet<Constraint>();
         contacts.addAll(il.getCollidingContacts());
@@ -76,7 +79,12 @@ public class Simulation {
             for (int i=0; i<c.getDimension(); i++) {
                 double d = c.getPenalty().getComponent(i);
                 DecimalFormat format = new DecimalFormat("0.00000");
-                System.out.print("[" + format.format(d) + " / " + format.format(c.getPenaltyDot().getComponent(i)) + "] ");
+                String type = "?";
+                if (c instanceof VertexFaceCollision) type = "v";
+                if (c instanceof EdgeEdgeCollision)   type = "e";
+                if (c instanceof RotationConstraint)  type = "a";
+                System.out.print("[" + format.format(d) + " / " +
+                        format.format(c.getPenaltyDot().getComponent(i)) + " " + type + "] ");
                 if (d < -PENETRATION_TOLERANCE) {
                     double t = (d + PENETRATION_TOLERANCE) / c.getPenaltyDot().getComponent(i);
                     if ((!penetrated) || (t > penetrationTime)) penetrationTime = t;
@@ -90,7 +98,6 @@ public class Simulation {
     private StateVector fudgeInequalities(StateVector state, InteractionList il) {
         if (!ENABLE_FUDGE) return state;
         // Resets inequality constraints which have gone slightly negative to their zero position
-        il.classifyConstraints(state);
         Map<Body, Vector3D> positionMap = new java.util.HashMap<Body, Vector3D>();
         Set<InequalityConstraint> contacts = new java.util.HashSet<InequalityConstraint>();
         contacts.addAll(il.getCollidingContacts());
@@ -143,7 +150,6 @@ public class Simulation {
     }
     
     private StateVector constraintForces(StateVector state, InteractionList il) {
-        il.classifyConstraints(state);
         Vector lambda;
         Set<Constraint> constrs = new java.util.HashSet<Constraint>();
         Set<Constraint> contacts = new java.util.HashSet<Constraint>();
@@ -220,6 +226,7 @@ public class Simulation {
             StateVector state = compoundBody.getInitialState();
             interactions = new InteractionList();
             compoundBody.interaction(state, worldState, interactions, true);
+            interactions.classifyConstraints(state);
             return state;
         }
 
@@ -228,12 +235,17 @@ public class Simulation {
             StateVector sv = (StateVector) state;
             interactions = new InteractionList();
             compoundBody.interaction(sv, worldState, interactions, true);
+            interactions.classifyConstraints(sv);
             // Check if penetration has occurred -- may throw ODEBacktrackException
             if (allowBacktrack) checkPenetration(sv, interactions, time);
             // Compute constraint/collision impulses
             StateVector result = fudgeInequalities(sv, interactions);
             result = constraintImpulses(result, interactions, time);
             addToLog(time, state);
+            DecimalFormat format = new DecimalFormat("######0.000000000000000");
+            List<String> currentState = new java.util.ArrayList<String>();
+            currentState.add(format.format(time) + " " + state.toString());
+            writeLog("currentState", state.getDimension() + 1, currentState);
             return result;
         }
         
