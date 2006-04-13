@@ -2,23 +2,23 @@ package de.kleppmann.maniation.geometry;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import de.kleppmann.maniation.dynamics.ArticulatedBody;
 import de.kleppmann.maniation.dynamics.EdgeEdgeCollision;
 import de.kleppmann.maniation.dynamics.InteractionList;
 import de.kleppmann.maniation.dynamics.Body;
 import de.kleppmann.maniation.dynamics.VertexFaceCollision;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.realityinabox.util.CommutativePair;
+import de.realityinabox.util.Pair;
 
 public class Collision {
 
     private final List<CollisionPoint> intersections = new java.util.ArrayList<CollisionPoint>();
-    //private final AnimateMesh mesh1, mesh2;
+    private final AnimateMesh mesh1, mesh2;
     private final Body body1, body2;
     private Set<MeshTriangle> body1Triangles, body2Triangles;
-    private Vector3D planePoint = null, planeNormal = null, penetrationPoint = null;
     private Body planeBody = null;
     private MeshVertex vfVertex = null;
     private MeshTriangle vfFace = null;
@@ -26,7 +26,7 @@ public class Collision {
     private CommutativePair<MeshVertex> body1Edge = null, body2Edge = null;
     
     public Collision(AnimateMesh mesh1, AnimateMesh mesh2) {
-        //this.mesh1 = mesh1; this.mesh2 = mesh2;
+        this.mesh1 = mesh1; this.mesh2 = mesh2;
         try {
             this.body1 = (Body) mesh1.getDynamicBody();
             this.body2 = (Body) mesh2.getDynamicBody();
@@ -70,128 +70,50 @@ public class Collision {
             Vector3D d2 = body2Edge.getRight().getPosition().subtract(p2);
             if (d1.cross(d2).mult(p2.subtract(p1)) > 0.0) d1 = d1.mult(-1.0);
             result.addInteraction(new EdgeEdgeCollision(body1, p1, d1, body2, p2, d2));
-        } else if (calcPlane()) {
-            Body vertexBody = (planeBody == body1) ? body2 : body1;
-            result.addInteraction(new VertexFaceCollision(vertexBody, penetrationPoint,
-                    planeBody, planePoint, planeNormal));
-        }
+        } else compoundContact(result);
     }
     
-    private boolean calcPlane() {
-        // Find a point on the plane by averaging all collision line endpoints
-        Set<CommutativePair<InexactPoint>> lines = new java.util.HashSet<CommutativePair<InexactPoint>>();
-        for (CollisionPoint coll : intersections) {
-            lines.add(new CommutativePair<InexactPoint>(new InexactPoint(coll.lineFrom),
-                    new InexactPoint(coll.lineTo)));
-        }
-        planePoint = new Vector3D();
-        for (CommutativePair<InexactPoint> line : lines) {
-            planePoint = planePoint.add(line.getLeft ().getPosition());
-            planePoint = planePoint.add(line.getRight().getPosition());
-        }
-        planePoint = planePoint.mult(0.5/lines.size());
-        // Find the plane normal by averaging the normals (as specified in the file) of all triangles
-        planeNormal = new Vector3D();
-        for (CollisionPoint coll : intersections) {
-            planeNormal = planeNormal.add(coll.tri1.getNormal()).subtract(coll.tri2.getNormal());
-        }
-        if (planeNormal.magnitude() < 1e-6) return false;
-        planeNormal = planeNormal.normalize();
-        // Nasty hack: if the collision is between an articulated body and a mesh body, the mesh
-        // body should carry the plane.
-        double dist = 1e20;
-        if (body2 instanceof ArticulatedBody.Limb) {
-            planeBody = body1;
-            for (CollisionPoint coll : intersections) {
-                for (MeshVertex v : coll.getTri2().getVertices()) {
-                    double d = v.getPosition().subtract(planePoint).mult(planeNormal);
-                    if (d < dist) dist = d;
-                }
-            }
-        } else if (body1 instanceof ArticulatedBody.Limb) {
-            planeBody = body2;
-            planeNormal = planeNormal.mult(-1.0);
-            for (CollisionPoint coll : intersections) {
-                for (MeshVertex v : coll.getTri1().getVertices()) {
-                    double d = v.getPosition().subtract(planePoint).mult(planeNormal);
-                    if (d < dist) dist = d;
-                }
-            }
+    private void compoundContact(InteractionList result) {
+        // The more coarse mesh will be used for the faces, to minimize the number of constraints
+        Set<MeshTriangle> planeTriangles, vertexTriangles;
+        Body vertexBody; AnimateMesh planeMesh;
+        if (body1Triangles.size() < body2Triangles.size()) {
+            planeBody = body1; vertexBody = body2; planeMesh = mesh1;
+            planeTriangles = body1Triangles; vertexTriangles = body2Triangles;
         } else {
-            planeBody = body1;
-            for (CollisionPoint coll : intersections) {
-                for (MeshVertex v : coll.getTri1().getVertices()) {
-                    double d = -v.getPosition().subtract(planePoint).mult(planeNormal);
-                    if (d < dist) dist = d;
+            planeBody = body2; vertexBody = body1; planeMesh = mesh2;
+            planeTriangles = body2Triangles; vertexTriangles = body1Triangles;
+        }
+        // Determine which of the other mesh's vertices lie inside the face mesh volume
+        Set<MeshVertex> inside = new java.util.HashSet<MeshVertex>();
+        Set<MeshVertex> outside = new java.util.HashSet<MeshVertex>();
+        for (MeshTriangle tri : vertexTriangles) {
+            for (MeshVertex vert : tri.vertices) {
+                if (inside.contains(vert) || outside.contains(vert)) continue;
+                if (planeMesh.isInsideVolume(vert.getPosition())) inside.add(vert);
+                else outside.add(vert);
+            }
+        }
+        // Associate each penetrated vertex with the face closest to it.
+        // But for each face, choose the furthest associated vertex.
+        Map<MeshTriangle, VertexFaceCollision> faceColl = new java.util.HashMap<MeshTriangle, VertexFaceCollision>();
+        for (MeshVertex vert : inside) {
+            VertexFaceCollision vfmax = null; double pmax = 0.0; MeshTriangle mtmax = null;
+            for (MeshTriangle face : planeTriangles) {
+                VertexFaceCollision vf = new VertexFaceCollision(vertexBody, vert.getPosition(),
+                        planeBody, face.getVertices()[0].getPosition(), face.getNormal());
+                double pen = vf.getPenalty().getComponent(0);
+                if (((vfmax == null) || (pen > pmax)) && (pen < 0.0)) {
+                    vfmax = vf; pmax = pen; mtmax = face;
                 }
-                for (MeshVertex v : coll.getTri2().getVertices()) {
-                    double d = v.getPosition().subtract(planePoint).mult(planeNormal);
-                    if (d < dist) dist = d;
-                }
             }
+            VertexFaceCollision prev = faceColl.get(mtmax);
+            if ((vfmax != null) && ((prev == null) || (prev.getPenalty().getComponent(0) > pmax)))
+                faceColl.put(mtmax, vfmax);
         }
-        // Find the point of maximum penetration through the plane
-        /*for (CollisionPoint coll : intersections) {
-            for (MeshVertex v : coll.getTri1().getVertices()) {
-                double d = -v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (d < dist) dist = d;
-            }
-            for (MeshVertex v : coll.getTri2().getVertices()) {
-                double d = v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (d < dist) dist = d;
-            }
-        }*/
-        // Find the plane normal by averaging the normals of all triangles
-        /*planeNormal = new Vector3D();
-        for (CommutativePair<InexactPoint> line : lines) {
-            Vector3D a = line.getLeft ().getPosition().subtract(planePoint);
-            Vector3D b = line.getRight().getPosition().subtract(planePoint);
-            Vector3D n = a.cross(b);
-            if (n.magnitude() > 1e-6) {
-                // Flip this normal if it's pointing in the opposite direction to the previous ones
-                if (planeNormal.mult(n) < 0.0) n = n.mult(-1.0);
-                planeNormal = planeNormal.add(n);
-            }
+        for (Map.Entry<MeshTriangle, VertexFaceCollision> entry : faceColl.entrySet()) {
+            result.addInteraction(entry.getValue());
         }
-        // If the plane is so undefined that we can't even make out a normal, we might as well
-        // just ignore the collision. (This might happen in a vertex/vertex collision. Maybe it
-        // would be better to handle this case separately.)
-        if (planeNormal.magnitude() < 1e-8) return false;
-        planeNormal = planeNormal.normalize();
-        // Find the point of maximum penetration through the plane
-        double dmax = -1e20, dmin = 1e20;
-        for (CollisionPoint coll : intersections) {
-            for (MeshVertex v : coll.getTri1().getVertices()) {
-                double dist = -v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (dist > dmax) dmax = dist;
-                if (dist < dmin) dmin = dist;
-            }
-            for (MeshVertex v : coll.getTri2().getVertices()) {
-                double dist = v.getPosition().subtract(planePoint).mult(planeNormal);
-                if (dist > dmax) dmax = dist;
-                if (dist < dmin) dmin = dist;
-            }
-        }
-        // Try to determine which side of the plane is the 'bad' one by considering the
-        // locations of the centres of masses relative to the plane.
-        double dist;
-        Body.State state1, state2;
-        try {
-            state1 = (Body.State) mesh1.getDynamicState();
-            state2 = (Body.State) mesh2.getDynamicState();
-        } catch (ClassCastException e) {
-            throw new IllegalStateException(e);
-        }
-        double com = state2.getCoMPosition().subtract(state1.getCoMPosition()).mult(planeNormal);
-        if (com > 0.0) {
-            planeBody = body1; dist = dmin;
-        } else {
-            planeBody = body2; dist = -dmax;
-        }*/
-        // As penetration point, we just choose one offset from the plane centrepoint
-        // by the appropriate distance.
-        penetrationPoint = planePoint.add(planeNormal.mult(dist));
-        return true;
     }
     
     private boolean detectVertexFace() {
@@ -244,6 +166,37 @@ public class Collision {
         for (CommutativePair<MeshVertex> e : edges) edge = e;
         if (triangles == body1Triangles) body1Edge = edge; else body2Edge = edge;
         return true;
+    }
+    
+    private boolean linesProximity(Vector3D p1, Vector3D p2, Vector3D q1, Vector3D q2) {
+        Vector3D s = p2.subtract(p1), t = q2.subtract(q1);
+        double ss = s.magnitude()*s.magnitude(), tt = t.magnitude()*t.magnitude();
+        double st = s.mult(t);
+        double den = ss*tt - st*st;
+        if ((den < 1e-10) && (den > -1e-10)) return false;
+        Vector3D v = s.mult(st).add(t.mult(ss));
+        double rho = p1.subtract(q1).mult(v) / den;
+        if ((rho < 0.0) || (rho > 1.0)) return false;
+        double lambda = s.mult(t.mult(rho).add(q1).subtract(p1)) / ss;
+        return (lambda >= 0.0) && (lambda <= 1.0);
+    }
+    
+    // Returns the edges in anticlockwise orientation, as seen when looking at the outside
+    private Set<Pair<MeshVertex,MeshVertex>> triangleEdges(MeshTriangle tri) {
+        Set<Pair<MeshVertex,MeshVertex>> result = new java.util.HashSet<Pair<MeshVertex,MeshVertex>>();
+        Vector3D p1 = tri.getVertices()[0].getPosition();
+        Vector3D p2 = tri.getVertices()[1].getPosition();
+        Vector3D p3 = tri.getVertices()[2].getPosition();
+        if (p2.subtract(p1).cross(p3.subtract(p1)).mult(tri.getNormal()) >= 0.0) {
+            result.add(new Pair<MeshVertex,MeshVertex>(tri.getVertices()[0], tri.getVertices()[1]));
+            result.add(new Pair<MeshVertex,MeshVertex>(tri.getVertices()[1], tri.getVertices()[2]));
+            result.add(new Pair<MeshVertex,MeshVertex>(tri.getVertices()[2], tri.getVertices()[0]));
+        } else {
+            result.add(new Pair<MeshVertex,MeshVertex>(tri.getVertices()[0], tri.getVertices()[2]));
+            result.add(new Pair<MeshVertex,MeshVertex>(tri.getVertices()[2], tri.getVertices()[1]));
+            result.add(new Pair<MeshVertex,MeshVertex>(tri.getVertices()[1], tri.getVertices()[0]));
+        }
+        return result;
     }
     
     
