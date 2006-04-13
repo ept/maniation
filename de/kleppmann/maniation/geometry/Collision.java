@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import de.kleppmann.maniation.dynamics.ArticulatedBody;
 import de.kleppmann.maniation.dynamics.EdgeEdgeCollision;
 import de.kleppmann.maniation.dynamics.InteractionList;
 import de.kleppmann.maniation.dynamics.Body;
@@ -14,7 +15,7 @@ import de.realityinabox.util.CommutativePair;
 public class Collision {
 
     private final List<CollisionPoint> intersections = new java.util.ArrayList<CollisionPoint>();
-    private final AnimateMesh mesh1, mesh2;
+    //private final AnimateMesh mesh1, mesh2;
     private final Body body1, body2;
     private Set<MeshTriangle> body1Triangles, body2Triangles;
     private Vector3D planePoint = null, planeNormal = null, penetrationPoint = null;
@@ -25,7 +26,7 @@ public class Collision {
     private CommutativePair<MeshVertex> body1Edge = null, body2Edge = null;
     
     public Collision(AnimateMesh mesh1, AnimateMesh mesh2) {
-        this.mesh1 = mesh1; this.mesh2 = mesh2;
+        //this.mesh1 = mesh1; this.mesh2 = mesh2;
         try {
             this.body1 = (Body) mesh1.getDynamicBody();
             this.body2 = (Body) mesh2.getDynamicBody();
@@ -89,8 +90,59 @@ public class Collision {
             planePoint = planePoint.add(line.getRight().getPosition());
         }
         planePoint = planePoint.mult(0.5/lines.size());
-        // Find the plane normal by averaging the normals of all triangles
+        // Find the plane normal by averaging the normals (as specified in the file) of all triangles
         planeNormal = new Vector3D();
+        for (CollisionPoint coll : intersections) {
+            planeNormal = planeNormal.add(coll.tri1.getNormal()).subtract(coll.tri2.getNormal());
+        }
+        if (planeNormal.magnitude() < 1e-6) return false;
+        planeNormal = planeNormal.normalize();
+        // Nasty hack: if the collision is between an articulated body and a mesh body, the mesh
+        // body should carry the plane.
+        double dist = 1e20;
+        if (body2 instanceof ArticulatedBody.Limb) {
+            planeBody = body1;
+            for (CollisionPoint coll : intersections) {
+                for (MeshVertex v : coll.getTri2().getVertices()) {
+                    double d = v.getPosition().subtract(planePoint).mult(planeNormal);
+                    if (d < dist) dist = d;
+                }
+            }
+        } else if (body1 instanceof ArticulatedBody.Limb) {
+            planeBody = body2;
+            planeNormal = planeNormal.mult(-1.0);
+            for (CollisionPoint coll : intersections) {
+                for (MeshVertex v : coll.getTri1().getVertices()) {
+                    double d = v.getPosition().subtract(planePoint).mult(planeNormal);
+                    if (d < dist) dist = d;
+                }
+            }
+        } else {
+            planeBody = body1;
+            for (CollisionPoint coll : intersections) {
+                for (MeshVertex v : coll.getTri1().getVertices()) {
+                    double d = -v.getPosition().subtract(planePoint).mult(planeNormal);
+                    if (d < dist) dist = d;
+                }
+                for (MeshVertex v : coll.getTri2().getVertices()) {
+                    double d = v.getPosition().subtract(planePoint).mult(planeNormal);
+                    if (d < dist) dist = d;
+                }
+            }
+        }
+        // Find the point of maximum penetration through the plane
+        /*for (CollisionPoint coll : intersections) {
+            for (MeshVertex v : coll.getTri1().getVertices()) {
+                double d = -v.getPosition().subtract(planePoint).mult(planeNormal);
+                if (d < dist) dist = d;
+            }
+            for (MeshVertex v : coll.getTri2().getVertices()) {
+                double d = v.getPosition().subtract(planePoint).mult(planeNormal);
+                if (d < dist) dist = d;
+            }
+        }*/
+        // Find the plane normal by averaging the normals of all triangles
+        /*planeNormal = new Vector3D();
         for (CommutativePair<InexactPoint> line : lines) {
             Vector3D a = line.getLeft ().getPosition().subtract(planePoint);
             Vector3D b = line.getRight().getPosition().subtract(planePoint);
@@ -135,7 +187,7 @@ public class Collision {
             planeBody = body1; dist = dmin;
         } else {
             planeBody = body2; dist = -dmax;
-        }
+        }*/
         // As penetration point, we just choose one offset from the plane centrepoint
         // by the appropriate distance.
         penetrationPoint = planePoint.add(planeNormal.mult(dist));
@@ -169,11 +221,12 @@ public class Collision {
             for (MeshVertex v : vset) vfVertex = v;
         } else return false;
         // Determine normal of the face
-        Vector3D v1 = vfFace.getVertices()[0].getPosition();
+        /*Vector3D v1 = vfFace.getVertices()[0].getPosition();
         Vector3D v2 = vfFace.getVertices()[1].getPosition();
         Vector3D v3 = vfFace.getVertices()[2].getPosition();
         vfNormal = v2.subtract(v1).cross(v3.subtract(v1)).normalize();
-        if (vfVertex.getPosition().subtract(v1).mult(vfNormal) > 0.0) vfNormal = vfNormal.mult(-1.0);
+        if (vfVertex.getPosition().subtract(v1).mult(vfNormal) > 0.0) vfNormal = vfNormal.mult(-1.0);*/
+        vfNormal = vfFace.getNormal();
         return true;
     }
     
