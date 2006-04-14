@@ -46,12 +46,11 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
                 intersect.retainAll(mesh.getBoneVerticesMap().get(other));
                 if (intersect.size() == 0) {
                     ArticulatedLimb l = mesh.getBoneLimbMap().get(other);
-                    for (int k=0; k<getBodies(); k++) if (l == mesh.getLimbList()[i]) limbSet.add(k);
+                    for (int k=0; k<getBodies(); k++) if (l == mesh.getLimbList()[k]) limbSet.add(k);
                 }
             }
             collisionTestLimbs.put(mesh.getBoneLimbMap().get(bone), limbSet);
         }
-        
     }
     
     private static GeneralizedBody[] bodiesFromMesh(World world, ArticulatedMesh mesh) {
