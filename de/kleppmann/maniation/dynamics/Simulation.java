@@ -23,7 +23,7 @@ public class Simulation {
     public static final double PENETRATION_TOLERANCE = 0.005;
     public static final double ELASTICITY = 0.2;
     public static final double FRAMES_PER_SECOND = 120.0;
-    public static final boolean ENABLE_FUDGE = true;
+    public static final boolean ENABLE_FUDGE = false;
     
     private World world = new World();
     private SimulationObject.State worldState = world.getInitialState();
@@ -109,7 +109,9 @@ public class Simulation {
     }
     
     private StateVector constraintImpulses(StateVector state, InteractionList il, double time) {
-        while (true) {
+        int iterations = 0;
+        while (iterations < 100) {
+            iterations++;
             // Repeat until there are no more colliding contacts
             il.classifyConstraints(state);
             if (il.getCollidingContacts().size() == 0) break;
@@ -242,10 +244,11 @@ public class Simulation {
             StateVector result = fudgeInequalities(sv, interactions);
             result = constraintImpulses(result, interactions, time);
             addToLog(time, state);
-            DecimalFormat format = new DecimalFormat("######0.000000000000000");
+            writeLog("javadata", state.getDimension() + 1, log);
+            /*DecimalFormat format = new DecimalFormat("######0.000000000000000");
             List<String> currentState = new java.util.ArrayList<String>();
             currentState.add(format.format(time) + " " + state.toString());
-            writeLog("currentState", state.getDimension() + 1, currentState);
+            writeLog("currentState", state.getDimension() + 1, currentState);*/
             return result;
         }
         
