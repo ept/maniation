@@ -5,7 +5,7 @@ public class ConjugateGradient {
     private int size;
     private Matrix[] alist;
     private Vector b;
-    private double tolerance = 1e-5;
+    private double tolerance = 1e-7;
     private int maxIter;
     private Method method = Method.SIMPLE;
     
