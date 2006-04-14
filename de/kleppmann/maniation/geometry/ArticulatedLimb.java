@@ -1,5 +1,8 @@
 package de.kleppmann.maniation.geometry;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import de.kleppmann.maniation.dynamics.Body;
@@ -8,6 +11,7 @@ import de.kleppmann.maniation.dynamics.MeshBody;
 import de.kleppmann.maniation.maths.Quaternion;
 import de.kleppmann.maniation.maths.Vector3D;
 import de.kleppmann.maniation.scene.Bone;
+import de.realityinabox.util.Pair;
 
 public class ArticulatedLimb extends AnimateMesh {
     
@@ -20,6 +24,8 @@ public class ArticulatedLimb extends AnimateMesh {
     private Body.State dynamicState;
     private Vector3D baseRest, baseCurrent;
     private Quaternion orientRest, orientCurrent;
+    private Vector3D axis;
+    private List<Pair<Vector3D,Double>> bubbles;
     
     public ArticulatedLimb(Set<MeshTriangle> triangles, Bone bone, ArticulatedLimb parent,
             ArticulatedMesh wholeMesh) {
@@ -49,6 +55,36 @@ public class ArticulatedLimb extends AnimateMesh {
     public Vector3D currentVertexPosition(Vector3D pos) {
         Vector3D local = orientRest.getInverse().transform(pos.subtract(baseRest));
         return orientCurrent.transform(local).add(baseCurrent);
+    }
+    
+    public void updateBubbles() {
+        axis = orientCurrent.transform(new Vector3D(0,1,0));
+        Vector3D[] points = new Vector3D[triangles.length*3];
+        for (int i=0; i<triangles.length; i++)
+            for (int j=0; j<3; j++)
+                points[3*i+j] = triangles[i].getVertices()[j].getPosition();
+        Arrays.sort(points, new Comparator<Vector3D>() {
+            public int compare(Vector3D v1, Vector3D v2) {
+                double l1 = v1.subtract(baseCurrent).mult(axis);
+                double l2 = v2.subtract(baseCurrent).mult(axis);
+                if (l1 < l2) return -1;
+                if (l1 > l2) return +1; else return 0;
+            }
+        });
+        bubbles = new java.util.ArrayList<Pair<Vector3D,Double>>();
+        double size = 0.0, start = 0.0;
+        for (Vector3D point : points) {
+            Vector3D diff = point.subtract(baseCurrent);
+            double apos = diff.mult(axis); // axial
+            double rpos = diff.cross(axis).magnitude(); // radial
+            if (rpos > size) size = rpos;
+            if (apos - start > size) {
+                bubbles.add(new Pair<Vector3D,Double>(baseCurrent.add(axis.mult(start+size)), size));
+                start += 2.0*size/3.0;
+                size = rpos;
+            }
+        }
+        if (size > 0.0) bubbles.add(new Pair<Vector3D,Double>(baseCurrent.add(axis.mult(start+size)), size));
     }
 
     @Override
@@ -121,6 +157,10 @@ public class ArticulatedLimb extends AnimateMesh {
 
     public ArticulatedLimb getParent() {
         return parent;
+    }
+    
+    public List<Pair<Vector3D,Double>> getBubbles() {
+        return bubbles;
     }
     
     @Override

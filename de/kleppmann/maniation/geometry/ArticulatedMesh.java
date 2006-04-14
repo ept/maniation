@@ -170,6 +170,7 @@ public class ArticulatedMesh extends AnimateMesh {
                 coordIndex += 3;
             }
             ArticulatedMesh.super.getCollisionVolume().updateBBox();
+            for (ArticulatedLimb limb : limbList) limb.updateBubbles();
             /*try {
                 java.io.FileWriter fw = new java.io.FileWriter("debug.ps");
                 fw.write("0.01 setlinewidth 82.5 45 moveto 82.5 75 lineto stroke 82.5 75 moveto 120 75 lineto stroke ");
