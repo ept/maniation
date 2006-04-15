@@ -26,4 +26,5 @@ public interface Bone {
     void setZAxis(de.kleppmann.maniation.scene.AxisConstraint zAxis);
     de.kleppmann.maniation.scene.Animation getAnimation();
     void setAnimation(de.kleppmann.maniation.scene.Animation animation);
+    java.util.List<de.kleppmann.maniation.scene.Bubble> getBubbles();
 }
