@@ -86,13 +86,14 @@ public class Quaternion {
     }
     
     public Quaternion quergs(Quaternion delta) {
-        double mag = delta.getMagnitude();
+        /*double mag = delta.getMagnitude();
         if (mag < 1e-20) return this;
         long n = Math.round(mag/Math.PI - 0.5);
         double d = mag - Math.PI*(n + 0.5);
         if ((d < 1e-6) && (d > -1e-6)) return new Quaternion(delta.w/mag,
                 delta.x/mag, delta.y/mag, delta.z/mag);
-        double t = Math.tan(mag)/mag;
+        double t = Math.tan(mag)/mag;*/
+        double t = 1.0;
         double wn = this.w + t*delta.w;
         double xn = this.x + t*delta.x;
         double yn = this.y + t*delta.y;
