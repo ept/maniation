@@ -1,0 +1,89 @@
+In this chapter I present some of the results obtained from performing experiments with the
+simulation application described in the last three chapters.
+
+\section{Quantitative evaluation}
+\subsection{Simulation accuracy}
+The quality of simulation results is hard to measure quantitatively, since simulation is usually
+employed to calculate the behaviour of systems whose exact solution is not known. Therefore it is
+useful to run the simulation on a system which can be characterized analytically, and to compare
+the results against the theoretical values.
+
+For this comparison I chose to simulate a \emph{gyroscope} (figure~\ref{gyroscope}). It consists
+of a single rotating rigid body and a `nail' constraint (appendix~\ref{constrNail}) holding one
+end of its axis in place. When gravity acts on the centre of mass of the body, the `nail' exerts
+a balancing force and a torque which stop the gyroscope from falling down and causes forced
+precession. The angular velocity of precession can be derived analytically~\cite{Julian:notes}
+and depends only on the gravitational force, the distance between the centre of mass and the
+nail, and the angular momentum of the body.
+
+\begin{figure}
+\centerline{\includegraphics{figures/gyroscope}}
+\caption{Schematic drawing of a gyroscope. The disc rapidly rotates about its own axis, and
+    gravity causes a slower precession movement about the vertical axis (shown as a dotted line).
+    \label{gyroscope}}
+\end{figure}
+
+I set up the initial conditions for the simulation to reflect values one might find in an actual
+toy gyroscope (20 revolutions per second about the gyroscope axis, one full circle of precession
+in 8 seconds). I then ran the simulation for 8~s, using an average time step length of about
+$2.3\cdot 10^{-4}$~s. The simulation performed one full circle of precession in 7.953~s, which
+is within 0.6~\% of the theoretical value. Over the course of 8~s, the body rotated by $320.36\pi$
+radians about its own axis (160.18 revolutions), which differs from the theoretical value by only
+0.1~\%. These errors varied very little even in simulations using larger time steps.
+The effects of nutation~\cite{Feynman:63} were small for the chosen initial conditions but may
+have contributed towards the errors.
+
+These results are very encouraging, but is interesting to also observe a different error, namely
+the amount by which the constraint drifts apart. Usually this drift is compensated in the Lagrange
+multiplier method so that it never manifests itself, but temporarily deactivating this
+correction\footnote{by setting $k=d=0$ in equation~\ref{lagrangeEquation}.} makes the error
+introduced by the ODE solver observable.
+
+\begin{figure}
+\centerline{\input{figures/errorplot}}
+\caption{Errors introduced by the ODE solver for different step sizes $h$.
+    Solid line: target error (difference between $O(h^4)$ and $O(h^5)$ approximations) of
+    the ODE solver. Dashed line: drift of `nail' constraint in gyroscope simulation after
+    8~s simulation time.\label{errorplot}}
+\end{figure}
+
+Figure~\ref{errorplot} shows by what distance the gyroscope's `nail' constraint drifted apart
+after 8~s of simulation time, for a wide range of different step sizes. Since I used the
+adaptive-stepsize algorithm described in section~\ref{solvingODEs}, I actually set the target
+error (solid line in figure~\ref{errorplot}) and then used the average step size taken by the
+solver as abscissa. There are some noteworthy features about this plot:
+
+\begin{itemize}
+\item The logarithmic axes are scaled such that one order of magnitude in the horizontal has the
+    same length as five orders of magnitude in the vertical. Observe that in this scaling, the
+    solid line (error per time step) is an almost perfect straight line with gradient~1. This
+    shows that the error is indeed an $O(h^5)$ function of the step size, as expected.
+\item Over a wide range of step sizes, the plot of the total accumulated error is parallel to the
+    solid line. This means the total error is also $O(h^5)$, which is in fact better than
+    expected: although the approximation in each time step is $O(h^5)$, the number of steps
+    required is inversely proportional to the step length, so one might expect a larger overall
+    error. This relationship indicates that the ODE solver's target error can in fact be used
+    as a reliable estimate of the overall error to within a constant factor.
+\item As step sizes $h$ become very small~-- below about $3\cdot 10^{-4}$~s~-- the error in each
+    step continues to scale order $O(h^5)$, but due to the huge number of steps, the accumulated
+    error cannot be reduced much further. However, the errors here are in the range of nanometres,
+    so they should be of little concern for computer graphics purposes.
+\end{itemize}
+
+In summary, the results for the simple gyroscope simulation inspire the confidence that the
+implementation is reliable and will continue to produce realistic results for complicated systems
+which lack an exact solution. They also show that the target error can conveniently be adjusted
+to match the requirements, because more CPU time does~-- within sensible bounds~-- buy higher
+accuracy.
+
+
+\section{Qualitative evaluation}
+
+
+\section{Limitations}
+friction
+
+collision response (plane/bubble approximation)
+
+polyhedral mass properties
+
