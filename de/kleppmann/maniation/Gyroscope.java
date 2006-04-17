@@ -13,17 +13,19 @@ public class Gyroscope extends Cylinder {
 
     private World world;
     private Constraint nail;
-    private Quaternion initialOrientation = Quaternion.fromYRotation(0.2);
+    private Quaternion initialOrientation = Quaternion.fromYRotation(Math.PI/4.0);
     
     public Gyroscope(World world) {
-        super(new Vector3D(0, 0, 1), 4.0, 0.2, 1.0);
+        // rotation about axis: 20 per second
+        // expected precession: once in 8 seconds
+        super(new Vector3D(0, 0, 1), Math.sqrt(0.0981)/Math.PI, /*0.005*/ Math.sqrt(0.2943)/Math.PI, 0.1);
         this.world = world;
-        nail = new NailConstraint(world, this, new Vector3D(0, 0, -1), new Vector3D(0, 0, 0));
+        nail = new NailConstraint(world, this, new Vector3D(0, 0, -0.05), new Vector3D(0, 0, 0));
     }
 
     @Override
     protected Vector3D getInitialAngularMomentum() {
-        return initialOrientation.transform(new Vector3D(0, 0, 5));
+        return initialOrientation.transform(new Vector3D(0, 0, 0.1962/Math.PI));
     }
 
     @Override
@@ -33,7 +35,7 @@ public class Gyroscope extends Cylinder {
 
     @Override
     protected Vector3D getInitialPosition() {
-        return initialOrientation.transform(new Vector3D(0, 0, 1));
+        return initialOrientation.transform(new Vector3D(0, 0, 0.05));
     }
 
     @Override
