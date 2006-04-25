@@ -1,6 +1,7 @@
 function retval = plotpose(result)
 
     fixedbodies = 1;
+
   % restquat = [        % for articulated.xml
   %     -0.27060    -0.65328    0.65328     0.27060     0   % Bone1
   %     -0.70711    0.70711     0           0           1   % Bone2
@@ -62,21 +63,28 @@ function retval = plotpose(result)
   %     1           0           0   0  24
   % ]';
 
-    data = zeros(columns(result), 4*((rows(result)-1)/13 - fixedbodies) + 4);
+    inRowsPerSkel = 13*columns(restquat);
+    outRowsPerSkel = 3+4*columns(restquat);
+    skelCount = (rows(result) - 1 - 13*fixedbodies)/inRowsPerSkel;
+    data = zeros(columns(result), 1 + skelCount*outRowsPerSkel);
     data(:, 1) = result'(:, 1);
-    x = 13*fixedbodies+2;
-    data(:, 2:4) = result'(:, x:x+2);
-    for t=1:columns(result)
-        for b=1:((rows(result)-1)/13 - fixedbodies)
-            x = 13*(fixedbodies+b)-8;
-            q1 = result(x:x+3, t);
-            p = restquat(5, b);
-            if (p == 0) q0 = [1;0;0;0]; else
-                x = 13*(fixedbodies+p)-8;
-                q0 = result(x:x+3, t);
-            endif
-            r = restquat(1:4, b);
-            data(t, 4*b+1:4*b+4) = qmult(qinv(r), qmult(qinv(q0), q1))';
+    for skel = 1:skelCount
+        x = 13*fixedbodies + (skel-1)*inRowsPerSkel + 2;
+        y = (skel-1)*outRowsPerSkel + 5;
+        data(:, y-3:y-1) = result'(:, x:x+2);
+        for t=1:columns(result)
+            for b=1:columns(restquat)
+                xx = x + 13*(b-1);
+                q1 = result(xx+3:xx+6, t);
+                p = restquat(5, b);
+                if (p == 0) q0 = [1;0;0;0]; else
+                    xp = x + 13*(p-1);
+                    q0 = result(xp+3:xp+6, t);
+                endif
+                r = restquat(1:4, b);
+                yy = y + 4*(b-1);
+                data(t, yy:yy+3) = qmult(qinv(r), qmult(qinv(q0), q1))';
+            endfor
         endfor
     endfor
     
