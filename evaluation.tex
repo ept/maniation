@@ -77,6 +77,55 @@ to match the requirements, because more CPU time does~-- within sensible bounds~
 accuracy.
 
 
+\subsection{Collision handling}
+
+\begin{figure}
+\centerline{\input{figures/cradle}}
+\caption{Plot of various time-varying properties of Newton's cradle. Left column: using ideal,
+    fully elastic collisions ($\varepsilon = 1.0$). Right column: imperfect collisions
+    ($\varepsilon = 0.9$).\label{cradlePlots}}
+\end{figure}
+
+
+\subsection{Run-time cost}
+
+Profiling of the application revealed that the simulation spends about 93~\% of its time running
+the biconjugate gradient algorithm to solve the constraint equations. To round off the quantitative
+evaluation, I wanted to know how the computational cost relates to the size of the problem.
+
+The biconjugate gradient algorithm is an interative procedure which stops when some error
+criterion is met. In theory, if exact arithmetic was being used, a solution would always be found
+in $O(N)$ iterations for a system of $N$ constraints\footnote{or rigid bodies, but since we are
+dealing with articulated bodies, we can assume a linear dependence between the numbers of bodies
+and constraints.}~\cite{NRinC}. Each iteration requires a constant number of multiplications of a
+matrix with a vector. Such a multiplication has a cost of $O(N^2)$ for a general matrix, but only
+$O(N)$ for the type of sparse matrix we are dealing with. Hence a theoretical estimate of the
+overall cost of the algorithm would be $O(N\cdot N) = O(N^2)$.
+
+In practise, the algorithm converges more slowly when using floating-point arithmetic.
+I measured the ratio of CPU time to simulation time for a range of different-sized systems and
+found an overall relationship of about $O(N^{2.5})$. Note that the use of sparse matrices still
+causes a significant benefit, since a simpler implementation would require the same number of
+iterations and hence be about $O(N^{3.5})$. In absolute terms, a small simulation~-- of a
+double pendulum, say~-- runs almost in real-time on my PC\footnote{AMD Athlon(tm) XP 2000+},
+while one with Alfred and multiple resting contacts requires up to an hour of CPU time for one
+second of simulation time.
+
+
+\subsection{Numerical stability}
+
+I had very few problems with numerical stability throughout this project. The ODE solving turned
+out to be very robust; this is particularly satisfying since ODE stability would have been the
+greatest problem if a penalty method had been used instead of Lagrange multipliers
+(section~\ref{approachesToConstraints}). I very occasionally observed divergence of the biconjugate
+gradient algorithm; this seemed to occur only if there were contradictory constraints in the
+system. In complicated collision geometries such contradictions did sometimes occur. I solved this
+problem by keeping track of the approximate solution with the smallest error amongst all
+iterations; if the algorithm starts diverging, it is aborted and the `best guess' is used.
+This procedure is not mathematically justified, but in all my simulations it produced a good
+result.
+
+
 \section{Qualitative evaluation}
 
 
