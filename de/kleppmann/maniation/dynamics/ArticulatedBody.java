@@ -82,12 +82,12 @@ public class ArticulatedBody extends CompoundBody implements Collideable {
         if (info == null) return;
         RotationConstraint constr = null;
         if (Math.abs(info.getMaxExtreme() - info.getMinExtreme()) < 1e-6) {
-            constr = new RotationConstraint(null, child, axis, parent, 0);
+            constr = new RotationConstraint(null, child, axis, parent, 0, Simulation.ELASTICITY);
             parent.links.add(constr); child.links.add(constr);
         } else {
-            constr = new RotationConstraint(null, child, axis, parent, info.getMaxExtreme());
+            constr = new RotationConstraint(null, child, axis, parent, info.getMaxExtreme(), Simulation.ELASTICITY);
             parent.links.add(constr); child.links.add(constr);
-            constr = new RotationConstraint(null, child, axis, parent, info.getMinExtreme());
+            constr = new RotationConstraint(null, child, axis, parent, info.getMinExtreme(), Simulation.ELASTICITY);
             parent.links.add(constr); child.links.add(constr);
         }
     }

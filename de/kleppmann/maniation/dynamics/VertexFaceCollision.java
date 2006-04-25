@@ -15,18 +15,20 @@ public class VertexFaceCollision implements InequalityConstraint {
     private Body.State vertexBodyState, faceBodyState;
     private final Vector3D vertexWorld, facePoint, faceNormal;
     private Vector3D vertexLocal;
+    private final double elasticity;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
         t1, t2, t3, n1, n2, n3;
     private Map<GeneralizedBody, Matrix> jacMap, jacDotMap;
 
     // All vectors are in world coordinates!
     public VertexFaceCollision(Body vertexBody, Vector3D vertex,
-            Body faceBody, Vector3D facePoint, Vector3D faceNormal) {
+            Body faceBody, Vector3D facePoint, Vector3D faceNormal, double elasticity) {
         this.vertexBody = vertexBody;
         this.vertexWorld = vertex;
         this.faceBody = faceBody;
         this.facePoint = facePoint;
         this.faceNormal = faceNormal.normalize();
+        this.elasticity = elasticity;
     }
     
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
@@ -134,5 +136,9 @@ public class VertexFaceCollision implements InequalityConstraint {
         result.add(faceBody);
         result.add(vertexBody);
         return result;
+    }
+
+    public double getElasticity() {
+        return elasticity;
     }
 }

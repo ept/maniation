@@ -14,7 +14,7 @@ public class SphereEdgeCollision implements InequalityConstraint {
 
     private final Body sphereBody, edgeBody;
     private final Vector3D centre, point, direction;
-    private final double radius;
+    private final double radius, elasticity;
     private Body.State sphereBodyState, edgeBodyState;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
         s1, s2, s3, t1, t2, t3, d1, d2, d3;
@@ -22,10 +22,11 @@ public class SphereEdgeCollision implements InequalityConstraint {
     
     // All vectors are given in local coordinates
     public SphereEdgeCollision(Body sphereBody, Vector3D centre, double radius, 
-            Body edgeBody, Vector3D point, Vector3D direction) {
+            Body edgeBody, Vector3D point, Vector3D direction, double elasticity) {
         this.sphereBody = sphereBody; this.edgeBody = edgeBody;
         this.centre = centre; this.point = point; this.direction = direction.normalize();
         this.radius = radius;
+        this.elasticity = elasticity;
     }
 
     public boolean isInequality() {
@@ -242,5 +243,9 @@ public class SphereEdgeCollision implements InequalityConstraint {
         List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
         result.add(sphereBody); result.add(edgeBody);
         return result;
+    }
+
+    public double getElasticity() {
+        return elasticity;
     }
 }

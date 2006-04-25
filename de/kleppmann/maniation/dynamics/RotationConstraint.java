@@ -18,12 +18,13 @@ public class RotationConstraint implements InequalityConstraint {
     private final Vector3D normal;
     private final double limit;
     private final Quaternion restDifference;
+    private final double elasticity;
     private double n1, n2, n3, pw, px, py, pz, v1, v2, v3, qw, qx, qy, qz, w1, w2, w3;
     private Map<GeneralizedBody, Matrix> jacMap, jacDotMap;
 
     // normal is given in local coordinates of body1.
     // if body1State is null, normal is in world coordinates
-    public RotationConstraint(World world, Body body1, Vector3D normal, Body body2, double limit) {
+    public RotationConstraint(World world, Body body1, Vector3D normal, Body body2, double limit, double elasticity) {
         this.world = world;
         this.body1 = body1;
         this.body2 = body2;
@@ -33,6 +34,7 @@ public class RotationConstraint implements InequalityConstraint {
             this.restDifference = body1.getInitialState().getOrientation().getInverse().mult(
                     body2.getInitialState().getOrientation());
         else this.restDifference = new Quaternion();
+        this.elasticity = elasticity;
     }
     
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
@@ -168,5 +170,9 @@ public class RotationConstraint implements InequalityConstraint {
             0.5 *(x17*qz + x13*qy - x14*qx - x15*qw - x16*pw*qz) }};
         jacDotMap.put(body2, new MatrixImpl(m2));
         return jacDotMap;
+    }
+
+    public double getElasticity() {
+        return elasticity;
     }
 }

@@ -14,6 +14,7 @@ public class EdgeEdgeCollision implements InequalityConstraint {
     private final Body body1, body2;
     private Body.State body1State, body2State;
     private final Vector3D point1, direction1, point2, direction2;
+    private final double elasticity;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
             s1, s2, s3, t1, t2, t3, u1, u2, u3, v1, v2, v3, h;
     private Matrix jacB1, jacB2, jDotB1, jDotB2;
@@ -21,13 +22,14 @@ public class EdgeEdgeCollision implements InequalityConstraint {
     
     // All vectors are in world coordinates!
     public EdgeEdgeCollision(Body body1, Vector3D point1, Vector3D direction1,
-            Body body2, Vector3D point2, Vector3D direction2) {
+            Body body2, Vector3D point2, Vector3D direction2, double elasticity) {
         this.body1 = body1;
         this.point1 = point1;
         this.direction1 = direction1.normalize();
         this.body2 = body2;
         this.point2 = point2;
         this.direction2 = direction2.normalize();
+        this.elasticity = elasticity;
     }
     
     public void setStateMapping(Map<GeneralizedBody, GeneralizedBody.State> states) {
@@ -427,5 +429,9 @@ public class EdgeEdgeCollision implements InequalityConstraint {
         result.add(body1);
         result.add(body2);
         return result;
+    }
+
+    public double getElasticity() {
+        return elasticity;
     }
 }

@@ -12,9 +12,9 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class SphereSphereCollision implements InequalityConstraint {
     
-    private Body body1, body2;
-    private Vector3D centre1, centre2;
-    private double radius1, radius2;
+    private final Body body1, body2;
+    private final Vector3D centre1, centre2;
+    private final double radius1, radius2, elasticity;
     private Body.State body1State, body2State;
     private double a1, a2, a3, b1, b2, b3, ad1, ad2, ad3, bd1, bd2, bd3, w1, w2, w3, p1, p2, p3,
         s1, s2, s3, t1, t2, t3, d1, d2, d3, dd1, dd2, dd3;
@@ -22,10 +22,11 @@ public class SphereSphereCollision implements InequalityConstraint {
     
     // Sphere centres are given in local coordinates
     public SphereSphereCollision(Body body1, Vector3D centre1, double radius1, 
-            Body body2, Vector3D centre2, double radius2) {
+            Body body2, Vector3D centre2, double radius2, double elasticity) {
         this.body1 = body1; this.body2 = body2;
         this.centre1 = centre1; this.centre2 = centre2;
         this.radius1 = radius1; this.radius2 = radius2;
+        this.elasticity = elasticity;
     }
 
     public boolean isInequality() {
@@ -130,5 +131,9 @@ public class SphereSphereCollision implements InequalityConstraint {
         List<SimulationObject> result = new java.util.ArrayList<SimulationObject>();
         result.add(body1); result.add(body2);
         return result;
+    }
+
+    public double getElasticity() {
+        return elasticity;
     }
 }
