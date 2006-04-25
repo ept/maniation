@@ -1,6 +1,7 @@
 package de.kleppmann.maniation.maths;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 public class VectorImpl implements Vector {
 
@@ -17,6 +18,33 @@ public class VectorImpl implements Vector {
         if ((values == null) || (values.length == 0)) {
             this.values = new double[1];
             this.values[0] = 0.0;
+        }
+    }
+    
+    public VectorImpl(String filename) {
+        try {
+            List<Double> list = new java.util.ArrayList<Double>();
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(filename));
+            java.io.StreamTokenizer tok = new java.io.StreamTokenizer(reader);
+            tok.ordinaryChars('0', '9');
+            tok.ordinaryChar('.');
+            tok.ordinaryChar('-');
+            tok.wordChars(0x0021, 0x00ff);
+            tok.whitespaceChars(0x0000, 0x0020);
+            tok.commentChar('#');
+            tok.eolIsSignificant(true);
+            while (true) {
+                int token = tok.nextToken();
+                if (token == java.io.StreamTokenizer.TT_EOF) break;
+                if ((token == java.io.StreamTokenizer.TT_EOL) && (list.size() > 0)) break;
+                if (token == java.io.StreamTokenizer.TT_NUMBER) list.add(tok.nval);
+                if (token == java.io.StreamTokenizer.TT_WORD)
+                    list.add(Double.parseDouble(tok.sval));
+            }
+            values = new double[list.size()];
+            for (int i=0; i<values.length; i++) values[i] = list.get(i);
+        } catch (java.io.IOException e) {
+            this.values = null;
         }
     }
 
