@@ -10,5 +10,9 @@ function retval = plotrot(result, zero, normal)
         endfor
     endfor
 
+    retval = zeros(rows(data), columns(data) + 1);
+    retval(:, 1) = result'(:, 1);
+    retval(:, 2:columns(retval)) = data(:, 1:columns(data));
+
     plot(result'(:,1), data);
 endfunction
