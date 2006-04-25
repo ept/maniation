@@ -18,6 +18,7 @@ public interface GeneralizedBody extends SimulationObject {
         State applyPosition(Map<Body, Vector3D> newPositions);
         double getEnergy();
         GeneralizedBody getOwner();
+        State load(Vector input);
         State mult(double scalar);
         State add(Vector v);
         State subtract(Vector v);

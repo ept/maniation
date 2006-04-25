@@ -222,4 +222,20 @@ public class StateVector extends SlicedVector<GeneralizedBody.State> implements 
     public GeneralizedBody getOwner() {
         return owner;
     }
+
+    public StateVector load(Vector input) {
+        if (input.getDimension() != this.getDimension()) throw new IllegalArgumentException();
+        GeneralizedBody.State[] newStates = new GeneralizedBody.State[bodies.length];
+        double[] arr = new double[getDimension()];
+        input.toDoubleArray(arr, 0);
+        int offs = 0;
+        for (int i=0; i<bodies.length; i++) {
+            GeneralizedBody.State state = getSlice(i);
+            double[] subarr = new double[state.getDimension()];
+            for (int j=0; j<subarr.length; j++) subarr[j] = arr[offs+j];
+            newStates[i] = state.load(new VectorImpl(subarr));
+            offs += state.getDimension();
+        }
+        return new StateVector(owner, bodies, newStates, false);
+    }
 }

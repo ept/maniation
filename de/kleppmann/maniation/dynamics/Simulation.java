@@ -19,11 +19,14 @@ import de.kleppmann.maniation.maths.VectorImpl;
 
 public class Simulation {
     
-    public static final double RESTING_TOLERANCE = 0.001;
-    public static final double PENETRATION_TOLERANCE = 0.005;
-    public static final double ELASTICITY = 0.2;
-    public static final double FRAMES_PER_SECOND = 120.0;
+    public static final double RESTING_TOLERANCE = 1e-9;
+    public static final double PENETRATION_TOLERANCE = 5e-9;
+    public static final double ELASTICITY = 1.0;
+    public static final double FRAMES_PER_SECOND = 100.0;
     public static final boolean ENABLE_FUDGE = false;
+    public static final boolean ENABLE_CONTINUATION = false;
+    public static final double CONTINUATION_TIME = 3.78;
+    public static final String CONTINUATION_FILE = "/home/martin/graphics/maniation/matlab/restart";
     
     private World world = new World();
     private SimulationObject.State worldState = world.getInitialState();
@@ -54,16 +57,22 @@ public class Simulation {
     }
     
     public void run(double time) {
+        double startTime = 0;
         // Set up compound body
         compoundBody = new CompoundBody(world, bodies.toArray(new GeneralizedBody[bodies.size()]));
         GeneralizedBody.State initialState = compoundBody.getInitialState();
+        if (ENABLE_CONTINUATION) {
+            initialState = initialState.load(new VectorImpl(CONTINUATION_FILE));
+            startTime = CONTINUATION_TIME;
+        }
         log.clear();
-        log.add("0.0 " + initialState.toString());
+        log.add(startTime + " " + initialState.toString());
         // Initialize ODE solver
         RungeKutta solver = new RungeKutta(new DifferentialEquation(), 1.0/FRAMES_PER_SECOND);
         solver.setMaxTimeStep(1.0/FRAMES_PER_SECOND);
+        //solver.setMaxTimeStep(0.2/FRAMES_PER_SECOND);
         // Run simulation
-        solver.solve(0.0, time);
+        solver.solve(startTime, time);
         // Write results to file
         writeLog("javadata", initialState.getDimension() + 1, log);
     }
@@ -123,9 +132,9 @@ public class Simulation {
             il.compileConstraints(state, constrs);
             double[] el = new double[il.getPenalty().getDimension()];
             for (int i=0; i<el.length; i++) el[i] = 1.0;
-            for (Constraint c : il.getCollidingContacts()) {
+            for (InequalityConstraint c : il.getCollidingContacts()) {
                 int offset = il.getConstraintOffset(c);
-                for (int i=0; i<c.getDimension(); i++) el[i+offset] = 1.0 + ELASTICITY;
+                for (int i=0; i<c.getDimension(); i++) el[i+offset] = 1.0 + c.getElasticity();
             }
             // Set up Lagrange multiplier equation and solve it
             Vector rhs = (new VectorImpl(el)).multComponents(
@@ -226,6 +235,7 @@ public class Simulation {
 
         public Vector getInitial() {
             StateVector state = compoundBody.getInitialState();
+            if (ENABLE_CONTINUATION) state = state.load(new VectorImpl(CONTINUATION_FILE));
             interactions = new InteractionList();
             compoundBody.interaction(state, worldState, interactions, true);
             interactions.classifyConstraints(state);
@@ -275,7 +285,6 @@ public class Simulation {
             }
             lastCompleted = state;
             lastCompletedTime = time;
-            //System.out.println("Total energy: " + compoundBody.getEnergy());
         }
     }
 }

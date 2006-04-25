@@ -204,6 +204,17 @@ public abstract class RigidBody implements Body {
             return accel2;
         }
 
+        public RigidBody.State load(Vector input) {
+            if (input.getDimension() != 13) throw new IllegalArgumentException();
+            double[] arr = new double[13];
+            input.toDoubleArray(arr, 0);
+            Vector3D pos = new Vector3D(arr[0], arr[1], arr[2]);
+            Quaternion orient = new Quaternion(arr[3], arr[4], arr[5], arr[6]);
+            Vector3D mom = new Vector3D(arr[7], arr[8], arr[9]);
+            Vector3D angmom = new Vector3D(arr[10], arr[11], arr[12]);
+            return new State(pos, orient, mom, angmom, false);
+        }
+
         public State add(Vector v) {
             if (!(v instanceof State)) throw new IllegalArgumentException();
             // If we are performing an integration step, v2 should be the derivative.
