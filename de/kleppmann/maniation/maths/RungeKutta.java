@@ -6,7 +6,7 @@ public class RungeKutta implements ODESolver {
     
     private ODE ode;
     private double time;
-    private double h, hnew, hmin = 0.00001, hmax = 0.1, eps = 1e-6, errorOffset = 0.01, safety = 0.9;
+    private double h, hnew, hmin = 1e-7, hmax = 0.1, eps = 1e-8, errorOffset = 0.01, safety = 0.9;
     private double shrinkPower = -0.25, growPower = -0.2;
     private Vector status, error;
     private boolean colliding = false;
@@ -98,7 +98,7 @@ public class RungeKutta implements ODESolver {
         while (time + hmin < finishTime) {
             if (time + h > finishTime) h = finishTime - time;
             try {
-                boolean allowBacktrack = false;//(h >= 1.1*hmin);
+                boolean allowBacktrack = (h >= 1.1*hmin);
                 status = ode.timeStep(time + h, calcStep(allowBacktrack), allowBacktrack);
                 if (allowBacktrack) System.out.println("completed.");
                 else System.out.println("completed (penetration ignored).");
