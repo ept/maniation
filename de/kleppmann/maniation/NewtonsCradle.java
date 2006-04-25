@@ -164,5 +164,9 @@ public class NewtonsCradle {
             result.put(ball2, ball2State.getCoMPosition().subtract(d));
             return result;
         }
+
+        public double getElasticity() {
+            return Simulation.ELASTICITY;
+        }
     }
 }

@@ -53,15 +53,15 @@ public class Centrifuge extends Cylinder {
         sphere.interactions = new java.util.HashMap<SimulationObject,Interaction[]>();
         Interaction[] cyl = {
             new NailConstraint(sim.getWorld(), cylinder, new Vector3D(0, 0, 0), new Vector3D(0, 0, 0)),
-            new RotationConstraint(sim.getWorld(), null, new Vector3D(1,0,0), cylinder, 0),
-            new RotationConstraint(sim.getWorld(), null, new Vector3D(0,1,0), cylinder, 0),
+            new RotationConstraint(sim.getWorld(), null, new Vector3D(1,0,0), cylinder, 0, 0),
+            new RotationConstraint(sim.getWorld(), null, new Vector3D(0,1,0), cylinder, 0, 0),
             new AcceleratingTorque(sim.getWorld(), cylinder)
         };
         cylinder.interactions.put(sim.getWorld(), cyl);
         Interaction[] sph = {
             new JointConstraint(cylinder, new Vector3D(0, 0.7, 3), sphere, new Vector3D(0, 0, 0.8)),
-            new RotationConstraint(sim.getWorld(), cylinder, new Vector3D(0,1,0), sphere, 0),
-            new RotationConstraint(sim.getWorld(), cylinder, new Vector3D(0,0,1), sphere, 0)
+            new RotationConstraint(sim.getWorld(), cylinder, new Vector3D(0,1,0), sphere, 0, 0),
+            new RotationConstraint(sim.getWorld(), cylinder, new Vector3D(0,0,1), sphere, 0, 0)
         };
         cylinder.interactions.put(sphere, sph);
         sphere.interactions.put(cylinder, sph);
