@@ -48,6 +48,7 @@ public class ArticulatedLimb extends AnimateMesh {
         baseCurrent = baseCurrent.add(orientCurrent.transform(local));
         orientCurrent = orientCurrent.mult(bone.getOrientation().getValue());
         if (bone.getPose() != null) orientCurrent = orientCurrent.mult(bone.getPose().getValue());
+        updateBubbles();
     }
     
     public Vector3D currentVertexPosition(Vector3D pos) {
