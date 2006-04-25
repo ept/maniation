@@ -15,13 +15,13 @@ indistinguishable even to experts, thus opening up a whole range of new artistic
 Currently computer animation still involves a large amount of manual effort, despite commonly
 being termed ``computer generated''. It is said that in large-budget film productions every single
 frame is edited by hand, and many animations are completely handcrafted. There are artistic
-reasons for this~-- sometimes an animation is deliberately required to be physically impossible
-to achieve a special effect~-- and also economic reasons (animators are cheaper to hire than
+reasons for this (sometimes an animation is deliberately required to be physically impossible
+to achieve a special effect), and also economic reasons (animators are cheaper to hire than
 computer scientists). However, as the complexity of animated scenes increases, manual animation
 becomes unfeasible. Large crowds, fluids, cloths and some types of deformable bodies are therefore
 commonly animated using simulation techniques.
 
-Unfortunately such scenes with an unbounded number degrees of freedom are difficult to simulate
+Unfortunately such scenes with an unbounded number of degrees of freedom are difficult to simulate
 well. Fluid dynamics is very complicated and a subject of ongoing research; the physics of
 deformable bodies (so-called ``soft matter'') is not even completely understood. Graphical
 simulations in these areas tend to resort to means which look good but are physically meaningless.
@@ -108,7 +108,7 @@ initial conditions and a set of constraints. Hence this project can be broken in
     section~\ref{solvingODEs}.
 \item An implementation of the equations of motion for rigid bodies. This is standard physics but
     has some implementation quirks. See sections~\ref{rigidBodyDynamics} and~\ref{quaternions}.
-\item Algorithms to ensure the correct handling of articulated bodies. This is by far the most
+\item Algorithms to ensure the correct handling of articulated bodies. This is probably the most
     challenging part of the project. See sections~\ref{constraints} and~\ref{articulatedBodies}.
 \item Detection of collision between bodies. A vast amount of research has been done in this area,
     and most algorithms are concerned with speed. However, since run-time efficiency is not my
