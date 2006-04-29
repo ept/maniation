@@ -9,7 +9,7 @@ I anticipated that testing and debugging would be necessary.
 
 As mentioned in section~\ref{engineering}, I prototyped most numerical algorithms in
 \textsl{Octave} which allowed rapid interpretation of results through its plotting facilities,
-and hence a very rapid edit--test--debug cycle. For each major algorithmic part of the project
+and hence a rapid edit--test--debug cycle. For each major algorithmic part of the project
 I modelled a physical system which placed a particular emphasis on one part of the simulation,
 thus allowing me to test and debug each feature before working on the next feature:
 \begin{itemize}
@@ -19,11 +19,11 @@ thus allowing me to test and debug each feature before working on the next featu
 \item a simulation of boxes falling onto a table to test resting contact handling.
 \end{itemize}
 
-Only after each feature was working to satisfaction in \textsl{Octave} did I develop the Java
-version, which usually introduced a range of new bugs. To find these, I implemented the same
-test cases in Java, and used step-by-step comparison of the Java results with the \textsl{Octave}
-results. This testing and debugging strategy proved very fruitful and I was glad to have the
-prototype as a reference.
+I developed the \textsl{Java} version of each feature only after it was working to satisfaction in
+the \textsl{Octave} prototype. The \textsl{Java} implementation usually introduced new bugs, which
+I could locate by implementing the same test cases in \textsl{Java}, and using step-by-step
+comparison with the \textsl{Octave} computation. This testing and debugging strategy turned out
+to be fruitful and effective.
 
 
 \section{Quantitative evaluation}
@@ -54,11 +54,11 @@ in 8 seconds). I then ran the simulation for 8~s, using an average time step len
 $2.3\cdot 10^{-4}$~s. The simulation performed one full circle of precession in 7.953~s, which
 is within 0.6~\% of the theoretical value. Over the course of 8~s, the body rotated by $320.36\pi$
 radians about its own axis (160.18 revolutions), which differs from the theoretical value by only
-0.1~\%. These errors varied very little even in simulations using larger time steps.
+0.1~\%. These errors varied little even in simulations using larger time steps.
 The effects of nutation~\cite{Feynman:63} were small for the chosen initial conditions but may
 have contributed towards the errors.
 
-These results are very encouraging, but is interesting to also observe a different error, namely
+These results are encouraging, but is interesting to also observe a different error, namely
 the amount by which the constraint drifts apart. Usually this drift is compensated in the Lagrange
 multiplier method so that it never manifests itself, but temporarily deactivating this
 correction\footnote{by setting $k=d=0$ in equation~\ref{lagrangeEquation}.} makes the error
@@ -107,7 +107,7 @@ accuracy.
 The analysis in the last section is relevant for continuous systems, but says nothing about
 simulations involving collisions. For this purpose I simulated a different kind of physics toy,
 \emph{Newton's cradle} (figure~\ref{cradleFigure}). This system does not have an exact analytical
-solution, but very characteristic behaviour that may be observed.
+solution, but it does have characteristic behaviour patterns that may be observed.
 
 \begin{figure}
 \centerline{\includegraphics{figures/cradle}}
@@ -173,7 +173,7 @@ second of simulation time.
 I had very few problems with numerical stability throughout this project. The ODE solving turned
 out to be very robust; this is particularly satisfying since ODE stability would have been the
 greatest problem if a penalty method had been used instead of Lagrange multipliers
-(section~\ref{approachesToConstraints}). I very occasionally observed divergence of the biconjugate
+(section~\ref{approachesToConstraints}). I occasionally observed divergence of the biconjugate
 gradient algorithm; this seemed to occur only if there were contradictory constraints in the
 system. In complicated collision geometries such contradictions did sometimes occur. I solved this
 problem by keeping track of the approximate solution with the smallest error amongst all
@@ -185,9 +185,42 @@ This procedure is not mathematically justified, but in all my simulations it pro
 
 In the end, the purpose of this project is to produce animations for computer graphics, and the
 last word must be given to the human observer who watches these animations. Some sample output
-from my program is given in appendix~\ref{samples}. Unfortunately, animations are notoriously hard
-to display in print; the flickbook in the corner of this dissertation is an attempt to this end.
-For a more useful qualitative impression I have provided a CDROM of video files with this
-dissertation; alternatively they may be obtained from the project web site
-\texttt{http://www.maniation.com/}. I suggest that the reader should watch these videos to gain
-a more personal impression of this project's results.
+from my program is given in figures~\ref{sampleCradle} to~\ref{sampleSpiral}. Unfortunately,
+animations are notoriously hard to display in print; the flickbook in the corner of this
+dissertation is an attempt to this end. For a more useful qualitative impression I have provided
+a CDROM of video files with this dissertation; alternatively they may be obtained from the
+project web site \texttt{http://www.maniation.com/}. I suggest that the reader should watch
+these videos to gain a more personal impression of this project's results.
+
+\begin{figure}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/cradle1} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/cradle2}}\vspace{5mm}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/cradle3} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/cradle4}}
+\caption{Animation of Newton's cradle. Each ball is joined to the frame with a `nail'
+    constraint.\label{sampleCradle}}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/boxes1} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/boxes2}}\vspace{5mm}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/boxes3} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/boxes4}}
+\caption{Animation of ten boxes falling onto a table.\label{sampleBoxes}}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/stairs1} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/stairs2}}\vspace{5mm}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/stairs3} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/stairs4}}
+\caption{Animation of Alfred falling down a set of stairs.\label{sampleStairs}}
+\end{figure}
+
+\begin{figure}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/spiral1} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/spiral2}}\vspace{5mm}
+\centerline{\includegraphics[width=60mm,height=45mm]{figures/spiral3} \hspace{5mm}
+            \includegraphics[width=60mm,height=45mm]{figures/spiral4}}
+\caption{Animation of Alfred tumbling down a spiral staircase.\label{sampleSpiral}}
+\end{figure}
