@@ -1,18 +1,21 @@
 \section{Collision detection\label{collisionDetection}}
 
+I now turn to the fourth main component of the system (as listed in section~\ref{introOverview}).
+An important requirement of the simulation is that bodies must not penetrate each other. In order
+to enforce this constraint, the program must first be able to detect penetration.
+
 \subsection{Intersection of triangle meshes\label{meshIntersection}}
 
-Before any dynamic interaction between bodies can be tackled, a simulation needs to know which
-meshes are geometrically in contact, and what type of contact is present. This is the subject
-of collision detection. The simplest algorithm for this purpose would be to take each triangle
+Collision detection determines which meshes are geometrically in contact, and what type of contact
+is present. The simplest algorithm for this purpose would be to take each triangle
 of one mesh and test it for intersection~\cite{Moeller:97} against each triangle of the other
 mesh. This $O(N^2)$ algorithm is clearly very inefficient; most research in collision detection
-endeavours to create algorithms which are as close as possible to $O(1)$ complexity, but
-semantically equivalent.
+endeavours to create algorithms which are as close as possible to $O(1)$ complexity while
+remaining semantically equivalent.
 
 Fast computation is only a minor concern in this project, therefore I shall describe my solution
-only very briefly. This algorithm was suggested by Brett Saunders and is simpler than most
-published algorithms, but still very effective.
+only briefly. This algorithm was suggested by Dr.~Breton Saunders~\cite{Saunders} and is
+simpler than most published algorithms, but nevertheless effective.
 
 For each mesh, the closest-fitting Axis-Aligned Bounding Box (AABB) is computed. The set of
 triangles is split approximately in half along the axis of the longest bounding box side, and
@@ -25,7 +28,7 @@ tree of bounding boxes (see figure~\ref{collisionVolumes}).
 \caption{Example tree of axis-aligned bounding boxes (AABBs).\label{collisionVolumes}}
 \end{figure}
 
-AABBs can very efficiently be tested for intersection. To determine whether two meshes are in
+AABBs can efficiently be tested for intersection. To determine whether two meshes are in
 contact, the boxes at the roots of their AABB trees are tested against each other. If the boxes
 intersect, all four pairings of their immediate children are tested. This procedure continues
 recursively as long as the boxes intersect. At the leaves of the tree, the actual triangles are
@@ -40,13 +43,13 @@ impact using proximity detection and the bodies' velocities. I take a simpler ap
 some time, meshes have penetrated beyond some tolerance threshold, the current simulation step
 is discarded and retried using a smaller step length.
 
-Retrying a step is quite expensive, so it is desirable to find the time of first contact with very
-few retries. The depth of penetration can usually be estimated from the collision geometry, and
-the velocities of the bodies are known from the simulation. Hence I can use the Newton-Raphson
-algorithm~\cite{NRinC} for root finding (see figure~\ref{collisionTime}) to make a good guess at
-the next step size. This method converges very rapidly in most cases, but occasionally it is
-unstable, so my program resorts to binary search~\cite{Sedgewick:83} if the results of
-Newton-Raphson seem erratic.
+Retrying a step is quite expensive, so it is desirable to find the time of first contact with a
+minimum number of retries. The depth of penetration can usually be estimated from the collision
+geometry, and the velocities of the bodies are known from the simulation. Hence I can use the
+Newton-Raphson algorithm~\cite{NRinC} for root finding (see figure~\ref{collisionTime}) to make
+a good guess at the next step size. This method converges rapidly in most cases, but
+occasionally it is unstable, so my program automatically resorts to binary
+search~\cite{Sedgewick:83} if Newton-Raphson diverges or converges too slowly.
 
 \begin{figure}
 \psfrag{frag:0}{$0$}
@@ -64,16 +67,23 @@ Newton-Raphson seem erratic.
 
 We are now in a state where the polygon meshes are in non-penetrative contact, i.e.\ there is some
 intersection between their surfaces, but the intersection of their volumes is very small or zero.
-Between polyhedral bodies we can identify several basic types of contact, two of which~--
-\emph{vertex/face} and \emph{edge/edge} contact~-- are shown in figure~\ref{contacts1Figure}.
+Between polyhedral bodies we can identify several basic types of contact, and the most common~--
+\emph{vertex/face} and \emph{edge/edge} contact~-- are exemplified in figure~\ref{contacts1Figure}.
+I have derived expressions for handling these two types of contact in
+appendices~\ref{vertexFaceConstraint} and~\ref{edgeEdgeConstraint}.
 
-There are some more basic types of contact, like vertex/vertex contacts, but these occur only in
-corner cases and can be approximated by other types of contact. Much more common is to have
-several basic contacts occurring simultaneously, as shown in figure~\ref{contacts2Figure}. Bodies
-may be concave, therefore the set of simultaneous contacts can become quite complicated. I would
-like to claim that it is nevertheless possible to decompose an arbitrary collision geometry into
-vertex/face and edge/edge contacts; however, I have not yet succeeded in backing up this claim
-with a proof or in finding any research literature on this question.
+There are many other types of contact which occur, particularly when complicated meshes
+collide. It is unclear how these might best be handled; regrettably I could not find any results
+of research in this area. It seems intuitively plausible that it might be possible to compose any
+contact between polyhedral bodies into a set of vertex/face and edge/edge contacts, as
+figure~\ref{contacts2Figure} demonstrates. However, no such algorithm is known to me, and my own
+attempts at creating one turned out to be unfruitful~-- the problem is extraordinarily difficult
+to tackle in general.
+
+Instead, I chose to use a heuristic if a collision cannot be classified as either vertex/face or
+edge/edge: the colliding surfaces are approximated by spheres, planes and points, for which
+handling expressions can be derived. This approximation can cause unrealistic behaviour in some
+cases, but I have not found it to be a problem in practise.
 
 \begin{figure}
 \centerline{\includegraphics{figures/contacts1}}
@@ -89,22 +99,18 @@ with a proof or in finding any research literature on this question.
     \label{contacts2Figure}}
 \end{figure}
 
-Lacking a general algorithm to decompose contacts, my simulation only checks whether exactly one
-vertex/face contact or one edge/edge contact is present (this can be done quite easily). If the
-geometry does not match either, it is approximated by a single vertex/face contact. This
-approximation can cause unrealistic behaviour in some cases, but I have not found it to be a
-problem in practise.
-
 
 \section{Collision and contact handling\label{collisionHandling}}
 
 \subsection{Overview}
 
+In the last section I explained how to detect contact between meshes. To prevent the bodies from
+penetrating each other during the simulation, the collision that has been detected must be
+handled in a physical way.
+
 In all parts of the simulation discussed up to and including section~\ref{articulatedBodies}, the
 acceleration was a continuous function of time; but collisions introduce discontinuities. These
-discontinuities occur at the instant of first contact, and section~\ref{findingContactTime}
-explained how to determine this point in time. I shall now consider the simulation state only at
-this time of contact.
+discontinuities occur at the instant of first contact.
 
 Let us distinguish two cases of contact between bodies: resting contact and colliding contact.
 A book lying on a table is in resting contact with the surface: their relative velocity is zero,
@@ -157,7 +163,7 @@ More exactly, if it is the case that $\ddot{c} < 0$, we need to apply forces and
 to the bodies such that afterwards we have $\ddot{c} = 0$. But when
 $\ddot{c} \ge 0$, no force is applied (otherwise we would be glueing the book to the
 table). But how do we solve this inequality in practise? At this point we diverge from Baraff's
-method~\cite{BaraffWitkin:97}, who expresses equation~\ref{constrInequality} and additional
+method~\cite{BaraffWitkin:97}, which expresses equation~\ref{constrInequality} and additional
 side conditions as a ``quadratic program'' and uses a specialized numerical solver.
 
 Let us take a much simpler approach and pretend for now that equation~\ref{constrInequality}
@@ -191,8 +197,8 @@ will break in the next time step), then repeat the solving for \ve{\lambda} with
 of constraints. The process may take several iterations before terminating, but always terminates
 because in each iteration we either reduce the number of active constraints or exit.
 
-I have not yet been successful in proving this algorithm correct, but despite extensive pondering
-I have not found any examples in which it fails either.
+I have not yet been successful in proving this novel algorithm correct, but despite extensive
+pondering I have not found any examples in which it fails either.
 
 \subsection{Colliding contact\label{collidingContact}}
 
@@ -311,7 +317,7 @@ occurs, the system will eventually run out of energy and return to a resting con
 
 In section~\ref{angleLimitation} I mentioned that the simulation still needed a way of limiting
 the range of valid angles for a joint of an articulated body. I could not find any literature
-explaining how one might realize such a constraint, but I was very excited to notice one day that
+explaining how one might realize such a constraint, but I was excited to notice one day that
 I already had all the tools in hand, and merely needed to combine them.
 
 An angle limitation is simply another type of inequality constraint. Usually two constraints are
@@ -342,7 +348,7 @@ myself a little program for this task (figure~\ref{jointLimit}) and used it to s
 limits for Alfred's skeleton.
 
 \begin{figure}
-\centerline{\scalebox{0.32}{\includegraphics{figures/jointlimit}}}
+\centerline{\includegraphics[width=120mm,height=70.54mm]{figures/jointlimit}}
 \caption{Screenshot of a tool to visualize the solution space of simultaneous inequalities in
     three variables (here, the rotation about three different axes). If a point in the solution
     space is selected, the three angles of rotation corresponding to this point are applied to the

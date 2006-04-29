@@ -136,30 +136,13 @@ its four components separately. However, when this is done it is observed that t
 $\q{q}'$ no longer has unit magnitude. This is an inherent property of the definition in
 equation~\ref{quatRateOfChange}, and not, as sometimes claimed~\cite{Eberly:04}, merely a matter
 of numerical round-off (proof in appendix~\ref{quatIntegrationMagnitude}). Usually this problem
-is `solved' by normalizing the quaternion:
+is `solved' by renormalizing the quaternion:
 \begin{equation}
 \q{q}(t + h) = \frac{\q{q}'}{\norm{\q{q}'}} \quad\quad\mathrm{where}\quad
     \q{q}' = \q{q}(t) + h\dot{\q{q}}(t)
 \end{equation}
 (using Euler's method for clarity; $\q{q}'$ would be appropriately redefined when using e.g.\ RK4).
-This `solution' seemed quite \textsl{ad hoc} to me, and I indeed showed that it returns a
-completely wrong result if the angular velocity is large (see appendix~\ref{quatNormalization}).
-
-To obtain the correct result, the ODE solver must be modified. Whenever it calculates the sum of
-a quaternion and a scaled derivative, as in $\q{q}(t) + h\dot{\q{q}}(t)$, we replace the summation
-by $\mathrm{Quergs}(\q{q}(t), h\dot{\q{q}}(t))$, where $\mathrm{Quergs}$ is the
-\emph{Qu}at\emph{er}nion inte\emph{g}ration \emph{s}tep\footnote{This naming follows the spirit of
-Shoemake~\cite{Shoemake:85}, whose ``Slerp'' function is an `acronym' of \emph{S}pherical
-\emph{l}inear int\emph{erp}olation.}:
-\begin{equation}
-\label{quergs}
-\mathrm{Quergs}(\q{q}, \Delta\q{q}) =
-    \frac{\q{q} + \tan\left(\norm{\Delta\q{q}}\right)
-        \frac{\Delta\q{q}}{\norm{\Delta\q{q}}}}{
-    \sqrt{\norm{\q{q}}^2 + \tan^2\left(\norm{\Delta\q{q}}\right)}}
-\end{equation}
-
-This formula is derived in appendix~\ref{quatIntegrationDerivation} and applied to the RK4
-algorithm in appendix~\ref{quergsRK4}. It ensures that the resulting quaternion has unit magnitude
-and is correct even at high velocities. I have not come across anything like it in the literature
-I have searched, and hence have some grounds to believe it may be new.
+This `solution' seemed quite \textsl{ad hoc} to me, and I demonstrated that it returns
+erroneous results if the angular velocity is large (see appendix~\ref{quatNormalization}).
+However, the errors turned out to be insignificant in practise, and hence it is sufficient to
+modify the ODE solver such that it renormalizes all quaternions after each simulation step.

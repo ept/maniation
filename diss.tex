@@ -1,10 +1,11 @@
-\documentclass[twoside,notitlepage]{report}
+\documentclass[11pt,a4paper,twoside,notitlepage]{report}
 \usepackage{a4}
 \usepackage{bm}
 \usepackage[british]{babel}
 \usepackage{graphicx}
 \usepackage{psfrag}
 \usepackage{ifthen}
+\headheight 14pt
 \bibliographystyle{plain}
 \newcommand{\diff}{\ensuremath{\mathrm{d}}}     % Differential d (for differential operators)
 \newcommand{\norm}[1]{\ensuremath{|#1|}}        % Magnitude/Norm
@@ -76,7 +77,7 @@ Name:               & Martin Kleppmann \\
 College:            & Corpus Christi College \\
 Project Title:      & Rigid body simulation for 3D character animation \\
 Examination:        & Computer Science Tripos, June 2006 \\
-Word Count:         & 12155%WORDCOUNT%
+Word Count:         & 13029%WORDCOUNT%
 \footnotemark[1]\\
 Project Originator: & Martin Kleppmann \\
 Supervisor:         & Dr Neil Dodgson \\
@@ -94,12 +95,12 @@ so the character must not move in an anatomically or physically impossible way.
 
 \section*{Work Completed}
 A general-purpose simulation for a wide range of mechanical systems has been developed and tested
-on various examples. While it correctly handles the dynamics of articulated characters, as
-required, it also supports many other systems of interacting rigid bodies. All physical effects
+on various examples. It correctly handles the dynamics of articulated characters, as required,
+and it also supports many other systems of interacting rigid bodies. All physical effects
 of rigid bodies have been implemented except for friction. The simulation results show a good
 agreement with the exact solutions for simple systems, and more complicated systems have been
-judged by survey. Several algorithms for different aspects of the simulation were newly invented
-in this project.
+judged qualitatively. Several algorithms for different aspects of the simulation were newly
+invented in this project.
 
 \section*{Special Difficulties}
 None.
@@ -130,11 +131,11 @@ material that has already been used to any substantial extent for a comparable p
 \input{simulation}
 \input{quaternions}
 \input{constraints}
+\input{articulated}
 \input{software}
 \chapter{Implementation}
-\input{articulated}
-\input{collision}
 \input{implement}
+\input{collision}
 \chapter{Evaluation}
 \input{evaluation}
 \chapter{Conclusions}
@@ -142,7 +143,18 @@ material that has already been used to any substantial extent for a comparable p
 \newpage\addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{diss}
 \begin{appendix}
-\input{samples}
+% Set 10pt font
+\renewcommand{\tiny}{\fontsize{5}{6}\selectfont}
+\renewcommand{\scriptsize}{\fontsize{7}{8}\selectfont}
+\renewcommand{\footnotesize}{\fontsize{8}{9.5}\selectfont}
+\renewcommand{\small}{\fontsize{9}{11}\selectfont}
+\renewcommand{\normalsize}{\fontsize{10}{12}\selectfont}
+\renewcommand{\large}{\fontsize{12}{14}\selectfont}
+\renewcommand{\Large}{\fontsize{14.4}{18}\selectfont}
+\renewcommand{\LARGE}{\fontsize{17.28}{22}\selectfont}
+\renewcommand{\huge}{\fontsize{20.74}{25}\selectfont}
+\renewcommand{\Huge}{\fontsize{24.88}{30}\selectfont}
+\normalsize
 \chapter{Proofs and derivations}
 All work presented in this appendix is my original work. I am not aware of similar derivations
 having been published already, except where bibliographical references are given.

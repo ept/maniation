@@ -26,7 +26,7 @@ There are various strategies for simulating articulated bodies:
     along these lines is \emph{Lagrangian mechanics}~\cite{Hand:98,Goldstein:80} which is
     commonly used in physics, but alternatives are described in~\cite{Wilhelms:91}
     and~\cite{Featherstone:87}.
-    These algorithms have in common that they allow very fast and reliable computation. However,
+    These algorithms have in common that they allow efficient and reliable computation. However,
     the functions to transform the coordinates must be determined analytically, and this becomes
     very hard or impossible for complicated systems, so the method does not scale or generalize
     well. And even if the equations can be solved, these methods are limited to so-called
@@ -43,13 +43,13 @@ There are various strategies for simulating articulated bodies:
     \emph{Lagrange multipliers} we can determine what forces must be applied to the bodies to
     nullify this unwanted acceleration before it ever occurs. This compromise comes at the expense
     of higher computational cost, because systems of linear equations have to be solved at
-    run-time. Note that despite the similarity in name, this method has very little in common with
+    run-time. Note that despite the similarity in name, this method has little in common with
     Lagrangian mechanics.
 \end{itemize}
 
 I chose to use Lagrange multiplier constraints to implement articulated body dynamics in this
-project, because the algorithm is very general-purpose and can, for example, be adapted to handle
-some types of non-holonomic constraint.
+project, because the algorithm is physically accurate and can be adapted to handle some types of
+non-holonomic constraint (section~\ref{collisionHandling}).
 The mathematical formulation of Lagrange multipliers is derived in~\cite{BaraffWitkin:97} and
 extended in~\cite{Saunders:PhD} (also see~\cite{Baraff:96} for an optimized algorithm),
 therefore I shall only state the results here.

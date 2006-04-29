@@ -1,15 +1,7 @@
-In section~\ref{introOverview}, six core components of this project were identified. The first
-two, ODE solving and rigid body dynamics, were introduced in the last chapter. In this chapter
-I shall leave the solid ground of textbook material and delve into some less well-known methods.
-I have already discussed how to formulate constraints, so we can now put together constraints
-and rigid bodies to create articulated bodies in section~\ref{articulatedBodies}. Then I will
-explore how to detect and handle collisions and contacts between bodies in
-sections~\ref{collisionDetection} and~\ref{collisionHandling}. Finally, in
-section~\ref{implementation} I will show how all the theory was cast into code to form a
-working simulation, and which challenges I faced along the way.
-
-
 \section{Articulated bodies\label{articulatedBodies}}
+
+In the last sections I described rigid body dynamics and constraints respectively. I now combine
+the two to create articulated bodies, which are the basis of character animation.
 
 \subsection{Modelling the human body}
 
@@ -35,8 +27,8 @@ This is illustrated in figure~\ref{jointsFigure}.
 \end{figure}
 
 There are different ways of formulating this model, but I choose to assume initially that every
-joint is a ball-and-socket type. If it is not, additional constraints are added to restrict
-the permitted axes of rotation.
+joint is a ball-and-socket type. For those joints which are not not, additional constraints are
+added to restrict the permitted axes of rotation.
 
 \subsection{Ball-and-socket joints}
 
@@ -82,8 +74,8 @@ prohibited axes. Further details on this constraint are given in appendix~\ref{c
 The constraints described so far capture most of the features of the human skeleton, with one
 exception: if rotation is permitted about some axis, there is no limit to the amount of rotation
 that can occur. For example, permitting Alfred to look left and right would allow the simulation
-to rotate his head by an arbitrary amount~-- quite literally to screw his head off. Imposing
+to rotate his head by an arbitrary amount. Imposing
 limits on the angle of rotation as well as the axis is possible but more complicated, and will
-be explained in section~\ref{generalizedCollisions}. It may be worth noting that this is our
+be explained in section~\ref{generalizedCollisions}. It is worth noting that this is our
 first example of a non-holonomic constraint, and thus lies beyond the capabilities of Lagrangian
 mechanics.

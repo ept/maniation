@@ -9,7 +9,7 @@ in world space. (It's a very flexible nail, because despite fixing the position,
 three modes of rotation.) Let \ve{p} be the position of the centre of mass of our rigid
 body, \ve{s} the vector from the centre of mass to the point in the body we want to attach,
 $\ve{\omega}$ the angular velocity of the rigid body, and \ve{t} the coordinates in world
-space that we want to nail the point to. Then we can set up a very simple constraint function,
+space that we want to nail the point to. Then we can set up a simple constraint function,
 \begin{equation}
 \ve{c} = \ve{p} + \ve{s} - \ve{t}
 \end{equation}
@@ -233,7 +233,7 @@ penultimate term:
 \end{eqnarray*}
 
 Fortunately, the other two terms of equation~\ref{constrJoystickCDot} we are interested in are
-very similar, so we can obtain them by substitution in the last expression. This gives us the
+similar, so we can obtain them by substitution in the last expression. This gives us the
 following expression for $\dot{\m{J}}$:
 \begin{eqnarray}
 \dot{\m{J}}\dot{\ve{x}} &=&
@@ -292,7 +292,7 @@ get (skipping some boring algebra):
      \cos\big(\frac{\gamma}{2}\big)   \label{angleLimit3}
 \end{eqnarray}
 
-These expressions make very clear how interdependent the three axes are~-- it is generally not
+These expressions make clear how interdependent the three axes are~-- it is generally not
 possible to change a constraint on one axis without affecting the others. The best way to proceed
 from here is to enter inequalities using formulae~\ref{angleLimit1} to~\ref{angleLimit3} into
 a program for graphical visualization, and to experimentally determine the values such that the

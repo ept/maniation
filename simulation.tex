@@ -1,8 +1,8 @@
 The preparatory work for this project splits into two parts:
 \begin{itemize}
 \item Surveying literature, learning the theoretical background and understanding the existing
-    algorithms for my task. The outcome of this preparation shall be discussed in
-    sections~\ref{rigidBodyDynamics} to~\ref{constraints}.
+    algorithms for my task. The outcome of this preparation is discussed in
+    sections~\ref{rigidBodyDynamics} to~\ref{articulatedBodies}.
 \item Setting up and learning to use the software environment for development. This is described
     in section~\ref{softwarePreparation}.
 \end{itemize}
@@ -14,7 +14,7 @@ remain constant. More conveniently, we can regard a rigid body as an object with
 three-dimensional shape, a non-zero volume and some mass distribution, and constrain it not to
 change shape.
 
-At a particular point in time, a rigid body is fully determined by four quantities: the
+At a particular point in time, a rigid body is fully determined by four non-scalar quantities: the
 \emph{position} of its centre of mass, its \emph{orientation}, and its \emph{linear} and
 \emph{angular velocities}. These values usually change over time. Each of these can be easily
 represented as a three-component vector, except for orientation, which is discussed in
@@ -34,7 +34,7 @@ known as \emph{free precession} or \emph{Poinsot motion}~\cite{Goldstein:80,Juli
 therefore more convenient to use \emph{angular momentum} instead, which is conserved in the
 absence of torques.
 
-\begin{figure}
+\begin{table}
 \renewcommand{\baselinestretch}{1.3}\small\normalsize
 \centerline{\begin{tabular}{|l|l|l|}\hline
 & \emph{Linear} & \emph{Angular} \\\hline
@@ -46,10 +46,10 @@ Momentum & Linear momentum     & Angular momentum           \\
 External influence & Force $\ve{F} = \dot{\ve{p}}$ & Torque $\ve{\tau} = \dot{\ve{L}}$ \\\hline
 \end{tabular}}
 \caption{Summary of the physical quantities describing a rigid body\label{rigidBodySummary}}
-\end{figure}
+\end{table}
 
 Forces and torques acting on a body may change the momenta of a body as described in
-figure~\ref{rigidBodySummary}. A force \ve{F} may be applied to any point $\ve{r}'$ of
+table~\ref{rigidBodySummary}. A force \ve{F} may be applied to any point $\ve{r}'$ of
 a body. We can treat this as if the force had been applied to the centre of mass \ve{r}, and add
 an additional torque given by $\ve{\tau} = (\ve{r}' - \ve{r})\times\ve{F}$. If multiple
 forces and torques are applied, all forces (applied to the centre of mass) may be added into
@@ -63,13 +63,13 @@ accelerations), otherwise the simulation will not correctly conserve angular mom
 
 \section{Solving ordinary differential equations (ODEs)\label{solvingODEs}}
 
-Undergraduate mathematics courses provide the sufficiently patient student with a range of
-different methods for solving ODEs analytically. These work well for simple systems and deliver
-an exact answer. For example, if a constant force is applied to a body, its displacement is a
+Undergraduate mathematics courses cover various methods for solving ODEs analytically.
+These work well for simple systems and deliver
+an exact solution. For example, if a constant force is applied to a body, its displacement is a
 quadratic (parabolic) function of time; if the force is negatively proportional to the
 displacement, we observe simple harmonic oscillation. Unfortunately, when systems become
 only slightly more complicated, the equations become intractable~-- even a simple pendulum
-already falls in this category. General solutions can then only be approximated numerically.
+falls in this category. General solutions can then only be approximated numerically.
 
 \begin{figure}
 \centerline{\includegraphics{figures/euler}}

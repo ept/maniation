@@ -18,7 +18,7 @@ frame is edited by hand, and many animations are completely handcrafted. There a
 reasons for this (sometimes an animation is deliberately required to be physically impossible
 to achieve a special effect), and also economic reasons (animators are cheaper to hire than
 computer scientists). However, as the complexity of animated scenes increases, manual animation
-becomes unfeasible. Large crowds, fluids, cloths and some types of deformable bodies are therefore
+becomes unfeasible. Large crowds, fluids, cloth and some types of deformable bodies are therefore
 commonly animated using simulation techniques.
 
 Unfortunately such scenes with an unbounded number of degrees of freedom are difficult to simulate
@@ -79,8 +79,7 @@ With respect to physical laws, the simulation should include
 \item changes to a body's state through forces, torques, linear and angular impulses,
 \item inertial mass, gravity and collisions between bodies,
 \item appropriate handling for articulated bodies, including limits on the range of valid angles
-    for each joint. (This point is deliberately vague because the different possible approaches
-    are discussed later in this report.)
+    for each joint.
 \end{itemize}
 
 This list of requirements differs slightly from those stated in the proposal:
@@ -108,8 +107,8 @@ initial conditions and a set of constraints. Hence this project can be broken in
     section~\ref{solvingODEs}.
 \item An implementation of the equations of motion for rigid bodies. This is standard physics but
     has some implementation quirks. See sections~\ref{rigidBodyDynamics} and~\ref{quaternions}.
-\item Algorithms to ensure the correct handling of articulated bodies. This is probably the most
-    challenging part of the project. See sections~\ref{constraints} and~\ref{articulatedBodies}.
+\item Algorithms to ensure the correct handling of articulated bodies.
+    See sections~\ref{constraints} and~\ref{articulatedBodies}.
 \item Detection of collision between bodies. A vast amount of research has been done in this area,
     and most algorithms are concerned with speed. However, since run-time efficiency is not my
     primary concern, this part was kept quite simple. See section~\ref{collisionDetection}.
@@ -117,5 +116,6 @@ initial conditions and a set of constraints. Hence this project can be broken in
     bodies. This must also work in the context of articulated bodies!
     See section~\ref{collidingContact}.
 \item Handling of resting contact, that is the computation of forces between bodies which are in
-    contact but not colliding. See section~\ref{restingContact}.
+    contact but not colliding. This is probably the most challenging part of the project.
+    See section~\ref{restingContact}.
 \end{enumerate}
