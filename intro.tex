@@ -29,7 +29,7 @@ This project aims to address the more well-defined subject of character animatio
 movement of humans, many species of animal, and some types of alien creatures. Their common
 feature is that their bodies are deformable on the basis of a skeleton. Such bodies are called
 \emph{articulated bodies} in computer graphics, and it is usually assumed that this is the only
-type of deformation~-- they do not have ``soft flesh''. \textsl{Skeleton} is not used as an
+type of deformation~-- they do not have ``soft flesh''. \emph{Skeleton} is not used as an
 anatomically accurate term, because more or fewer bones might be used, depending on the animation
 requirements.
 
@@ -43,7 +43,7 @@ non-penetrating and interacting bodies is surprisingly difficult. In fact, creat
 simulations was a subject of PhD theses only 10--15 years
 ago~\cite{Baraff:PhD,Mirtich:PhD,Saunders:PhD} and the topic has not yet settled enough to be
 described in textbooks\footnote{Some books \cite{Shabana:01,Eberly:04} give an introduction to
-the subject, but not to the depth that the reader could actually implement a simulation.}. This
+the subject, but not in enough depth that the reader could actually implement a simulation.}. This
 means that a project in this area will inevitably involve a research component in addition to
 the software engineering. This constitutes an exciting challenge.
 
@@ -51,8 +51,8 @@ the software engineering. This constitutes an exciting challenge.
 
 Simulations of dynamic systems are employed in a wide range of environments:
 \begin{enumerate}
-\item games and related real-time applications, where fast computation is paramount and anything
-    which ``looks good'' is acceptable;
+\item games and related real-time applications, where fast computation is pa\-ra\-mount and
+    anything which ``looks good'' is acceptable;
 \item professional animation systems for high quality graphics, in which calculations are done
     offline;
 \item engineering and quantitative research, where accuracy and knowledge of errors are the main
@@ -108,7 +108,7 @@ initial conditions and a set of constraints. Hence this project can be broken in
 \item An implementation of the equations of motion for rigid bodies. This is standard physics but
     has some implementation quirks. See sections~\ref{rigidBodyDynamics} and~\ref{quaternions}.
 \item Algorithms to ensure the correct handling of articulated bodies.
-    See sections~\ref{constraints} and~\ref{articulatedBodies}.
+    See section~\ref{articulatedBodies}.
 \item Detection of collision between bodies. A vast amount of research has been done in this area,
     and most algorithms are concerned with speed. However, since run-time efficiency is not my
     primary concern, this part was kept quite simple. See section~\ref{collisionDetection}.

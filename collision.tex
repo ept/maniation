@@ -36,9 +36,9 @@ tested for intersection.
 
 \subsection{Finding the time of contact\label{findingContactTime}}
 
-This collision detection algorithm returns nothing if meshes are separated merely by a very small
-distance. Thus it is likely that bodies which were separate in one time step are suddenly found
-to have interpenetrated in the next. There are elaborate solutions which predict the time of
+This collision detection algorithm returns nothing if meshes are separated me\-re\-ly by a very
+small distance. Thus it is likely that bodies which were separate in one time step are suddenly
+found to have interpenetrated in the next. There are elaborate solutions which predict the time of
 impact using proximity detection and the bodies' velocities. I take a simpler approach: if, at
 some time, meshes have penetrated beyond some tolerance threshold, the current simulation step
 is discarded and retried using a smaller step length.
@@ -53,13 +53,13 @@ search~\cite{Sedgewick:83} if Newton-Raphson diverges or converges too slowly.
 
 \begin{figure}
 \psfrag{frag:0}{$0$}
-\psfrag{frag:delta}{$-\delta$}
+\psfrag{frag:delta}{$-d$}
 \psfrag{frag:t}{$t$}
 \psfrag{frag:h}{$t+h$}
 \psfrag{frag:hprime}{$t+h'$}
 \centerline{\includegraphics{figures/coll-time}}
 \caption{Estimating a new step length $h'$ after penetration occurred when using step length $h$.
-    The iteration stops when the penetration depth lies within the tolerance $\delta$.
+    The iteration stops when the penetration depth lies within the tolerance $d$.
     \label{collisionTime}}
 \end{figure}
 
@@ -74,7 +74,7 @@ appendices~\ref{vertexFaceConstraint} and~\ref{edgeEdgeConstraint}.
 
 There are many other types of contact which occur, particularly when complicated meshes
 collide. It is unclear how these might best be handled; regrettably I could not find any results
-of research in this area. It seems intuitively plausible that it might be possible to compose any
+of research in this area. It seems intuitively plausible that it might be possible to decompose any
 contact between polyhedral bodies into a set of vertex/face and edge/edge contacts, as
 figure~\ref{contacts2Figure} demonstrates. However, no such algorithm is known to me, and my own
 attempts at creating one turned out to be unfruitful~-- the problem is extraordinarily difficult
@@ -87,7 +87,7 @@ cases, but I have not found it to be a problem in practise.
 
 \begin{figure}
 \centerline{\includegraphics{figures/contacts1}}
-\caption{Two basic types of polyhedral contact: \emph{(a)}~vertex/face, \emph{(b)}~edge/edge.
+\caption{Basic types of polyhedral contact: \emph{(a)}~vertex/face, \emph{(b)}~edge/edge.
     \label{contacts1Figure}}
 \end{figure}
 
@@ -107,10 +107,6 @@ cases, but I have not found it to be a problem in practise.
 In the last section I explained how to detect contact between meshes. To prevent the bodies from
 penetrating each other during the simulation, the collision that has been detected must be
 handled in a physical way.
-
-In all parts of the simulation discussed up to and including section~\ref{articulatedBodies}, the
-acceleration was a continuous function of time; but collisions introduce discontinuities. These
-discontinuities occur at the instant of first contact.
 
 Let us distinguish two cases of contact between bodies: resting contact and colliding contact.
 A book lying on a table is in resting contact with the surface: their relative velocity is zero,
@@ -136,25 +132,17 @@ required for articulated bodies.
 
 Bodies in resting contact exert equal and opposite forces on each other so that they do not
 interpenetrate. This force must exactly balance the outside force, otherwise they will accelerate
-apart. The direction of this force is perpendicular to the plane of contact; in the vertex/face
-case, this is just the plane of the face polygon. In the edge/edge case, the plane goes
-through the point of contact and is spanned by the directions of the two edges involved.
-There is only one special case to be handled separately, namely when the two edges are parallel.
-
-Note that we are not trying to simulate friction at this point. The force in the direction of the
-contact plane normal merely stops interpenetration~-- if one were to push the book over the
-horizontal table surface, it would glide without slowing down. Despite the movement, this contact
-is resting because the relative velocity is parallel to the contact plane.
+apart. The direction of this force is perpendicular to the plane of contact.
+Note that we are not trying to simulate friction at this point. If one were to push the book over
+the horizontal table surface, it would glide without slowing down. Despite the movement, this
+contact is resting because the relative velocity is parallel to the contact plane.
 
 How do we now compute this contact force in an arbitrary system, where there may be objects stacked
 on top of each other, different forces and torques acting, and so on? We can employ a constraint
-function like in section~\ref{constraints}. For a vertex/face contact, let the value of this
-function $c$ be the distance of the vertex point from the plane, being negative on
-one side and positive on the other; for an edge/edge contact, the value is the distance between the
-two straight lines. In contact, this distance is zero. In resting contact we also have
-$\dot{c} = 0$. The function becomes interesting when we consider its second
-derivative, $\ddot{c}$. If positive values of $c$ represent legal states (in which the
-bodies are touching or separate), we can enforce the non-penetration constraint by requiring
+function $c$ whose value is positive when the bodies are separated, zero when they are in contact,
+and negative when they have penetrated. In resting contact we have $\dot{c} = 0$. The function
+becomes interesting when we consider its second derivative, $\ddot{c}$. The non-penetration
+constraint for a resting contact can be written as
 \begin{equation} \label{constrInequality}
 \ddot{c} \ge 0.
 \end{equation}
@@ -164,11 +152,11 @@ to the bodies such that afterwards we have $\ddot{c} = 0$. But when
 $\ddot{c} \ge 0$, no force is applied (otherwise we would be glueing the book to the
 table). But how do we solve this inequality in practise? At this point we diverge from Baraff's
 method~\cite{BaraffWitkin:97}, which expresses equation~\ref{constrInequality} and additional
-side conditions as a ``quadratic program'' and uses a specialized numerical solver.
+side conditions as a \emph{quadratic program} and uses a specialized numerical solver.
 
 Let us take a much simpler approach and pretend for now that equation~\ref{constrInequality}
 contained an equals sign. Then this is a constraint like any other, which we can satisfy by using
-the Lagrange multiplier method of section~\ref{constraints}. Moreover, if there are multiple
+the Lagrange multiplier method of section~\ref{lagrange}. Moreover, if there are multiple
 points of resting contact in the system, and also `real' constraints like joints between bodies,
 we can solve all of these simultaneously without having to think twice.
 
@@ -218,15 +206,14 @@ force.
 A collision between two bodies must conserve the total momentum of the system~\cite{Feynman:63}.
 This implies that the impulses acting on the bodies at a point of collision must be equal and
 opposite. However, the collision need not necessarily conserve energy. A collision which does
-conserve energy is called \emph{elastic} or \emph{fully elastic}, and may be given for example
+conserve energy is called \emph{fully elastic}, and may be given for example
 by an ideal rubber ball which, when dropped, bounces up to exactly the same height as it was
 dropped from. At the other extreme, an \emph{inelastic} collision is one which reduces the energy
 of the system as much as possible~-- the bodies do not `bounce apart' again.
 
 Most real collisions are somewhere in between, depending on the materials of the colliding
 objects. The elasticity is a scalar $0 \le \varepsilon \le 1$, where $\varepsilon = 0$ indicates
-an inelastic collision, and $\varepsilon = 1$ full elasticity\footnote{Setting $\varepsilon > 1$
-yields amusing results.}.
+an inelastic collision, and $\varepsilon = 1$ full elasticity.
 
 How do we now find the impulses we need to apply to the colliding bodies, and how do we
 simultaneously handle constraints? Once again we can use a Lagrange multiplier method, but a new
@@ -238,7 +225,7 @@ not be included. Now for all points $i$ of colliding contact we have $\dot{c}_i 
 Remember that this value is the relative velocity of the bodies in the point of contact,
 projected onto the normal of the contact plane. Then the relative velocity $\dot{c}_i'$ after
 the collision is given by $\dot{c}_i' = -\varepsilon_i \dot{c}_i$. The components of the relative
-velocity parallel to the contact plain remain unchanged.
+velocity parallel to the contact plane remain unchanged.
 
 Assume for convenience that the first $m$ components of \ve{c} come from equality constraints, and
 that the remaining $k$ components are due to inequalities.
@@ -340,7 +327,7 @@ the current angle of rotation about a particular axis in equation~\ref{rotationC
 
 There is just one problem: it is fiendishly hard to visualize what a particular restriction on
 a 3D rotation actually means. The best I could come up with is to imagine a 3D phase space in
-which each coordinate is the angle of rotation about one of the limb's local (Cartesian) axes.
+which each coordinate is the angle of rotation about one of the segment's local (Cartesian) axes.
 The set of valid rotations for one joint is then a subspace of some shape; despite the linear
 look of inequalities~\ref{genCollIneq}, this space is generally not polyhedral; in fact it is
 often not even compact. Maple cannot visualize such a solution space of inequalities, so I wrote

@@ -1,0 +1,56 @@
+\chapter{Notation}
+\begin{tabular}{@{}lll}
+\renewcommand{\baselinestretch}{1.3}\small\normalsize
+$a$ & italic latin letter & scalar\\
+$\theta$ & italic greek letter & angle\\
+\ve{a} & boldface greek/latin letter & column vector\\
+\ve{0} & boldface figure 0 & null vector (of appropriate dimension)\\
+\m{M} & sans serif upper-case & matrix\\
+\m{1} & sans serif figure 1 & identity matrix (of appropriate dimensions)\\
+\q{q} & sans serif lower-case & quaternion\\
+$\dot{c}$ & dot & first derivative with respect to time\\
+$\ddot{c}$ & double dot & second derivative with respect to time\\
+$\m{J}^T$ & superscript $T$ & matrix transpose\\
+$\m{M}^{-1}$ & superscript $-1$ & matrix or quaternion inverse\\
+$\overline{\q{q}}$ & bar & quaternion conjugate\\
+$\norm{\ve{a}}$ & norm & vector or quaternion magnitude\\
+$\tilde{\ve{a}}$ & tilde & corresponding quaternion (equation~\ref{vectorToQuat})\\
+$\dual{\ve{a}}$ & asterisk & dual tensor (equation~\ref{dualTensor})\\
+$\ve{a}\times\ve{b}$ & cross & vector cross product\\
+$\ve{a}\cdot\ve{b}$ & dot & inner product\\
+$\Re(\q{q})$ & real & real part of a quaternion\\
+\end{tabular}
+\vspace{10pt}
+
+Given any vector $\ve{a} = (a_1, a_2, a_3)^T$, we define its dual
+tensor, written as a $3\times3$ matrix, to be
+\begin{equation}\label{dualTensor}
+\dual{\ve{a}} = \left[\begin{array}{ccc}
+    0 & -a_3 & a_2 \\ a_3 & 0 & -a_1 \\ -a_2 & a_1 & 0
+    \end{array}\right]
+\end{equation}
+(see \cite{RHB:02,BaraffWitkin:97} and also Kalra~\cite{Kalra:95}, who defines it to be
+the transpose of the expression above).
+The dual allows us to rewrite a vector cross product as a matrix multiplication:
+\begin{equation}
+\ve{a}\times\ve{b} = \dual{\ve{a}}\,\ve{b}
+\end{equation}
+Note that $\dual{\ve{a}}^T = -\dual{\ve{a}}$.
+
+Let us also recall some basic identities of vector and matrix algebra~\cite{RHB:02}:
+\begin{eqnarray*}
+\ve{a}\times\ve{a} & = & \ve{0}\quad\mathrm{(the~null~vector)} \\
+\ve{a}\times\ve{b} & = & -\ve{b}\times\ve{a} \\
+\ve{a}\times(\ve{b} + \ve{c}) & = & \ve{a}\times\ve{b} + \ve{a}\times\ve{c} \\
+\ve{a}\cdot\ve{b} & = & \ve{b}\cdot\ve{a} \\
+\ve{a}\cdot\ve{b} & = & \ve{a}^T\,\ve{b} \\
+\ve{a}\cdot(\ve{b} + \ve{c}) & = & \ve{a}\cdot\ve{b} + \ve{a}\cdot\ve{c} \\
+\ve{a}\cdot(\ve{b}\times\ve{c}) & = & \ve{b}\cdot(\ve{c}\times\ve{a}) \\
+    & = & \ve{c}\cdot(\ve{a}\times\ve{b}) \\
+\ve{a}\times(\ve{b}\times\ve{c}) & = &
+    \ve{b}(\ve{a}\cdot\ve{c}) - \ve{c}(\ve{a}\cdot\ve{b}) \\
+(\m{A}\m{B})\m{C} & = & \m{A}(\m{B}\m{C}) \\
+\m{A}(\m{B} + \m{C}) & = & \m{A}\m{B} + \m{A}\m{C} \\
+(\m{A}\m{B})^T & = & \m{B}^T\m{A}^T \\
+\m{A}\m{A}^{-1} = \m{A}^{-1}\m{A} & = & \m{1}\quad\mathrm{(the~identity~matrix)}
+\end{eqnarray*}

@@ -11,14 +11,14 @@ The preparatory work for this project splits into two parts:
 On the most theoretical level, a rigid body is a collection of $k$ point masses ($k \ge 3$,
 can be infinite) subject to the constraint that the distance between any pair of masses must
 remain constant. More conveniently, we can regard a rigid body as an object with a
-three-dimensional shape, a non-zero volume and some mass distribution, and constrain it not to
+three-dimensional shape, a non-zero volume and some mass distribution, and assume that it does not
 change shape.
 
 At a particular point in time, a rigid body is fully determined by four non-scalar quantities: the
 \emph{position} of its centre of mass, its \emph{orientation}, and its \emph{linear} and
 \emph{angular velocities}. These values usually change over time. Each of these can be easily
 represented as a three-component vector, except for orientation, which is discussed in
-section~\ref{quaternions}. By convention a right-handed Cartesian coordinate system will be used.
+section~\ref{quaternions}. By convention a right-handed Cartesian coordinate system is used.
 
 To characterize the body's dynamic behaviour, we also need to know its \emph{inertial mass},
 a scalar quantity, and its \emph{moment of inertia}, which is a rank-2 tensor (commonly written

@@ -1,6 +1,6 @@
 \section{Quaternions\label{quaternions}}
 \subsection{The need for Quaternions}
-Besides its position, every rigid body in 3D space may have an orientation, in which there are
+Besides its position, each rigid body in 3D space may have an orientation, in which there are
 three degrees of freedom (three independent axes to rotate about).
 While the position of a body can be neatly represented using Cartesian coordinates, there is
 no obvious best way of describing an orientation. The most common schemes describe
@@ -14,8 +14,8 @@ suffices to specify the three angles of rotation. However, this scheme has a num
 drawbacks~\cite{Saunders:PhD,Shoemake:85}: amongst other things, it is possible that rotation
 about one of the axes freezes during an animation (``Gimbal lock'').
 
-\emph{Rotation matrices} are commonly used because they are well understood, easily generalize
-to higher dimensions and allow efficient combination with other linear transformations (scaling
+\emph{Rotation matrices} are commonly used because they are well understood and
+allow efficient combination with other linear transformations (scaling
 and shearing~-- also translation if homogeneous coordinates are employed). However, ODEs over
 rotation matrices are difficult to implement correctly, since this representation uses nine
 numbers (a $3\times3$ matrix) to represent three degrees of freedom, thus introducing six
@@ -23,7 +23,7 @@ additional side conditions which must be maintained. Not doing so causes skew th
 drift~\cite{Saunders:PhD}.
 
 \emph{Quaternions}~\cite{Shoemake:85,Eberly:01,MathWorld:Quaternion} are a popular alternative
-to the two previous schemes, and they are used extensively in this project.
+to the two previous sche\-mes, and they are used extensively in this project.
 
 \subsection{Definition and properties}
 Mathematically, quaternions can be regarded as numbers with one real part and three

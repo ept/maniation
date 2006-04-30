@@ -1,60 +1,10 @@
 \section{Constrained rigid body dynamics\label{constraints}}
 
-\subsection{Approaches to constraints\label{approachesToConstraints}}
-The methods developed so far allow the simulation of a single rigid body with forces
-acting on it. Further challenges arise when we consider multibody systems in which the bodies
-interact in some way. We will primarily be interested in articulated bodies, that is, systems
-of individual rigid bodies held together by joints. Joints allow rotation but cannot be
-separated.
+This section is based on material in~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD}. The
+explanation in these sources is rather sketchy though, and the following details I worked
+out are more comprehensive.
 
-There are various strategies for simulating articulated bodies:
-
-\begin{itemize}
-\item \emph{Penalty methods} conceptually join bodies together with springs so that when they
-    begin to separate, a restoring force causes them to move back together again. These methods
-    are simple to implement initially but hard to get right: if the springs are too weak, the
-    bodies will separate too far; if they are too stiff, very large forces can arise suddenly,
-    causing the simulation to become unstable. Penalty methods only become active after the
-    system has already entered an illegal state, which may be undesirable.
-
-\item Mechanics formulations using \emph{generalized coordinates} build constraints firmly into
-    the system: the number of generalized coordinates equals the actual number of degrees of
-    freedom after the constraints have been applied. The state of the system is specified only in
-    terms of these generalized coordinates, and they are chosen such that the system will always
-    be in a legal state, irrespective of what the values of the coordinates are. Outside
-    influences can be transformed into the generalized coordinates. The most famous formulation
-    along these lines is \emph{Lagrangian mechanics}~\cite{Hand:98,Goldstein:80} which is
-    commonly used in physics, but alternatives are described in~\cite{Wilhelms:91}
-    and~\cite{Featherstone:87}.
-    These algorithms have in common that they allow efficient and reliable computation. However,
-    the functions to transform the coordinates must be determined analytically, and this becomes
-    very hard or impossible for complicated systems, so the method does not scale or generalize
-    well. And even if the equations can be solved, these methods are limited to so-called
-    \emph{holonomic constraints} (see~\cite{Hand:98} for a definition). Joints, for example,
-    are holonomic, while separable contact points between bodies are not.
-
-\item A compromise between the flexibility of penalty methods and the stability of generalized
-    coordinates can be found. As in the penalty method, we initially treat each limb of an
-    articulated body separately and grant it its full six degrees of freedom. We then impose
-    constraints on the system which prevent the limbs from separating or moving in other
-    undesirable ways. Crucially, we formulate the constraints in such a way that we can not only
-    tell whether the system is currently in an illegal state, but also whether it is moving
-    towards one, and even whether it is accelerating towards one. Using the method of
-    \emph{Lagrange multipliers} we can determine what forces must be applied to the bodies to
-    nullify this unwanted acceleration before it ever occurs. This compromise comes at the expense
-    of higher computational cost, because systems of linear equations have to be solved at
-    run-time. Note that despite the similarity in name, this method has little in common with
-    Lagrangian mechanics.
-\end{itemize}
-
-I chose to use Lagrange multiplier constraints to implement articulated body dynamics in this
-project, because the algorithm is physically accurate and can be adapted to handle some types of
-non-holonomic constraint (section~\ref{collisionHandling}).
-The mathematical formulation of Lagrange multipliers is derived in~\cite{BaraffWitkin:97} and
-extended in~\cite{Saunders:PhD} (also see~\cite{Baraff:96} for an optimized algorithm),
-therefore I shall only state the results here.
-
-\subsection{Prerequisites of constraint solving}
+\subsection{Prerequisites of constraint solving\label{constraintPrerequisites}}
 
 Consider a system of $n$ rigid bodies at a particular point in time. Assume that we can define
 a vector \ve{x} which represents the state of the whole system as a function of
@@ -121,21 +71,17 @@ such that
 \ddot{\ve{x}} = \m{M}^{-1} (\ve{\Phi} + \ve{\Phi}_p).
 \end{equation}
 
-\subsection{Lagrange multipliers}
 
-Now assume that we want to impose $m$ constraints on this system, where each constraint
-effectively reduces the number of degrees of freedom by one. Express each constraint as a function
-$c$ which is zero when the constraint is satisfied. (A ball-and-socket joint, which allows three
-modes of rotation but no separation, reduces the number of d.o.f.\ by three and is therefore
-expressed as a vector of three scalar constraint functions.) We can then concatenate all
+\subsection{Definition of the Jacobians\label{jacDefinition}}
+
+Now assume that we want to impose $m$ constraints on this system. Express each constraint as a function
+$c$ which is zero when the constraint is satisfied.  We can then concatenate all
 constraint functions into a single $m$-row constraint vector \ve{c}. Each valid configuration of
-the system must satisfy $\ve{c} = \ve{0}$, the null vector.
+the system must satisfy $\ve{c} = \ve{0}$. $\dot{\ve{c}}$ and $\ddot{\ve{c}}$ must be calculated
+algebraically before implementation.
 
-To find the constraint maintaining forces, we must know how a change in state or a change in
-time affects the value of \ve{c}. To this end, we must calculate the first two derivatives of
-\ve{c} with respect to time, $\dot{\ve{c}}$ and $\ddot{\ve{c}}$. We also calculate the Jacobian
-matrix~\cite{RHB:02} \m{J} which contains all partial derivatives of $\ve{c}$ w.r.t.\ each
-coordinate of \ve{x}, and the similarly defined Jacobian $\dot{\m{J}}$ of $\dot{\ve{c}}$:
+The Jacobian matrix~\cite{RHB:02} \m{J} contains all partial derivatives of $\ve{c}$ w.r.t.\ each
+coordinate of \ve{x}. Similarly, $\dot{\m{J}}$ is the Jacobian of $\dot{\ve{c}}$:
 \begin{equation}
 J_{ij} = \frac{\partial c_i}{\partial x_j} \quad\quad\mathrm{and}\quad\quad
 \dot{J}_{ij} = \frac{\partial \dot{c}_i}{\partial x_j}
@@ -177,26 +123,49 @@ gives derivations of Jacobian slices for different constraint types.
     \label{jacobianFigure}}
 \end{figure}
 
-Now that all is prepared, we can set up the equation\footnote{Here we adopt the sign convention
-of~\cite{BaraffWitkin:97}, which is the opposite of~\cite{Saunders:PhD}.}
-\begin{equation}
-\label{lagrangeEquation}
--\m{J}\m{M}^{-1}\m{J}^T\ve{\lambda} = \dot{\m{J}}\dot{\ve{x}} +
-    \m{J}\m{M}^{-1}(\ve{\Phi} + \ve{\Phi}_p) + k\ve{c} + d\dot{\ve{c}}
-\end{equation}
-in which all variables except $\ve{\lambda}$ are known. The meaning of this equation and
-its two scalar constants $k$ and $d$ is discussed in~\cite{BaraffWitkin:97}
-and~\cite{Saunders:PhD}. For us it will suffice to consider it to be a `black box' which can be
-given to a linear equation solver to obtain $\ve{\lambda}$.
 
-$\ve{\lambda}$ is an $m$-row vector of so-called \emph{Lagrange multipliers} (after which this
-algorithm is named), where $m$ is the number of constraints. Once we have solved for it, we can
-compute the expression
-\begin{equation} \label{lagrangeSolution}
-\ve{\Phi}_c = \m{J}^T\,\ve{\lambda}.
-\end{equation}
-$\ve{\Phi}_c$ has the same format as $\ve{\Phi}$, and indeed it is the vector containing
-the forces and torques which we need to additionally apply to each body to ensure that they
-continue to satisfy the constraints! All we therefore need to do is to compute
-$\ve{\Phi} + \ve{\Phi}_c$ and to feed the result into our ODE solver. $\ve{\Phi}_p$ must not
-be added to this term if the moment of inertia is recalculated based on the bodies' orientation.
+\subsection{Finding the Jacobians\label{jacCalculation}}
+
+Both~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD} omit details of how to derive the Jacobians
+$\m{J}$ and $\dot{\m{J}}$ for a custom constraint. I deduced the following procedure
+after pondering over some source code implementing one type of constraint
+(specifically equations~\ref{constrEx1J} and~\ref{constrEx1JDot} below). The source code
+was kindly provided by Dr.~Breton Saunders~\cite{Saunders}. It was used only for this
+derivation and not copied otherwise. The implementation in this project is based on the
+following derivations.
+
+We start by defining a function $\ve{c}$ which evaluates to zero (or the null vector) for
+all states which satisfy the constraint, and any non-zero value for all other states.
+We then calculate the first and second derivatives with respect to time, $\dot{\ve{c}}$
+and $\ddot{\ve{c}}$, which must both exist.
+
+For any sort of valid constraint, we should be able to massage both $\dot{\ve{c}}$ and
+$\ddot{\ve{c}}$ into a sum of products form. Moreover, in each product in
+$\dot{\ve{c}}$, at least one of the variables should be either the linear velocity of
+the centre of mass of one of the bodies, or the angular velocity of one of the bodies.
+Use algebra to make this `chosen variable' the rightmost variable in each product, and
+evaluate the rest of the product to a single matrix.
+
+Now observe equation~\ref{cDotAndCDDot} (page~\pageref{cDotAndCDDot}). We can easily
+factor our expression for
+$\dot{\ve{c}}$ into $\m{J}$ and $\dot{\ve{x}}$ (since the latter contains
+the linear and angular velocities for all bodies). $\m{J}$ has the same number of rows
+as there are constraints, and $6n$ columns for a system of $n$ bodies. Each of the matrices
+in our expression for $\dot{\ve{c}}$ also has the same number of rows as there are
+constraints, and has 3 columns. All we need to do is to find the correct horizontal position
+of each of these matrices in $\m{J}$, depending on the location of the `chosen variable'
+in $\dot{\ve{x}}$. Thus we obtain the matrix $\m{J}$.
+
+Observe equation~\ref{cDotAndCDDot} again. Now we know $\ddot{\ve{c}}$, $\dot{\ve{x}}$,
+$\m{J}$ and $\ddot{\ve{x}}$~-- no problem. Evaluate
+$\ddot{\ve{c}} - \m{J}\ddot{\ve{x}}$, remembering that $\ddot{\ve{x}}$ is
+the vector of linear accelerations and angular accelerations. The result should be an
+expression which we can bring into just the same kind of sum of products form as we previously
+did with $\dot{\ve{c}}$. By exactly the same procedure we factor out the linear velocities
+and angular velocities (not accelerations!), thus obtaining $\dot{\m{J}}$.
+
+In case you were in doubt, this procedure is of course executed by a human on paper
+(possibly assisted by a symbolic algebra system) prior to
+implementation. The simulation program will just plug numbers into the hard-coded expressions
+for $\ve{c}$, $\dot{\ve{c}}$, $\m{J}$ and $\dot{\m{J}}$ during each time step
+of the simulation.

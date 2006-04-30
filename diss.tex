@@ -21,12 +21,12 @@
     \equal{#1}{\Lambda}\or\equal{#1}{\Xi}\or\equal{#1}{\Pi}\or\equal{#1}{\Sigma}\or
     \equal{#1}{\Upsilon}\or\equal{#1}{\Phi}\or\equal{#1}{\Psi}\or\equal{#1}{\Omega}}
     {\bm{#1}}{\mathbf{#1}}}}
-\newcommand{\m}[1]{\ve{#1}}                     % Matrix
+\newcommand{\m}[1]{\ensuremath{\mathsf{#1}}}    % Matrix
 \newcommand{\dual}[1]{{\ensuremath{#1^*}}}      % Dual tensor
-\newcommand{\q}[1]{\ensuremath{#1}}             % Quaternion
-\newcommand{\qi}{\ensuremath{\mathrm{i}}}       % Quaternion i component
-\newcommand{\qj}{\ensuremath{\mathrm{j}}}       % Quaternion j component
-\newcommand{\qk}{\ensuremath{\mathrm{k}}}       % Quaternion k componenta
+\newcommand{\q}[1]{\ensuremath{\mathsf{#1}}}    % Quaternion
+\newcommand{\qi}{\ensuremath{\mathsf{i}}}       % Quaternion i component
+\newcommand{\qj}{\ensuremath{\mathsf{j}}}       % Quaternion j component
+\newcommand{\qk}{\ensuremath{\mathsf{k}}}       % Quaternion k componenta
 %%%%%%
 %%%%%% Flickbook and headers stuff
 %%%%%%
@@ -69,6 +69,7 @@ Computer Science Tripos \\\vspace*{5mm}
 Corpus Christi College \\\vspace*{5mm}
 \today
 \end{center}
+\newpage\thispagestyle{empty}
 \cleardoublepage\setcounter{page}{1}
 
 \chapter*{Proforma}
@@ -77,7 +78,7 @@ Name:               & Martin Kleppmann \\
 College:            & Corpus Christi College \\
 Project Title:      & Rigid body simulation for 3D character animation \\
 Examination:        & Computer Science Tripos, June 2006 \\
-Word Count:         & 13029%WORDCOUNT%
+Word Count:         & 12130%WORDCOUNT%
 \footnotemark[1]\\
 Project Originator: & Martin Kleppmann \\
 Supervisor:         & Dr Neil Dodgson \\
@@ -90,8 +91,9 @@ Supervisor:         & Dr Neil Dodgson \\
 The aim of this project was to develop a simulation which creates physically accurate animations
 of a 3D character, like a human or an animal. The character was to be represented as a polygon
 mesh bound to a skeleton, so that it could move at the joints but was otherwise rigid. The
-animations produced by the simulation should be fit for use in computer graphics applications,
-so the character must not move in an anatomically or physically impossible way.
+animations produced by the simulation should be fit for use in computer graphics applications~--
+i.e.\ they should be realistic in the sense that the character must not move in an anatomically
+or physically impossible way.
 
 \section*{Work Completed}
 A general-purpose simulation for a wide range of mechanical systems has been developed and tested
@@ -130,7 +132,6 @@ material that has already been used to any substantial extent for a comparable p
 \chapter{Preparation}
 \input{simulation}
 \input{quaternions}
-\input{constraints}
 \input{articulated}
 \input{software}
 \chapter{Implementation}
@@ -155,11 +156,13 @@ material that has already been used to any substantial extent for a comparable p
 \renewcommand{\huge}{\fontsize{20.74}{25}\selectfont}
 \renewcommand{\Huge}{\fontsize{24.88}{30}\selectfont}
 \normalsize
+\input{notation}
 \chapter{Proofs and derivations}
 All work presented in this appendix is my original work. I am not aware of similar derivations
 having been published already, except where bibliographical references are given.
 \input{quatProofs}
 \input{rigidBody}
+\input{constraints}
 \input{constrEx}
 % \chapter*{Organography\markboth{Organography}{}}
 % The word \emph{organography} is derived from the Greek
