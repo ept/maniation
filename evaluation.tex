@@ -1,7 +1,7 @@
-The last three chapters explain in detail how the simulation application was developed. I now
+The first three chapters explain in detail how the simulation application was developed. I now
 turn to its evaluation and explain how I showed that the program works as required.
 
-\section{Testing strategy}
+\section{Testing strategy\label{testingStrategy}}
 
 An application as large as the one developed in this project is almost impossible to get right
 entirely by advance planning. Although I took much care during the preparation and implementation,
@@ -13,7 +13,7 @@ and hence a rapid edit--test--debug cycle. For each major algorithmic part of th
 I modelled a physical system which placed a particular emphasis on one part of the simulation,
 thus allowing me to test and debug each feature before working on the next feature:
 \begin{itemize}
-\item a gyroscope (section~\ref{evalAccuracy}) to test rigid body dynamics,
+\item a gyroscope (section~\ref{evalGyroscope}) to test rigid body dynamics,
 \item a double pendulum to test articulated bodies/constraints,
 \item Newton's cradle (section~\ref{evalCollisions}) to test colliding contact handling,
 \item a simulation of boxes falling onto a table to test resting contact handling.
@@ -27,56 +27,55 @@ to be fruitful and effective.
 
 
 \section{Quantitative evaluation}
-\subsection{Simulation accuracy\label{evalAccuracy}}
-The quality of simulation results is hard to measure quantitatively, since simulation is usually
-employed to calculate the behaviour of systems whose exact solution is not known. Therefore it is
-useful to run the simulation on a system which can be characterized analytically, and to compare
-the results against the theoretical values.
 
-For this comparison I chose to simulate a \emph{gyroscope} (figure~\ref{gyroscope}). It consists
-of a single rotating rigid body and a `nail' constraint (appendix~\ref{constrNail}) holding one
-end of its axis in place. When gravity acts on the centre of mass of the body, the `nail' exerts
-a balancing force and a torque which stop the gyroscope from falling down and causes forced
-precession. The angular velocity of precession can be derived analytically~\cite{Julian:notes}
-and depends only on the gravitational force, the distance between the centre of mass and the
-nail, and the angular momentum of the body.
+I performed several quantitative tests on the program by simulating simple mechanical systems and
+comparing their numerical outcome to the physical predictions.
+
+\subsection{Gyroscope simulation\label{evalGyroscope}}
+The first set of tests simulates a \emph{gyroscope} (figure~\ref{gyroscope}), which was also used
+as a general test case (section~\ref{testingStrategy}). A gyroscope consists of a single rotating
+rigid body and a `nail' constraint (appendix~\ref{constrNail}) holding one end of its axis in
+place. In a gravitational field the gyroscope exhibits a precession movement. Although this
+behaviour seems counter-intuitive at first, it can be characterized analytically~\cite{Julian:notes}.
+There are not many interesting systems of rigid bodies which have an exact solution, so a
+gyroscope is a good choice for quantitative evaluation.
 
 \begin{figure}
 \centerline{\includegraphics{figures/gyroscope}}
 \caption{Schematic drawing of a gyroscope. The disc rapidly rotates about its own axis, and
-    gravity causes a slower precession movement about the vertical axis (shown as a dotted line).
+    gravity causes a slower precession movement (shown as a dotted line) about a vertical axis.
     \label{gyroscope}}
 \end{figure}
 
-I set up the initial conditions for the simulation to reflect values one might find in an actual
-toy gyroscope (20 revolutions per second about the gyroscope axis, one full circle of precession
-in 8 seconds). I then ran the simulation for 8~s, using an average time step length of about
-$2.3\cdot 10^{-4}$~s. The simulation performed one full circle of precession in 7.953~s, which
+I set up initial conditions similar to the values one might find in a toy gyroscope (20
+revolutions per second about the gyroscope axis, one full circle of precession in 8 seconds). I
+then ran the simulation for 8~s, using an average time step length of about $2.3\cdot 10^{-4}$~s.
+The simulation performed one full circle of precession in 7.953~s, which
 is within 0.6~\% of the theoretical value. Over the course of 8~s, the body rotated by $320.36\pi$
 radians about its own axis (160.18 revolutions), which differs from the theoretical value by only
-0.1~\%. These errors varied little even in simulations using larger time steps.
-The effects of nutation~\cite{Feynman:63} were small for the chosen initial conditions but may
-have contributed towards the errors.
+0.1~\%. These errors varied little even in simulations using larger time steps. The effects of
+nutation\footnote{Having nothing in common with mutation, nutation is an oscillation about an axis
+orthogonal to the two main axes of rotation. \cite{Feynman:63}} were small for the chosen initial
+conditions but may have contributed towards the errors.
 
-These results are encouraging, but is interesting to also observe a different error, namely
-the amount by which the constraint drifts apart. Usually this drift is compensated in the Lagrange
-multiplier method so that it never manifests itself, but temporarily deactivating this
+It is interesting to also observe a different error, namely the amount by which the constraint
+drifts apart. Usually this drift is compensated in the Lagrange multiplier method so that it
+never manifests itself, but temporarily deactivating this
 correction\footnote{by setting $k=d=0$ in equation~\ref{lagrangeEquation}.} makes the error
 introduced by the ODE solver observable.
 
 \begin{figure}
 \centerline{\input{figures/errorplot}}
-\caption{Errors introduced by the ODE solver for different step sizes $h$.
-    Solid line: target error (difference between $O(h^4)$ and $O(h^5)$ approximations) of
-    the ODE solver. Dashed line: drift of `nail' constraint in gyroscope simulation after
-    8~s simulation time.\label{errorplot}}
+\caption{Errors introduced by the ODE solver for different step sizes $h$, as observed in the
+    gyroscope simulation.
+    Solid line: difference between $O(h^4)$ and $O(h^5)$ Runge-Kutta approximations for each time
+    step. Dashed line: cumulative drift of the gyroscope's `nail' constraint after 8~s simulation
+    time.\label{errorplot}}
 \end{figure}
 
 Figure~\ref{errorplot} shows by what distance the gyroscope's `nail' constraint drifted apart
-after 8~s of simulation time, for a wide range of different step sizes. Since I used the
-adaptive-stepsize algorithm described in section~\ref{solvingODEs}, I actually set the target
-error (solid line in figure~\ref{errorplot}) and then used the average step size taken by the
-solver as abscissa. There are some noteworthy features about this plot:
+after 8~s of simulation time, for a wide range of different step sizes. There are some noteworthy
+features about this plot:
 
 \begin{itemize}
 \item The logarithmic axes are scaled such that one order of magnitude in the horizontal has the
@@ -84,7 +83,7 @@ solver as abscissa. There are some noteworthy features about this plot:
     solid line (error per time step) is an almost perfect straight line with gradient~1. This
     shows that the error is indeed an $O(h^5)$ function of the step size, as expected.
 \item Over a wide range of step sizes, the plot of the total accumulated error is parallel to the
-    solid line. This means the total error is also $O(h^5)$, which is in fact better than
+    solid line. This means the total error is also $O(h^5)$, which is even better than
     expected: although the approximation in each time step is $O(h^5)$, the number of steps
     required is inversely proportional to the step length, so one might expect a larger overall
     error. This relationship indicates that the ODE solver's target error can in fact be used
@@ -95,7 +94,7 @@ solver as abscissa. There are some noteworthy features about this plot:
     so they should be of little concern for computer graphics purposes.
 \end{itemize}
 
-In summary, the results for the simple gyroscope simulation inspire the confidence that the
+In summary, the results for the simple gyroscope simulation inspire confidence that the
 implementation is reliable and will continue to produce realistic results for complicated systems
 which lack an exact solution. They also show that the target error can conveniently be adjusted
 to match the requirements, because more CPU time does~-- within sensible bounds~-- buy higher
@@ -107,7 +106,7 @@ accuracy.
 The analysis in the last section is relevant for continuous systems, but says nothing about
 simulations involving collisions. For this purpose I simulated a different kind of physics toy,
 \emph{Newton's cradle} (figure~\ref{cradleFigure}). This system does not have an exact analytical
-solution, but it does have characteristic behaviour patterns that may be observed.
+solution, but it does have characteristic behaviour patterns which may be observed.
 
 \begin{figure}
 \centerline{\includegraphics{figures/cradle}}
@@ -120,8 +119,8 @@ Newton's cradle works best when the elasticity is large ($\varepsilon \approx 1$
 it using $\varepsilon = 1.0$ and $\varepsilon = 0.9$, with one ball initially raised and the other
 four at rest. The comparison of the two simulation results is shown in figure~\ref{cradlePlots}.
 The energy is calculated as the sum of potential, linear and angular kinetic energies of all five
-balls, with zero potential when all balls are at their equilibrium position. With fully elastic
-collisions, the energy stays constant (within $1$ part in $10^8$) over a collision, while
+balls, with zero potential when all balls are at their equilibrium position. Fully elastic
+collisions conserve energy in the simulation (constant to within $1$ part in $10^8$), while
 imperfect collisions instantaneously dissipate energy.
 
 The momentum of balls 2--4 stays zero (within $1$ part in $10^{10}$, except for transient peaks,
@@ -164,9 +163,9 @@ I measured the ratio of CPU time to simulation time for a range of different-siz
 found an overall relationship of about $O(N^{2.5})$. Note that the use of sparse matrices still
 causes a significant benefit, since a simpler implementation would require the same number of
 iterations and hence be about $O(N^{3.5})$. In absolute terms, a small simulation~-- of a
-double pendulum, say~-- runs almost in real-time on my PC\footnote{AMD Athlon(tm) XP 2000+},
-while one with Alfred and multiple resting contacts requires up to an hour of CPU time for one
-second of simulation time.
+double pendulum, say~-- runs almost in real-time on my PC\footnote{AMD Athlon~XP~2000+},
+while one with 100 constraints requires approximately one hour of CPU time per second of
+simulation time.
 
 \subsection{Numerical stability}
 
@@ -184,24 +183,32 @@ This procedure is not mathematically justified, but in all my simulations it pro
 \section{Qualitative evaluation}
 
 In the end, the purpose of this project is to produce animations for computer graphics, and the
-last word must be given to the human observer who watches these animations. Some sample output
-from my program is given in figures~\ref{sampleCradle} to~\ref{sampleSpiral}. Unfortunately,
-animations are notoriously hard to display in print; the flickbook in the corner of this
-dissertation is an attempt to this end. For a more useful qualitative impression I have provided
-a CDROM of video files with this dissertation; alternatively they may be obtained from the
-project web site \texttt{http://www.maniation.com/}. I suggest that the reader should watch
-these videos to gain a more personal impression of this project's results.
+last word must be given to the human observer who watches these animations. I would like to claim
+that the results are of a quality similar to what an animator might create, and that they are
+realistic in the sense that they do not violate the laws of physics or anatomy. However, such a
+claim is difficult to verify in print. For this purpose I have compiled a video of several
+example animations, and I urge the reader to watch it to gain a more personal impression of this
+project's results. The video can be found on the CDROM accompanying this dissertation, or on the
+project web site \texttt{http://www.maniation.com/}. Figures~\ref{sampleCradle}
+to~\ref{sampleSpiral} give some frames from this video.
 
-\begin{figure}
+In the human character animation samples, the joints sometimes twist into positions which look
+very uncomfortable. These positions do obey the joint limits which I prescribed to the simulation.
+The simulation does not have any notion of ``comfort'' though; within the range of valid angles,
+the joints move freely. Future versions of the simulation may attempt to address this issue.
+
+Appendix~\ref{cdrom} gives further details on the implementation of these examples, and points
+out noteworthy features.
+
+\begin{figure}[p]
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/cradle1} \hspace{5mm}
             \includegraphics[width=60mm,height=45mm]{figures/cradle2}}\vspace{5mm}
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/cradle3} \hspace{5mm}
             \includegraphics[width=60mm,height=45mm]{figures/cradle4}}
-\caption{Animation of Newton's cradle. Each ball is joined to the frame with a `nail'
-    constraint.\label{sampleCradle}}
+\caption{Animation of Newton's cradle.\label{sampleCradle}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/boxes1} \hspace{5mm}
             \includegraphics[width=60mm,height=45mm]{figures/boxes2}}\vspace{5mm}
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/boxes3} \hspace{5mm}
@@ -209,7 +216,7 @@ these videos to gain a more personal impression of this project's results.
 \caption{Animation of ten boxes falling onto a table.\label{sampleBoxes}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/stairs1} \hspace{5mm}
             \includegraphics[width=60mm,height=45mm]{figures/stairs2}}\vspace{5mm}
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/stairs3} \hspace{5mm}
@@ -217,7 +224,7 @@ these videos to gain a more personal impression of this project's results.
 \caption{Animation of Alfred falling down a set of stairs.\label{sampleStairs}}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[p]
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/spiral1} \hspace{5mm}
             \includegraphics[width=60mm,height=45mm]{figures/spiral2}}\vspace{5mm}
 \centerline{\includegraphics[width=60mm,height=45mm]{figures/spiral3} \hspace{5mm}
