@@ -9,7 +9,7 @@ wordcount:
 	sed -i~ -e "s/[0-9]*%WORDCOUNT%/"`perl ~/tools/latex2text.pl diss.tex | wc -w | tr -d '\n'`"%WORDCOUNT%/" diss.tex
 
 diss-final.pdf:	diss-ps.pdf diss.pdf
-	pdftk S=diss-ps.pdf D=diss.pdf cat D1-18 S19 D20-31 S32 D33-40 S41 D42 S43 D44-54 S55-56 D57 S58 D59-60 S61 D62-end output diss-final.pdf
+	pdftk S=diss-ps.pdf D=diss.pdf cat D1-18 S19 D20-31 S32 D33-40 S41 D42 S43 D44-56 S57-58 D59 S60 D61-62 S63 D64-end output diss-final.pdf
 
 diss.pdf:	*.tex
 	pdflatex diss

@@ -24,7 +24,7 @@ where $\ve{r}_i$ is the position of the centre of mass of body $i$, and $\ve{\om
 angular velocity. Thus $\dot{\ve{x}}$ is the concatenation of all bodies' linear and angular
 velocities, and $\ddot{\ve{x}}$ is that of the accelerations. We cannot write down an explicit
 expression for \ve{x} since we do not have a representation of orientation whose derivative is
-\ve{\omega}! This is not a problem though, since we can work exclusively with $\dot{\ve{x}}$ and
+\ve{\omega}. This is not a problem though, since we can work exclusively with $\dot{\ve{x}}$ and
 $\ddot{\ve{x}}$.
 
 We require two more vectors in the same format, containing the forces and torques already acting
@@ -97,7 +97,7 @@ partial differentiation. Instead we make use of the following analytic results:
 \end{equation}
 
 Any Jacobian component $J_{ij}$ is certainly zero if constraint $i$ does not mention body
-$\lfloor j/6 \rfloor$. Since constraints are usually only between two bodies, \m{J} and
+$\lfloor j/6 \rfloor$. Since each constraints usually involves only two bodies, \m{J} and
 $\dot{\m{J}}$ each have a sparse block-structured form sketched in figure~\ref{jacobianFigure}.
 If there are many constraints, their slices of the Jacobian can be calculated independently and
 simply inserted at the right places in \m{J} and $\dot{\m{J}}$. Appendix~\ref{constraintAppendix}
@@ -116,17 +116,17 @@ gives derivations of Jacobian slices for different constraint types.
 \centerline{\includegraphics{figures/jacobian}}
 \caption[]{Block structure of the Jacobian matrix of $m$ constraints in a system of $n$ bodies.
     For example, if $\ve{c}_i$ is a ball-and-socket joint between bodies $b_1$ and $b_2$, each of
-    the two slices is three rows high and six columns wide. The vertical position of $\ve{c}_i$
-    must match its offset in the concatenated constraint vector \hbox{\ve{c}}, and the horizontal
-    positions must match the offset of bodies $b_1$ and $b_2$ in the vectors $\dot{\ve{x}}$,
-    \ve{\Phi} and $\ve{\Phi}_p$ (equations~\ref{lagrangeStateVector} and~\ref{PhiVector}).
-    \label{jacobianFigure}}
+    the two slices (shaded areas) is three rows high and six columns wide. The vertical position
+    of $\ve{c}_i$ must match its offset in the concatenated constraint vector \hbox{\ve{c}}, and
+    the horizontal positions of the slices must match the offset of bodies $b_1$ and $b_2$ in the
+    vectors $\dot{\ve{x}}$, \ve{\Phi} and $\ve{\Phi}_p$ (equations~\ref{lagrangeStateVector}
+    and~\ref{PhiVector}). \label{jacobianFigure}}
 \end{figure}
 
 
 \subsection{Finding the Jacobians\label{jacCalculation}}
 
-Both~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD} omit details of how to derive the Jacobians
+Both~\cite{BaraffWitkin:97} and~\cite{Saunders:PhD} omit details on how to derive the Jacobians
 $\m{J}$ and $\dot{\m{J}}$ for a custom constraint. I deduced the following procedure
 after pondering over some source code implementing one type of constraint
 (specifically equations~\ref{constrEx1J} and~\ref{constrEx1JDot} below). The source code
@@ -140,7 +140,7 @@ We then calculate the first and second derivatives with respect to time, $\dot{\
 and $\ddot{\ve{c}}$, which must both exist.
 
 For any sort of valid constraint, we should be able to massage both $\dot{\ve{c}}$ and
-$\ddot{\ve{c}}$ into a sum of products form. Moreover, in each product in
+$\ddot{\ve{c}}$ into a sum of products form. Moreover, in each summand in
 $\dot{\ve{c}}$, at least one of the variables should be either the linear velocity of
 the centre of mass of one of the bodies, or the angular velocity of one of the bodies.
 Use algebra to make this `chosen variable' the rightmost variable in each product, and

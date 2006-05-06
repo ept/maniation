@@ -44,10 +44,10 @@ Note that multiplication is not commutative.
 We will also need the conjugate and the inverse of a quaternion. In analogy to
 complex numbers, these are given respectively by
 \begin{eqnarray}
-\overline{\q{q}} & = & q_w - q_x\qi - q_y\qj - q_z\qk\\
-\q{q}^{-1} & = & \frac{\overline{\q{q}}}{\norm{\q{q}}^2}\\
-\mathrm{where}\quad&& \norm{q_w + q_x\qi + q_y\qj + q_z\qk} =
-    \sqrt{q_w^2 + q_x^2 + q_y^2 + q_z^2}
+\overline{\q{q}} & = & q_w - q_x\qi - q_y\qj - q_z\qk \label{quatConjugate}\\
+\q{q}^{-1} & = & \frac{\overline{\q{q}}}{\norm{\q{q}}^2} \label{quatInverse}\\
+\mathrm{where}\quad\quad \norm{q_w + q_x\qi + q_y\qj + q_z\qk} &=&
+    \sqrt{q_w^2 + q_x^2 + q_y^2 + q_z^2} \label{quatMagnitude}
 \end{eqnarray}
 
 Sometimes we will need to relate a 3D vector to a quaternion with zero real part.
@@ -58,9 +58,9 @@ quaternion to be
 \tilde{\ve{u}} = u_1\qi + u_2\qj + u_3\qk.
 \end{equation}
 
-The complex constants \qi{}, \qj{} and \qk{} are required for the algebra
-only, therefore we can represent a quaternion as four numbers $(w,x,y,z)$. It turns out that a
-quaternion with unit magnitude ($\norm{\q{q}} = 1$) neatly represents an arbitrary rotation in
+The complex constants \qi{}, \qj{} and \qk{} are required for the algebra only, therefore we can
+represent a quaternion as four numbers $(q_w,q_x,q_y,q_z)$. It turns out that a quaternion
+with unit magnitude ($\norm{\q{q}} = 1$) neatly represents an arbitrary rotation in
 3D space, similarly to the way that an ordinary complex number represents a rotation in the 2D
 Argand diagram. The condition $\norm{\q{q}} = 1$ reduces the number of degrees of freedom to
 three, as required.
@@ -144,5 +144,6 @@ is `solved' by renormalizing the quaternion:
 (using Euler's method for clarity; $\q{q}'$ would be appropriately redefined when using e.g.\ RK4).
 This `solution' seemed quite \textsl{ad hoc} to me, and I demonstrated that it returns
 erroneous results if the angular velocity is large (see appendix~\ref{quatNormalization}).
-However, the errors turned out to be insignificant in practise, and hence it is sufficient to
-modify the ODE solver such that it renormalizes all quaternions after each simulation step.
+I derive an exact algorithm for quaternion integration in appendix~\ref{quatProofs}. Such
+an algorithm may be important in aerospace applications, as the NASA patent~\cite{NASA:00}
+suggests.

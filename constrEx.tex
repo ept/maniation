@@ -15,7 +15,7 @@ space that we want to nail the point to. Then we can set up a simple constraint 
 \end{equation}
 which equals the null vector when $\ve{p}+\ve{s}$ and $\ve{t}$ coincide, as required.
 Since this is a three-dimensional vector equation, we are actually defining three constraints
-at once. Since \ve{t} does not change over time, we obtain
+at once. \ve{t} does not change over time, so we obtain
 \begin{eqnarray}
 \dot{\ve{c}} &=& \dot{\ve{p}} + \ve{\omega}\times\ve{s} \nonumber\\
 &=& \dot{\ve{p}} - \dual{\ve{s}}\,\ve{\omega} \\
@@ -57,7 +57,7 @@ next step of the procedure:
     \end{array}\right] \ve{\omega} \nonumber\\\label{constrEx1JDot}
 \end{eqnarray}
 
-We see that here there is only one slice for $\dot{\m{J}}$; the rest of the matrix
+We see that here there is only one slice for $\dot{\m{J}}$; the slice belonging to $\ddot{\ve{p}}$
 is zero. Since $\ve{\omega}$ also occurs inside the matrix, there are actually several
 alternative representations of this matrix which are equally valid.
 
@@ -91,9 +91,10 @@ matrix slices for \m{J} and two slices for $\dot{\m{J}}$.
 
 We now have formulae to define a ball-and-socket joint. How can we express other types
 of joints? A good way of doing this is by augmenting the ball-and-socket constraint with
-additional constraints which restrict the set of valid rotations. In this section we will
+additional constraints which restrict the set of valid rotations. In this section I
 derive expressions for a constraint which prohibits rotation about one particular axis~--
-or, in other words, confines the axis to a plane. Let us define a unit vector \ve{n} which
+or, in other words, confines the axis of any valid rotation to a plane. In engineering terms,
+this is called a universal joint~\cite{Shabana:01}. Let us define a unit vector \ve{n} which
 points in the direction of the axis we want to prohibit; equivalently, this is the normal of
 the confinement plane.
 
@@ -105,14 +106,29 @@ Don't be confused by the fact that the joystick handle happens to point in the d
 normal~-- any sort of obscure shape may be substituted in its place without changing the nature
 of the constraint!
 
-A more common sort of joint is the hinge, which we find in most doors, in our knees and elbows.
-It allows rotation only about one particular axis. We can conveniently express it by employing two
-`joystick' constraints on the same body, each of which confines the axis to a plane. Provided the
-two planes are not parallel, the axis about which rotation may occur corresponds to the line of
-intersection of these two planes. In summary, to make a hinge joint, we first add a
-ball-and-socket joint. Then we find two non-collinear vectors which are both orthogonal to the
-hinge axis, and use them as normal vectors for two `joystick' constraints. This reduces the
-original number of six degrees of freedom to one~-- the angle of the hinge.
+A more common sort of joint is the \emph{hinge} or \emph{revolute joint}, which we find in most
+doors, in our knees and elbows. It allows rotation only about one particular axis. We can
+conveniently express it by employing two `joystick' constraints on the same body, each of which
+confines the axis to a plane. Provided the two planes are not parallel, the axis about which
+rotation may occur is just the line of intersection of these two planes. In summary, to make a
+revolute joint, we first add a ball-and-socket joint. Then we find two non-collinear vectors
+which are both orthogonal to the hinge axis, and use them as normal vectors for two `joystick'
+constraints. This reduces the original number of six degrees of freedom to one~-- the angle of
+the hinge.
+
+For this derivation I will use an alternative notation for quaternions, which is used by
+Shoemake~\cite{Shoemake:85}, amongst others. Instead of using the complex constants \qi{}, \qj{}
+and \qk{}, a quaternion is written as a pair consisting of a scalar (the real part) and a 3D
+vector (the three imaginary parts):
+\begin{equation}
+\q{q} = q_w + q_x\qi + q_y\qj + q_z\qk = [q_w, (q_x, q_y, q_z)^T] = [q_w, \ve{q}_v]
+\end{equation}
+Using this notation, we can write the quaternion product in terms of vector dot and cross products:
+\begin{equation}\label{quatProduct2}
+\q{p}\q{q} = [p_w,\; \ve{p}_v]\;[q_w,\; \ve{q}_v] =
+    [p_w q_w - \ve{p}_v \cdot \ve{q}_v,\;
+    p_w \ve{q}_v + q_w \ve{p}_v + \ve{p}_v \times \ve{q}_v]
+\end{equation}
 
 We shall now consider the relative rotation of two rigid bodies. Say the first body has an
 orientation quaternion \q{p} and angular velocity \ve{\phi}, and the second body orientation
@@ -136,20 +152,6 @@ Since the real part of $\tilde{\ve{n}}$ is zero by definition, this is just the 
 \ve{n} and the axis of $\q{p}^{-1}\q{q}$, with an extra minus sign in
 front~(cf.\ equation~\ref{quatProduct2}). The constraint function is a scalar because
 we are only losing one degree of freedom.
-
-For this derivation I will use an alternative notation for quaternions, which is used by
-Shoemake~\cite{Shoemake:85}, amongst others. Instead of using the complex constants \qi{}, \qj{}
-and \qk{}, a quaternion is written as a pair consisting of a scalar (the real part) and a 3D
-vector (the three imaginary parts):
-\begin{equation}
-\q{q} = q_w + q_x\qi + q_y\qj + q_z\qk = [q_w, (q_x, q_y, q_z)^T] = [q_w, \ve{q}_v]
-\end{equation}
-Using this notation, we can write the quaternion product in terms of vector dot and cross products:
-\begin{equation}\label{quatProduct2}
-\q{p}\q{q} = [p_w,\; \ve{p}_v]\;[q_w,\; \ve{q}_v] =
-    [p_w q_w - \ve{p}_v \cdot \ve{q}_v,\;
-    p_w \ve{q}_v + q_w \ve{p}_v + \ve{p}_v \times \ve{q}_v]
-\end{equation}
 
 The derivative of \q{q} with respect to time is
 $\dot{\q{q}} = \frac{1}{2}\tilde{\ve{\omega}}\q{q}$. Pushing the differential operator
@@ -305,9 +307,9 @@ desired behaviour is achieved.
 We want to define a constraint function whose value is the distance between a point
 and a plane, where the point is attached to one rigid body, and the plane to another. The plane
 is defined by a point in the plane and a normal vector. The distance should be positive if the
-point is on the side of the plane pointed to by the normal, and negative otherwise.
-If we put this constraint directly into the Lagrange multiplier equation, it will enforce the
-condition that the distance be zero~-- the point is confined to move only within the plane.
+point is on the side of the plane pointed to by the normal, and negative if it is on the opposite
+side. If we put this constraint directly into the Lagrange multiplier equation, it will enforce
+the condition that the distance be zero~-- the point is confined to move only within the plane.
 But if we use the same constraint function in an inequality, we have a handler for the
 vertex/face collision case.
 
@@ -367,7 +369,7 @@ If \ve{u} and \ve{v} are not parallel, we can find a unique plane which contains
 parallel to the other. This plane has a normal vector $\ve{n} = \ve{u}\times\ve{v}$ (or
 $\ve{n} = \ve{v}\times\ve{u}$). Interestingly this normal is the direction in which the force or
 impulse acts in the event of a collision. It is not obvious that this is the case, but by playing
-around with two books or similar, it is possible to convince oneself. Then the closest distance
+around with two books or similar it is possible to convince oneself. Then the closest distance
 between the two lines is given by
 \begin{equation}
 c = (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot\frac{\ve{n}}{\norm{\ve{n}}}

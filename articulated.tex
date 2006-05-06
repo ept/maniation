@@ -4,7 +4,7 @@
 The methods developed so far allow the simulation of a single rigid body with forces
 acting on it. Further challenges arise when we consider multibody systems in which there are
 conditions which must not be violated. In an articulated body, for example, each segment
-must be modelled as an invidiual rigid body, under the condition that joints must not be pulled
+must be modelled as an individual rigid body, under the condition that joints must not be pulled
 apart.
 
 There are various strategies for simulating articulated bodies:
@@ -33,7 +33,7 @@ There are various strategies for simulating articulated bodies:
     moving towards one, and even whether it is accelerating towards one. Using the method of
     \emph{Lagrange multipliers} we can determine what forces must be applied to the bodies to
     nullify this unwanted acceleration before it ever occurs. This compromise comes at the
-    expense of higher computational cost, because systems of linear equations have to be solved
+    expense of higher computational cost, because simultaneous linear equations have to be solved
     at run-time.
 \end{itemize}
 
@@ -115,7 +115,7 @@ parent bone. This is illustrated in figure~\ref{jointsFigure}.
 \end{figure}
 
 There are different ways of formulating this model. My approach is to assume initially that every
-joint is a ball-and-socket type. For those joints which are not not, additional constraints are
+joint is a ball-and-socket type. For those joints which are not, additional constraints are
 added to restrict the permitted axes of rotation.
 
 \subsection{Ball-and-socket joints}

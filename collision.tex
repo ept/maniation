@@ -83,7 +83,28 @@ to tackle in general.
 Instead, I chose to use a heuristic if a collision cannot be classified as either vertex/face or
 edge/edge: the colliding surfaces are approximated by spheres, planes and points, for which
 handling expressions can be derived. This approximation can cause unrealistic behaviour in some
-cases, but I have not found it to be a problem in practise.
+cases, but I have not found it to be a problem in practice.
+
+
+\section{Collision and contact handling\label{collisionHandling}}
+
+\subsection{Overview}
+
+In the last section I explained how to detect contact between meshes. To prevent the bodies from
+penetrating each other during the simulation, the collision that has been detected must be
+handled in a physical way.
+
+Let us distinguish two cases of contact between bodies: resting contact and colliding contact.
+Resting contact is given when the relative velocity at the contact point is zero (or very small)
+when projected onto the contact plane. Bodies in colliding contact are moving towards each other.
+
+Creating a simulation involving contacts is generally seen as a difficult task.
+Baraff~\cite{BaraffWitkin:97} derives equations to handle collisions, and outlines (with a number
+of errors) a way of handling resting contact. Unfortunately his collision handling does not work
+in combination with constraints, and his resting contact computation relies on a complicated and
+uncommon numerical routine. In this project, I developed a new method of handling contacts which
+is simpler to implement, more powerful, and works perfectly together with constraints like those
+required for articulated bodies.
 
 \begin{figure}
 \centerline{\includegraphics{figures/contacts1}}
@@ -100,65 +121,34 @@ cases, but I have not found it to be a problem in practise.
 \end{figure}
 
 
-\section{Collision and contact handling\label{collisionHandling}}
-
-\subsection{Overview}
-
-In the last section I explained how to detect contact between meshes. To prevent the bodies from
-penetrating each other during the simulation, the collision that has been detected must be
-handled in a physical way.
-
-Let us distinguish two cases of contact between bodies: resting contact and colliding contact.
-A book lying on a table is in resting contact with the surface: their relative velocity is zero,
-but the desk exerts a force on the book to prevent it from penetrating into the surface.
-Colliding contact is given for example between the ground and a ball bouncing off it. In reality,
-the ball stays in contact with the ground for a finite length of time, during which it is
-deformed and experiences a finite force accelerating it upwards. In our simulation, however, we
-are working with rigid bodies which cannot be deformed, so we want the collision to happen
-instantaneously in the moment when the ball touches the ground. One way of looking at this is as
-an infinitely strong force acting over an infinitely short time, but a more useful representation
-is in terms of an impulse which directly affects the momenta of the bodies.
-
-Creating a simulation involving contacts is generally seen as a difficult task.
-Baraff~\cite{BaraffWitkin:97} derives equations to handle collisions, and outlines (with a number
-of errors) a way of handling resting contact. Unfortunately his collision handling does not work
-in combination with constraints, and his resting contact computation relies on a complicated and
-uncommon numerical routine. In this project, a new method of handling contacts is developed, which
-is simpler to implement, more powerful, and works perfectly together with constraints like those
-required for articulated bodies.
-
-
 \subsection{Resting contact\label{restingContact}}
 
 Bodies in resting contact exert equal and opposite forces on each other so that they do not
 interpenetrate. This force must exactly balance the outside force, otherwise they will accelerate
 apart. The direction of this force is perpendicular to the plane of contact.
-Note that we are not trying to simulate friction at this point. If one were to push the book over
-the horizontal table surface, it would glide without slowing down. Despite the movement, this
-contact is resting because the relative velocity is parallel to the contact plane.
 
-How do we now compute this contact force in an arbitrary system, where there may be objects stacked
-on top of each other, different forces and torques acting, and so on? We can employ a constraint
-function $c$ whose value is positive when the bodies are separated, zero when they are in contact,
-and negative when they have penetrated. In resting contact we have $\dot{c} = 0$. The function
-becomes interesting when we consider its second derivative, $\ddot{c}$. The non-penetration
-constraint for a resting contact can be written as
+We need an algorithm which computes the contact forces in an arbitrary system, where there may be
+objects stacked on top of each other, different forces and torques acting, etc. Let us employ a
+constraint function $c$ whose value is positive when the bodies are separated, zero when they are
+in contact, and negative when they have penetrated. In resting contact we have $\dot{c} = 0$. The
+function becomes interesting when we consider its second derivative, $\ddot{c}$. The
+non-penetration constraint for a resting contact can be written as
 \begin{equation} \label{constrInequality}
 \ddot{c} \ge 0.
 \end{equation}
 
 More exactly, if it is the case that $\ddot{c} < 0$, we need to apply forces and torques
-to the bodies such that afterwards we have $\ddot{c} = 0$. But when
-$\ddot{c} \ge 0$, no force is applied (otherwise we would be glueing the book to the
-table). But how do we solve this inequality in practise? At this point we diverge from Baraff's
+to the bodies such that afterwards we have $\ddot{c} = 0$. When
+$\ddot{c} \ge 0$, no force is applied (otherwise we would be glueing the bodies together).
+But how do we solve this inequality in practice? At this point we diverge from Baraff's
 method~\cite{BaraffWitkin:97}, which expresses equation~\ref{constrInequality} and additional
 side conditions as a \emph{quadratic program} and uses a specialized numerical solver.
 
-Let us take a much simpler approach and pretend for now that equation~\ref{constrInequality}
+Let us take a much simpler approach and pretend for now that (\ref{constrInequality})
 contained an equals sign. Then this is a constraint like any other, which we can satisfy by using
 the Lagrange multiplier method of section~\ref{lagrange}. Moreover, if there are multiple
-points of resting contact in the system, and also `real' constraints like joints between bodies,
-we can solve all of these simultaneously without having to think twice.
+points of resting contact in the system, and also `real' equality constraints like joints between
+bodies, we can solve all of these simultaneously without having to think twice.
 
 However, having solved equation~\ref{lagrangeEquation} for \ve{\lambda}, we need to take care.
 Observe equation~\ref{lagrangeSolution}, in which the constraint forces are computed:
@@ -167,13 +157,13 @@ Observe equation~\ref{lagrangeSolution}, in which the constraint forces are comp
 \end{equation}
 Since each row of \m{J} is generated by a particular constraint, and the $i$th row of \m{J} is
 scaled with component $\lambda_i$ of \ve{\lambda} in the linear combination of constraint forces,
-we can say that each each component $i$ of \ve{\lambda} specifies the `amount' of constraint $i$
+we can say that each each component $\lambda_i$ specifies the `amount' of constraint $i$
 to apply to the system. Moreover, a positive value of the $\lambda_i$ component generates
 forces and torques which push the bodies apart, while a negative value pulls them together (the
 opposite sign convention is equivalent, but one convention must be used consistently). It is such
 a negative $\lambda_i$ that we must avoid.
 
-This gives us a basis for an algorithm which turns equation~\ref{constrInequality} back into what
+This gives us a basis for an algorithm which turns (\ref{constrInequality}) back into what
 it actually is~-- an inequality: set up constraint functions for all contact points, and solve the
 system of linear equations for the Lagrange multiplier \ve{\lambda}. In this vector, find all
 components relating to inequality constraints whose value is negative. (Equality constraints
@@ -186,7 +176,7 @@ of constraints. The process may take several iterations before terminating, but 
 because in each iteration we either reduce the number of active constraints or exit.
 
 I have not yet been successful in proving this novel algorithm correct, but despite extensive
-pondering I have not found any examples in which it fails either.
+pondering and testing I have not found any examples in which it fails either.
 
 \subsection{Colliding contact\label{collidingContact}}
 
@@ -212,8 +202,9 @@ dropped from. At the other extreme, an \emph{inelastic} collision is one which r
 of the system as much as possible~-- the bodies do not `bounce apart' again.
 
 Most real collisions are somewhere in between, depending on the materials of the colliding
-objects. The elasticity is a scalar $0 \le \varepsilon \le 1$, where $\varepsilon = 0$ indicates
-an inelastic collision, and $\varepsilon = 1$ full elasticity.
+objects. The elasticity (also called \emph{coefficient of restitution}) is a scalar
+$0 \le \varepsilon \le 1$, where $\varepsilon = 0$ indicates an inelastic collision, and
+$\varepsilon = 1$ full elasticity.
 
 How do we now find the impulses we need to apply to the colliding bodies, and how do we
 simultaneously handle constraints? Once again we can use a Lagrange multiplier method, but a new

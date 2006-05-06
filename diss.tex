@@ -44,7 +44,7 @@
 \newcommand{\flickbook}{%
     \fancyhf{}
     \fancyfoot[RO]{\stepcounter{flickframe}
-        \zerobox{t}{\rule{2cm}{1.5cm}\\Frame \arabic{flickframe}}}
+        \zerobox{t}{\vspace{-1cm}\hspace{0.5cm}\includegraphics[width=3cm,height=3cm]{flick/flick1-\arabic{flickframe}}}}
     \fancyfoot[LE]{}
 }
 \flickbook
@@ -78,7 +78,7 @@ Name:               & Martin Kleppmann \\
 College:            & Corpus Christi College \\
 Project Title:      & Rigid body simulation for 3D character animation \\
 Examination:        & Computer Science Tripos, June 2006 \\
-Word Count:         & 12130%WORDCOUNT%
+Word Count:         & 11982%WORDCOUNT%
 \footnotemark[1]\\
 Project Originator: & Martin Kleppmann \\
 Supervisor:         & Dr Neil Dodgson \\
@@ -90,7 +90,7 @@ Supervisor:         & Dr Neil Dodgson \\
 \section*{Original Aims of the Project}
 The aim of this project was to develop a simulation which creates physically accurate animations
 of a 3D character, like a human or an animal. The character was to be represented as a polygon
-mesh bound to a skeleton, so that it could move at the joints but was otherwise rigid. The
+mesh, bound to a skeleton such that it could move at the joints but was otherwise rigid. The
 animations produced by the simulation should be fit for use in computer graphics applications~--
 i.e.\ they should be realistic in the sense that the character must not move in an anatomically
 or physically impossible way.
@@ -100,7 +100,7 @@ A general-purpose simulation for a wide range of mechanical systems has been dev
 on various examples. It correctly handles the dynamics of articulated characters, as required,
 and it also supports many other systems of interacting rigid bodies. All physical effects
 of rigid bodies have been implemented except for friction. The simulation results show a good
-agreement with the exact solutions for simple systems, and more complicated systems have been
+agreement with exact solutions for simple systems, and more complicated systems have been
 judged qualitatively. Several algorithms for different aspects of the simulation were newly
 invented in this project.
 

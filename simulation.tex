@@ -28,8 +28,8 @@ body's \emph{principal axes}~\cite{Feynman:63,Goldstein:80}.
 
 Angular velocity appears to be a straightforward way of describing the body's rotation: the
 direction of the vector gives the axis of rotation, while its magnitude is the rate of rotation
-(most commonly given in radians per second). Unfortunately, in an asymmetric body, the angular
-velocity may vary over time even if there are no external influences on the body, due to an effect
+in radians per second. Unfortunately, in an asymmetric body, the angular velocity may vary over
+time even if there are no external influences on the body, due to an effect
 known as \emph{free precession} or \emph{Poinsot motion}~\cite{Goldstein:80,Julian:notes}. It is
 therefore more convenient to use \emph{angular momentum} instead, which is conserved in the
 absence of torques.
@@ -45,7 +45,7 @@ Momentum & Linear momentum     & Angular momentum           \\
          & $\ve{p} = m\ve{v}$ & $\ve{L} = \m{I}\ve{\omega}$\\\hline
 External influence & Force $\ve{F} = \dot{\ve{p}}$ & Torque $\ve{\tau} = \dot{\ve{L}}$ \\\hline
 \end{tabular}}
-\caption{Summary of the physical quantities describing a rigid body\label{rigidBodySummary}}
+\caption{Summary of the physical quantities describing a rigid body.\label{rigidBodySummary}}
 \end{table}
 
 Forces and torques acting on a body may change the momenta of a body as described in
@@ -93,7 +93,7 @@ evaluate $\frac{\diff f}{\diff t}$ at different times and use these values to fi
 curve to the exact solution over the range of one time step. For example, fourth-order Runge-Kutta
 (RK4)~\cite{NRinC} uses four values of the derivative to fit a fourth-order polynomial~-- contrast
 this to the first-order polynomial (linear function) used by Euler's method. This amounts to using
-the first five terms of the Taylor expansion of the exact solution, including the $h^4$ term, so
+the first five terms of the Taylor series of the exact solution, including the $h^4$ term, so
 we expect the error in each time step to be $O(h^5)$~-- a minute error even if $h$ is only
 moderately small. The step size can be much longer than in Euler's method while achieving the same
 accuracy, which makes Runge-Kutta significantly more efficient.
@@ -102,7 +102,7 @@ Further improvements can be made by adapting the step size $h$ to the situation.
 I chose to use the embedded Cash-Karp/Runge-Kutta method described in~\cite{NRinC}, which uses
 six evaluations of the derivative to calculate both a fourth-order and a fifth-order
 extrapolation. If the difference between them is small, the total error is likely to be small,
-and the next step taken will be longer. If the difference lies above a threshold, the current
+and the next step will be longer. If the absolute difference lies above some threshold, the current
 time step is discarded and retried with a smaller $h$. Thus the ODE solver can rapidly skip over
 periods in which there is little happening, without sacrificing accuracy in moments of sudden
 change.

@@ -52,9 +52,9 @@ revolutions per second about the gyroscope axis, one full circle of precession i
 then ran the simulation for 8~s, using an average time step length of about $2.3\cdot 10^{-4}$~s.
 The simulation performed one full circle of precession in 7.953~s, which
 is within 0.6~\% of the theoretical value. Over the course of 8~s, the body rotated by $320.36\pi$
-radians about its own axis (160.18 revolutions), which differs from the theoretical value by only
-0.1~\%. These errors varied little even in simulations using larger time steps. The effects of
-nutation\footnote{Having nothing in common with mutation, nutation is an oscillation about an axis
+radians about its own axis, which differs from the theoretical value by only 0.1~\%. These errors
+varied little even in simulations using larger time steps. The effects of nutation\footnote{Having
+nothing in common with \emph{mutation}, \emph{nutation} is an oscillation about an axis
 orthogonal to the two main axes of rotation. \cite{Feynman:63}} were small for the chosen initial
 conditions but may have contributed towards the errors.
 
@@ -148,7 +148,7 @@ Profiling of the application revealed that the simulation spends about 93~\% of 
 the biconjugate gradient algorithm to solve the constraint equations. To round off the quantitative
 evaluation, I wanted to know how the computational cost relates to the size of the problem.
 
-The biconjugate gradient algorithm is an interative procedure which stops when some error
+The biconjugate gradient algorithm is an iterative procedure which stops when some error
 criterion is met. In theory, if exact arithmetic was being used, a solution would always be found
 in $O(N)$ iterations for a system of $N$ constraints\footnote{or rigid bodies, but since we are
 dealing with articulated bodies, we can assume a linear dependence between the numbers of bodies
@@ -158,7 +158,7 @@ a multiplication has a cost of $O(N^2)$ for a general matrix, but only
 $O(N)$ for the type of sparse matrix we are dealing with. Hence a theoretical estimate of the
 overall cost of the algorithm would be $O(N\cdot N) = O(N^2)$.
 
-In practise, the algorithm converges more slowly when using floating-point arithmetic.
+In practice, the algorithm converges more slowly when using floating-point arithmetic.
 I measured the ratio of CPU time to simulation time for a range of different-sized systems and
 found an overall relationship of about $O(N^{2.5})$. Note that the use of sparse matrices still
 causes a significant benefit, since a simpler implementation would require the same number of
@@ -179,23 +179,24 @@ problem by keeping track of the approximate solution with the smallest error amo
 iterations; if the algorithm starts diverging, it is aborted and the `best guess' is used.
 This procedure is not mathematically justified, but in all my simulations it produced good results.
 
-
+\enlargethispage{20pt}
 \section{Qualitative evaluation}
 
 In the end, the purpose of this project is to produce animations for computer graphics, and the
 last word must be given to the human observer who watches these animations. I would like to claim
 that the results are of a quality similar to what an animator might create, and that they are
 realistic in the sense that they do not violate the laws of physics or anatomy. However, such a
-claim is difficult to verify in print. For this purpose I have compiled a video of several
+claim is difficult to defend convincingly in print. I have therefore compiled a video of several
 example animations, and I urge the reader to watch it to gain a more personal impression of this
-project's results. The video can be found on the CDROM accompanying this dissertation, or on the
+project's results. The video can be found on the CD-ROM accompanying this dissertation, and on the
 project web site \texttt{http://www.maniation.com/}. Figures~\ref{sampleCradle}
 to~\ref{sampleSpiral} give some frames from this video.
 
 In the human character animation samples, the joints sometimes twist into positions which look
 very uncomfortable. These positions do obey the joint limits which I prescribed to the simulation.
 The simulation does not have any notion of ``comfort'' though; within the range of valid angles,
-the joints move freely. Future versions of the simulation may attempt to address this issue.
+the joints move freely. The articulated body model would have to be extended to accommodate such
+aspects.
 
 Appendix~\ref{cdrom} gives further details on the implementation of these examples, and points
 out noteworthy features.
