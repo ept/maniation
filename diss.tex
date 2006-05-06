@@ -38,14 +38,16 @@
     \makebox[0pt][l]{\box0}%
     \ignorespaces
 }
-\newcounter{flickframe}
+\newcounter{flickright}
+\newcounter{flickleft}
 \usepackage{fancyhdr}
 \pagestyle{fancyplain}
 \newcommand{\flickbook}{%
     \fancyhf{}
-    \fancyfoot[RO]{\stepcounter{flickframe}
-        \zerobox{t}{\vspace{-1cm}\hspace{0.5cm}\includegraphics[width=3cm,height=3cm]{flick/flick1-\arabic{flickframe}}}}
-    \fancyfoot[LE]{}
+    \fancyfoot[RO]{\stepcounter{flickright}
+        \zerobox{t}{\vspace{-1.2cm}\hspace{0.6cm}\includegraphics[width=3cm,height=3cm]{flick/flick1-\arabic{flickright}}}}
+    \fancyfoot[LE]{\stepcounter{flickleft}
+        \zerobox{t}{\vspace{-1.2cm}\makebox[0pt][r]{\includegraphics[width=3cm,height=3cm]{flick/flick2-\arabic{flickleft}}\hspace{0.6cm}}}}
 }
 \flickbook
 \fancyhead[RO,LE]{\thepage}
