@@ -17,10 +17,11 @@ public class TestDynamics {
             return;
         }
         Simulation sim = new Simulation();
-        //MultiPendulum.setup(sim, 2);
+        //MultiPendulum.setup(sim, 8);
         //new NewtonsCradle(sim);
+        //sim.addBody(new Gyroscope(sim.getWorld()));
         new DynamicScene(scene, sim);
-        sim.run(5.0);
+        sim.run(6.0);
     }
 
     public static void main(String[] args) {
