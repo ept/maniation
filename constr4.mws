@@ -1,0 +1,390 @@
+{VERSION 3 0 "IBM INTEL NT" "3.0" }
+{USTYLETAB {CSTYLE "Maple Input" -1 0 "Courier" 0 1 255 0 0 1 0 1 0 0 
+1 0 0 0 0 }{CSTYLE "2D Math" -1 2 "Times" 0 1 0 0 0 0 0 0 2 0 0 0 0 0 
+0 }{CSTYLE "2D Output" 2 20 "" 0 1 0 0 255 1 0 0 0 0 0 0 0 0 0 }
+{PSTYLE "Normal" -1 0 1 {CSTYLE "" -1 -1 "" 0 1 0 0 0 0 0 0 0 0 0 0 0 
+0 0 }0 0 0 -1 -1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "Text Output" -1 2 1 
+{CSTYLE "" -1 -1 "Courier" 1 10 0 0 255 1 0 0 0 0 0 1 3 0 3 }1 0 0 -1 
+-1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "" 2 6 1 {CSTYLE "" -1 -1 "" 0 1 0 0 
+0 0 0 0 0 0 0 0 2 0 0 }0 0 0 -1 -1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "Warni
+ng" 2 7 1 {CSTYLE "" -1 -1 "" 0 1 0 0 255 1 0 0 0 0 0 0 1 0 0 }0 0 0 
+-1 -1 -1 0 0 0 0 0 0 -1 0 }{PSTYLE "Maple Output" 0 11 1 {CSTYLE "" 
+-1 -1 "" 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 }3 3 0 -1 -1 -1 0 0 0 0 0 0 -1 
+0 }{PSTYLE "" 11 12 1 {CSTYLE "" -1 -1 "" 0 1 0 0 0 0 0 0 0 0 0 0 0 0 
+0 }1 0 0 -1 -1 -1 0 0 0 0 0 0 -1 0 }}
+{SECT 0 {EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 70 "restart; with(linalg
+); with(linalg,crossprod); with(linalg,transpose);" }}{PARA 7 "" 1 "" 
+{TEXT -1 32 "Warning, new definition for norm" }}{PARA 7 "" 1 "" 
+{TEXT -1 33 "Warning, new definition for trace" }}{PARA 12 "" 1 "" 
+{XPPMATH 20 "6#7^r%.BlockDiagonalG%,GramSchmidtG%,JordanBlockG%)LUdeco
+mpG%)QRdecompG%*WronskianG%'addcolG%'addrowG%$adjG%(adjointG%&angleG%(
+augmentG%(backsubG%%bandG%&basisG%'bezoutG%,blockmatrixG%(charmatG%)ch
+arpolyG%)choleskyG%$colG%'coldimG%)colspaceG%(colspanG%*companionG%'co
+ncatG%%condG%)copyintoG%*crossprodG%%curlG%)definiteG%(delcolsG%(delro
+wsG%$detG%%diagG%(divergeG%(dotprodG%*eigenvalsG%,eigenvaluesG%-eigenv
+ectorsG%+eigenvectsG%,entermatrixG%&equalG%,exponentialG%'extendG%,ffg
+ausselimG%*fibonacciG%+forwardsubG%*frobeniusG%*gausselimG%*gaussjordG
+%(geneqnsG%*genmatrixG%%gradG%)hadamardG%(hermiteG%(hessianG%(hilbertG
+%+htransposeG%)ihermiteG%*indexfuncG%*innerprodG%)intbasisG%(inverseG%
+'ismithG%*issimilarG%'iszeroG%)jacobianG%'jordanG%'kernelG%*laplacianG
+%*leastsqrsG%)linsolveG%'mataddG%'matrixG%&minorG%(minpolyG%'mulcolG%'
+mulrowG%)multiplyG%%normG%*normalizeG%*nullspaceG%'orthogG%*permanentG
+%&pivotG%*potentialG%+randmatrixG%+randvectorG%%rankG%(ratformG%$rowG%
+'rowdimG%)rowspaceG%(rowspanG%%rrefG%*scalarmulG%-singularvalsG%&smith
+G%,stackmatrixG%*submatrixG%*subvectorG%)sumbasisG%(swapcolG%(swaprowG
+%*sylvesterG%)toeplitzG%&traceG%*transposeG%,vandermondeG%*vecpotentG%
+(vectdimG%'vectorG%*wronskianG" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#7#%*
+crossprodG" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#7#%*transposeG" }}}
+{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 226 "dual := (a) -> matrix(3,3,[
+0,-a[3,1],a[2,1],a[3,1],0,-a[1,1],-a[2,1],a[1,1],0]);\ntr := (a) -> tr
+anspose(a);\ncross := (a,b) -> matrix(3,1,[a[2,1]*b[3,1]-a[3,1]*b[2,1]
+, a[3,1]*b[1,1]-a[1,1]*b[3,1], a[1,1]*b[2,1]-a[2,1]*b[1,1]]);" }}
+{PARA 11 "" 1 "" {XPPMATH 20 "6#>%%dualGR6#%\"aG6\"6$%)operatorG%&arro
+wGF(-%'matrixG6%\"\"$F/7+\"\"!,$&9$6$F/\"\"\"!\"\"&F46$\"\"#F6F3F1,$&F
+46$F6F6F7,$F8F7F<F1F(F(F(" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%#trG%*t
+ransposeG" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%&crossGR6$%\"aG%\"bG6\"
+6$%)operatorG%&arrowGF)-%'matrixG6%\"\"$\"\"\"7%,&*&&9$6$\"\"#F1F1&9%6
+$F0F1F1F1*&&F6F;F1&F:F7F1!\"\",&*&F=\"\"\"&F:6$F1F1F1F1*&&F6FDF1F9FBF?
+,&*&FFFBF>FBF1*&F5FBFCFBF?F)F)F)" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 297 "a := matrix(3,1,[a1,a2,a3]); ad := matrix(3,1,[ad1,a
+d2,ad3]);\nb := matrix(3,1,[b1,b2,b3]); bd := matrix(3,1,[bd1,bd2,bd3]
+);\nd := matrix(3,1,[d1,d2,d3]);\ns := matrix(3,1,[s1,s2,s3]);\nt := m
+atrix(3,1,[t1,t2,t3]);\nn := matrix(3,1,[n1,n2,n3]);\np := matrix(3,1,
+[p1,p2,p3]);\nw := matrix(3,1,[w1,w2,w3]);" }}{PARA 11 "" 1 "" 
+{XPPMATH 20 "6#>%\"aG-%'matrixG6#7%7#%#a1G7#%#a2G7#%#a3G" }}{PARA 11 "
+" 1 "" {XPPMATH 20 "6#>%#adG-%'matrixG6#7%7#%$ad1G7#%$ad2G7#%$ad3G" }}
+{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"bG-%'matrixG6#7%7#%#b1G7#%#b2G7#%#
+b3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%#bdG-%'matrixG6#7%7#%$bd1G7#%
+$bd2G7#%$bd3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"dG-%'matrixG6#7%7
+#%#d1G7#%#d2G7#%#d3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"sG-%'matri
+xG6#7%7#%#s1G7#%#s2G7#%#s3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"tG-
+%'matrixG6#7%7#%#t1G7#%#t2G7#%#t3G" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#
+>%\"nG-%'matrixG6#7%7#%#n1G7#%#n2G7#%#n3G" }}{PARA 11 "" 1 "" 
+{XPPMATH 20 "6#>%\"pG-%'matrixG6#7%7#%#p1G7#%#p2G7#%#p3G" }}{PARA 11 "
+" 1 "" {XPPMATH 20 "6#>%\"wG-%'matrixG6#7%7#%#w1G7#%#w2G7#%#w3G" }}}
+{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 109 "phi := -tr(a+s-b-t)&*dual(c
+ross(p,n)) - 2*tr(ad+cross(w,s)-bd-cross(p,t))&*dual(n) + tr(n)&*dual(
+cross(p,t));" }}{PARA 12 "" 1 "" {XPPMATH 20 "6#>%$phiG,(-%#&*G6$-%'ma
+trixG6#7#7%,*%#a1G\"\"\"%#s1GF0%#b1G!\"\"%#t1GF3,*%#a2GF0%#s2GF0%#b2GF
+3%#t2GF3,*%#a3GF0%#s3GF0%#b3GF3%#t3GF3-F*6#7%7%\"\"!,&*&%#p1GF0%#n2GF0
+F3*&%#p2GF0%#n1GF0F0,&*&%#p3GF0FJ\"\"\"F0*&FFFN%#n3GF0F37%,&FEF0FHF3FC
+,&*&FIFNFPFNF3*&FMFNFGFNF07%,&FLF3FOF0,&FTF0FUF3FCF3-F'6$,$-F*6#7#7%,.
+%$ad1GF0*&%#w2GF0F<F0F0*&%#w3GF0F7F0F3%$bd1GF3*&FIFNF>F0F3*&FMFNF9F0F0
+,.%$ad2GF0*&F_oFNF1F0F0*&%#w1GF0F<FNF3%$bd2GF3*&FMFNF4F0F3*&FFFNF>FNF0
+,.%$ad3GF0*&FgoFNF7FNF0*&F]oFNF1FNF3%$bd3GF3*&FFFNF9FNF3*&FIFNF4FNF0\"
+\"#-F*6#7%7%FC,$FPF3FG7%FPFC,$FJF37%,$FGF3FJFCF3-F'6$-F*6#7#7%FJFGFP-F
+*6#7%7%FC,&F`pF3FapF0,&FioF0FjoF37%,&F`pF0FapF3FC,&FaoF3FboF07%,&FioF3
+FjoF0,&FaoF0FboF3FCF0" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 34 "om
+ega := -tr(n)&*dual(cross(w,s));" }}{PARA 0 "> " 0 "" {MPLTEXT 1 0 0 "
+" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%&omegaG,$-%#&*G6$-%'matrixG6#7#7
+%%#n1G%#n2G%#n3G-F*6#7%7%\"\"!,&*&%#w1G\"\"\"%#s2GF9!\"\"*&%#w2GF9%#s1
+GF9F9,&*&%#w3GF9F>\"\"\"F9*&F8FB%#s3GF9F;7%,&F7F9F<F;F5,&*&F=FBFDFBF;*
+&FAFBF:FBF97%,&F@F;FCF9,&FHF9FIF;F5F;" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 26 "jdot := concat(omega,phi):" }}}{EXCHG {PARA 0 "> " 0 
+"" {MPLTEXT 1 0 83 "with(codegen,makeproc): with(codegen,C):\ncode := \+
+makeproc(jdot): C(code,optimized);" }}{PARA 6 "" 1 "" {TEXT -1 15 "voi
+d code(jdot)" }}{PARA 6 "" 1 "" {TEXT -1 18 "double jdot[1][6];" }}
+{PARA 6 "" 1 "" {TEXT -1 1 "\{" }}{PARA 6 "" 1 "" {TEXT -1 13 "  doubl
+e t53;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t54;" }}{PARA 6 "" 1 "
+" {TEXT -1 13 "  double t55;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double \+
+t62;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t51;" }}{PARA 6 "" 1 "" 
+{TEXT -1 12 "  double t4;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t6;
+" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t5;" }}{PARA 6 "" 1 "" 
+{TEXT -1 12 "  double t8;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t10
+;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t9;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t16;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t1
+5;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t14;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t25;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t2
+2;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t27;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t30;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t3
+4;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t33;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t38;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t3
+2;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t42;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t39;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t3
+7;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t44;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t46;" }}{PARA 6 "" 1 "" {TEXT -1 3 "  \{" }}
+{PARA 6 "" 1 "" {TEXT -1 15 "    t4 = w1*s2;" }}{PARA 6 "" 1 "" {TEXT 
+-1 15 "    t5 = w2*s1;" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t6 = t4-t5;
+" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t8 = w3*s1;" }}{PARA 6 "" 1 "" 
+{TEXT -1 15 "    t9 = w1*s3;" }}{PARA 6 "" 1 "" {TEXT -1 17 "    t10 =
+ -t8+t9;" }}{PARA 6 "" 1 "" {TEXT -1 31 "    jdot[0][0] = -n2*t6-n3*t1
+0;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t14 = w2*s3;" }}{PARA 6 "" 1 "
+" {TEXT -1 16 "    t15 = w3*s2;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    t1
+6 = t14-t15;" }}{PARA 6 "" 1 "" {TEXT -1 30 "    jdot[0][1] = n1*t6-n3
+*t16;" }}{PARA 6 "" 1 "" {TEXT -1 31 "    jdot[0][2] = n1*t10+n2*t16;
+" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t22 = a2+s2-b2-t2;" }}{PARA 6 "" 
+1 "" {TEXT -1 22 "    t25 = p1*n2-p2*n1;" }}{PARA 6 "" 1 "" {TEXT -1 
+22 "    t27 = a3+s3-b3-t3;" }}{PARA 6 "" 1 "" {TEXT -1 23 "    t30 = -
+p3*n1+p1*n3;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t32 = p3*t1;" }}
+{PARA 6 "" 1 "" {TEXT -1 16 "    t33 = p1*t3;" }}{PARA 6 "" 1 "" 
+{TEXT -1 32 "    t34 = ad2+t8-t9-bd2-t32+t33;" }}{PARA 6 "" 1 "" 
+{TEXT -1 16 "    t37 = p1*t2;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t38 \+
+= p2*t1;" }}{PARA 6 "" 1 "" {TEXT -1 32 "    t39 = ad3+t4-t5-bd3-t37+t
+38;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    t42 = t37-t38;" }}{PARA 6 "" 
+1 "" {TEXT -1 19 "    t44 = -t32+t33;" }}{PARA 6 "" 1 "" {TEXT -1 70 "
+    jdot[0][3] = -t22*t25-t27*t30-2.0*t34*n3+2.0*t39*n2+n2*t42+n3*t44;
+" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t46 = a1+s1-b1-t1;" }}{PARA 6 "" 
+1 "" {TEXT -1 22 "    t51 = p2*n3-p3*n2;" }}{PARA 6 "" 1 "" {TEXT -1 
+16 "    t53 = p2*t3;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t54 = p3*t2;
+" }}{PARA 6 "" 1 "" {TEXT -1 34 "    t55 = ad1+t14-t15-bd1-t53+t54;" }
+}{PARA 6 "" 1 "" {TEXT -1 18 "    t62 = t53-t54;" }}{PARA 6 "" 1 "" 
+{TEXT -1 69 "    jdot[0][4] = t46*t25-t27*t51+2.0*t55*n3-2.0*t39*n1-n1
+*t42+n3*t62;" }}{PARA 6 "" 1 "" {TEXT -1 69 "    jdot[0][5] = t46*t30+
+t22*t51-2.0*t55*n2+2.0*t34*n1-n1*t44-n2*t62;" }}{PARA 6 "" 1 "" {TEXT 
+-1 11 "    return;" }}{PARA 6 "" 1 "" {TEXT -1 3 "  \}" }}{PARA 6 "" 
+1 "" {TEXT -1 1 "\}" }}{PARA 6 "" 1 "" {TEXT -1 0 "" }}}{EXCHG {PARA 
+0 "" 0 "" {TEXT -1 0 "" }}{PARA 0 "" 0 "" {TEXT -1 0 "" }}}{EXCHG 
+{PARA 0 "> " 0 "" {MPLTEXT 1 0 63 "l := evalm(a+s-b-t);\nld := evalm(a
+d+cross(w,s)-bd-cross(p,t));\n" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%\"
+lG-%'matrixG6#7%7#,*%#a1G\"\"\"%#s1GF,%#b1G!\"\"%#t1GF/7#,*%#a2GF,%#s2
+GF,%#b2GF/%#t2GF/7#,*%#a3GF,%#s3GF,%#b3GF/%#t3GF/" }}{PARA 11 "" 1 "" 
+{XPPMATH 20 "6#>%#ldG-%'matrixG6#7%7#,.%$ad1G\"\"\"*&%#w2GF,%#s3GF,F,*
+&%#w3GF,%#s2GF,!\"\"%$bd1GF3*&%#p2GF,%#t3GF,F3*&%#p3GF,%#t2GF,F,7#,.%$
+ad2GF,*&F1\"\"\"%#s1GF,F,*&%#w1GF,F/F?F3%$bd2GF3*&F9F?%#t1GF,F3*&%#p1G
+F,F7F?F,7#,.%$ad3GF,*&FBF?F2F?F,*&F.F?F@F?F3%$bd3GF3*&FGF?F:F?F3*&F6F?
+FEF?F," }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 101 "bdot1 := 2*tr(cr
+oss(l,d))&*dual(d);\nphi1 := -2*tr(cross(l,d))&*(dual(d)&*dual(t) + du
+al(l)&*dual(d));" }}{PARA 11 "" 1 "" {XPPMATH 20 "6#>%&bdot1G-%#&*G6$,
+$-%'matrixG6#7#7%,&*&,*%#a2G\"\"\"%#s2GF2%#b2G!\"\"%#t2GF5F2%#d3GF2F2*
+&,*%#a3GF2%#s3GF2%#b3GF5%#t3GF5F2%#d2GF2F5,&*&F9\"\"\"%#d1GF2F2*&,*%#a
+1GF2%#s1GF2%#b1GF5%#t1GF5F2F7FAF5,&*&FDFAF>FAF2*&F0FAFBFAF5\"\"#-F*6#7
+%7%\"\"!,$F7F5F>7%F7FQ,$FBF57%,$F>F5FBFQ" }}{PARA 12 "" 1 "" {XPPMATH 
+20 "6#>%%phi1G,$-%#&*G6$,$-%'matrixG6#7#7%,&*&,*%#a2G\"\"\"%#s2GF3%#b2
+G!\"\"%#t2GF6F3%#d3GF3F3*&,*%#a3GF3%#s3GF3%#b3GF6%#t3GF6F3%#d2GF3F6,&*
+&F:\"\"\"%#d1GF3F3*&,*%#a1GF3%#s1GF3%#b1GF6%#t1GF6F3F8FBF6,&*&FEFBF?FB
+F3*&F1FBFCFBF6\"\"#,&-F'6$-F+6#7%7%\"\"!,$F8F6F?7%F8FU,$FCF67%,$F?F6FC
+FU-F+6#7%7%FU,$F>F6F77%F>FU,$FIF67%,$F7F6FIFUF3-F'6$-F+6#7%7%FU,*F;F6F
+<F6F=F3F>F3F17%F:FU,*FFF6FGF6FHF3FIF37%,*F2F6F4F6F5F3F7F3FEFUFQF3F6" }
+}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 83 "adot1 := -2*tr(cross(l,d))
+&*dual(d);\nomega1 := -2*tr(cross(l,d))&*dual(d)&*dual(s);" }}{PARA 
+11 "" 1 "" {XPPMATH 20 "6#>%&adot1G,$-%#&*G6$,$-%'matrixG6#7#7%,&*&,*%
+#a2G\"\"\"%#s2GF3%#b2G!\"\"%#t2GF6F3%#d3GF3F3*&,*%#a3GF3%#s3GF3%#b3GF6
+%#t3GF6F3%#d2GF3F6,&*&F:\"\"\"%#d1GF3F3*&,*%#a1GF3%#s1GF3%#b1GF6%#t1GF
+6F3F8FBF6,&*&FEFBF?FBF3*&F1FBFCFBF6\"\"#-F+6#7%7%\"\"!,$F8F6F?7%F8FR,$
+FCF67%,$F?F6FCFRF6" }}{PARA 12 "" 1 "" {XPPMATH 20 "6#>%'omega1G,$-%#&
+*G6$-F'6$,$-%'matrixG6#7#7%,&*&,*%#a2G\"\"\"%#s2GF5%#b2G!\"\"%#t2GF8F5
+%#d3GF5F5*&,*%#a3GF5%#s3GF5%#b3GF8%#t3GF8F5%#d2GF5F8,&*&F<\"\"\"%#d1GF
+5F5*&,*%#a1GF5%#s1GF5%#b1GF8%#t1GF8F5F:FDF8,&*&FGFDFAFDF5*&F3FDFEFDF8
+\"\"#-F-6#7%7%\"\"!,$F:F8FA7%F:FT,$FEF87%,$FAF8FEFT-F-6#7%7%FT,$F>F8F6
+7%F>FT,$FIF87%,$F6F8FIFTF8" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 
+38 "j1 := concat(adot1,omega1,bdot1,phi1):" }}{PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 40 "code := makeproc(j1): C(code,optimized);" }}{PARA 6 "
+" 1 "" {TEXT -1 13 "void code(j1)" }}{PARA 6 "" 1 "" {TEXT -1 17 "doub
+le j1[1][12];" }}{PARA 6 "" 1 "" {TEXT -1 1 "\{" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t62;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t5
+6;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t8;" }}{PARA 6 "" 1 "" 
+{TEXT -1 12 "  double t4;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t6;
+" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t7;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t13;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t1
+5;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t11;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t17;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t2
+4;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t25;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t27;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t3
+0;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t12;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t18;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t2
+1;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t45;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t37;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t3
+8;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t39;" }}{PARA 6 "" 1 "" 
+{TEXT -1 3 "  \{" }}{PARA 6 "" 1 "" {TEXT -1 21 "    t4 = a3+s3-b3-t3;
+" }}{PARA 6 "" 1 "" {TEXT -1 21 "    t6 = a1+s1-b1-t1;" }}{PARA 6 "" 
+1 "" {TEXT -1 15 "    t7 = t6*d3;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    \+
+t8 = t4*d1-t7;" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t11 = a2+s2-b2-t2;
+" }}{PARA 6 "" 1 "" {TEXT -1 17 "    t12 = t11*d1;" }}{PARA 6 "" 1 "" 
+{TEXT -1 20 "    t13 = t6*d2-t12;" }}{PARA 6 "" 1 "" {TEXT -1 24 "    \+
+t15 = -t8*d3+t13*d2;" }}{PARA 6 "" 1 "" {TEXT -1 23 "    j1[0][0] = 2.
+0*t15;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t17 = t4*d2;" }}{PARA 6 "" 
+1 "" {TEXT -1 21 "    t18 = t11*d3-t17;" }}{PARA 6 "" 1 "" {TEXT -1 
+24 "    t21 = t18*d3-t13*d1;" }}{PARA 6 "" 1 "" {TEXT -1 23 "    j1[0]
+[1] = 2.0*t21;" }}{PARA 6 "" 1 "" {TEXT -1 24 "    t24 = -t18*d2+t8*d1
+;" }}{PARA 6 "" 1 "" {TEXT -1 23 "    j1[0][2] = 2.0*t24;" }}{PARA 6 "
+" 1 "" {TEXT -1 15 "    t25 = -t21;" }}{PARA 6 "" 1 "" {TEXT -1 15 "  \+
+  t27 = -t24;" }}{PARA 6 "" 1 "" {TEXT -1 38 "    j1[0][3] = -2.0*t25*
+s3+2.0*t27*s2;" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t30 = -t15;" }}
+{PARA 6 "" 1 "" {TEXT -1 37 "    j1[0][4] = 2.0*t30*s3-2.0*t27*s1;" }}
+{PARA 6 "" 1 "" {TEXT -1 38 "    j1[0][5] = -2.0*t30*s2+2.0*t25*s1;" }
+}{PARA 6 "" 1 "" {TEXT -1 25 "    j1[0][6] = -j1[0][0];" }}{PARA 6 "" 
+1 "" {TEXT -1 25 "    j1[0][7] = -j1[0][1];" }}{PARA 6 "" 1 "" {TEXT 
+-1 25 "    j1[0][8] = -j1[0][2];" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t
+37 = d3*t3;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t38 = d2*t2;" }}{PARA 
+6 "" 1 "" {TEXT -1 14 "    t39 = -t4;" }}{PARA 6 "" 1 "" {TEXT -1 14 "
+    t45 = -t6;" }}{PARA 6 "" 1 "" {TEXT -1 79 "    j1[0][9] = -2.0*t18
+*(-t37-t38+t39*d3-t11*d2)-2.0*t8*(d1*t2-t45*d2)-2.0*t13*" }}{PARA 6 "
+" 1 "" {TEXT -1 11 "(d1*t3+t7);" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t5
+6 = d1*t1;" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t62 = -t11;" }}{PARA 6 
+"" 1 "" {TEXT -1 79 "    j1[0][10] = -2.0*t18*(d2*t1+t12)-2.0*t8*(-t37
+-t56-t4*d3+t45*d1)-2.0*t13*(d2" }}{PARA 6 "" 1 "" {TEXT -1 12 "*t3-t62
+*d3);" }}{PARA 6 "" 1 "" {TEXT -1 77 "    j1[0][11] = -2.0*t18*(d3*t1-
+t39*d1)-2.0*t8*(d3*t2+t17)-2.0*t13*(-t38-t56+" }}{PARA 6 "" 1 "" 
+{TEXT -1 14 "t62*d2-t6*d1);" }}{PARA 6 "" 1 "" {TEXT -1 11 "    return
+;" }}{PARA 6 "" 1 "" {TEXT -1 3 "  \}" }}{PARA 6 "" 1 "" {TEXT -1 1 "
+\}" }}{PARA 6 "" 1 "" {TEXT -1 0 "" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 462 "bdot2 := 2*tr(cross(ld,d))&*dual(d) + 2*tr(cross(l,c
+ross(p,d)))&*dual(d) + 2*tr(cross(l,d))&*dual(cross(p,d)):\nphi2 := -2
+*tr(cross(ld,d))&*dual(d)&*dual(t) - 2*tr(cross(l,cross(p,d)))&*dual(d
+)&*dual(t) - 2*tr(cross(l,d))&*dual(cross(p,d))&*dual(t) - 2*tr(cross(
+l,d))&*dual(d)&*dual(cross(p,t)) - 2*tr(cross(ld,d))&*dual(l)&*dual(d)
+ - 2*tr(cross(l,cross(p,d)))&*dual(l)&*dual(d) - 2*tr(cross(l,d))&*dua
+l(ld)&*dual(d) - 2*tr(cross(l,d))&*dual(l)&*dual(cross(p,d)):" }}}
+{EXCHG {PARA 6 "" 1 "" {TEXT -1 0 "" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 297 "adot2 := -2*tr(cross(ld,d))&*dual(d) - 2*tr(cross(l,
+cross(p,d)))&*dual(d) - 2*tr(cross(l,d))&*dual(cross(p,d)):\nomega2 :=
+ -2*tr(cross(ld,d))&*dual(d)&*dual(s) - 2*tr(cross(l,cross(p,d)))&*dua
+l(d)&*dual(s) - 2*tr(cross(l,d))&*dual(cross(p,d))&*dual(s) - 2*tr(cro
+ss(l,d))&*dual(d)&*dual(cross(w,s)):" }}}{EXCHG {PARA 0 "> " 0 "" 
+{MPLTEXT 1 0 38 "j2 := concat(adot2,omega2,bdot2,phi2):" }}{PARA 0 "> \+
+" 0 "" {MPLTEXT 1 0 40 "code := makeproc(j2): C(code,optimized);" }}
+{PARA 6 "" 1 "" {TEXT -1 13 "void code(j2)" }}{PARA 6 "" 1 "" {TEXT 
+-1 17 "double j2[1][12];" }}{PARA 6 "" 1 "" {TEXT -1 1 "\{" }}{PARA 6 
+"" 1 "" {TEXT -1 14 "  double t198;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  \+
+double t38;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t77;" }}{PARA 6 "
+" 1 "" {TEXT -1 13 "  double t32;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  do
+uble t30;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t75;" }}{PARA 6 "" 
+1 "" {TEXT -1 13 "  double t70;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  doub
+le t179;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t72;" }}{PARA 6 "" 
+1 "" {TEXT -1 13 "  double t23;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  doub
+le t80;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t69;" }}{PARA 6 "" 1 
+"" {TEXT -1 13 "  double t27;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double
+ t71;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t20;" }}{PARA 6 "" 1 "
+" {TEXT -1 13 "  double t66;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double \+
+t21;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t22;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t25;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t1
+0;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t88;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t64;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t1
+3;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t65;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t53;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t9
+7;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t61;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t59;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t6
+0;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t6;" }}{PARA 6 "" 1 "" 
+{TEXT -1 12 "  double t5;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t17
+;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t92;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t54;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t9
+6;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t102;" }}{PARA 6 "" 1 "" 
+{TEXT -1 14 "  double t108;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t
+111;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t101;" }}{PARA 6 "" 1 "
+" {TEXT -1 12 "  double t8;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t
+4;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t105;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t55;" }}{PARA 6 "" 1 "" {TEXT -1 12 "  double t7
+;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t90;" }}{PARA 6 "" 1 "" 
+{TEXT -1 14 "  double t116;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t
+119;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t204;" }}{PARA 6 "" 1 "
+" {TEXT -1 13 "  double t86;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double \+
+t74;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t139;" }}{PARA 6 "" 1 "
+" {TEXT -1 14 "  double t141;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double
+ t146;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t143;" }}{PARA 6 "" 1 
+"" {TEXT -1 14 "  double t151;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  doubl
+e t149;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t12;" }}{PARA 6 "" 1 
+"" {TEXT -1 13 "  double t11;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double
+ t49;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t84;" }}{PARA 6 "" 1 "
+" {TEXT -1 14 "  double t155;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double
+ t159;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t164;" }}{PARA 6 "" 1 
+"" {TEXT -1 14 "  double t169;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  doubl
+e t212;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t173;" }}{PARA 6 "" 
+1 "" {TEXT -1 14 "  double t177;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  dou
+ble t26;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t19;" }}{PARA 6 "" 
+1 "" {TEXT -1 13 "  double t16;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  doub
+le t14;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t79;" }}{PARA 6 "" 1 
+"" {TEXT -1 13 "  double t43;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double
+ t82;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double t188;" }}{PARA 6 "" 1 "
+" {TEXT -1 14 "  double t193;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double
+ t191;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t37;" }}{PARA 6 "" 1 "
+" {TEXT -1 14 "  double t209;" }}{PARA 6 "" 1 "" {TEXT -1 14 "  double
+ t231;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t78;" }}{PARA 6 "" 1 "
+" {TEXT -1 13 "  double t41;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double \+
+t45;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t76;" }}{PARA 6 "" 1 "" 
+{TEXT -1 13 "  double t50;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t3
+5;" }}{PARA 6 "" 1 "" {TEXT -1 13 "  double t46;" }}{PARA 6 "" 1 "" 
+{TEXT -1 3 "  \{" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t4 = w1*s2;" }}
+{PARA 6 "" 1 "" {TEXT -1 15 "    t5 = w2*s1;" }}{PARA 6 "" 1 "" {TEXT 
+-1 15 "    t6 = p1*t2;" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t7 = p2*t1;
+" }}{PARA 6 "" 1 "" {TEXT -1 29 "    t8 = ad3+t4-t5-bd3-t6+t7;" }}
+{PARA 6 "" 1 "" {TEXT -1 16 "    t10 = w2*s3;" }}{PARA 6 "" 1 "" 
+{TEXT -1 16 "    t11 = w3*s2;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t12 \+
+= p2*t3;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t13 = p3*t2;" }}{PARA 6 "
+" 1 "" {TEXT -1 34 "    t14 = ad1+t10-t11-bd1-t12+t13;" }}{PARA 6 "" 
+1 "" {TEXT -1 23 "    t16 = t8*d1-t14*d3;" }}{PARA 6 "" 1 "" {TEXT -1 
+17 "    t17 = t16*d3;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t19 = w3*s1;
+" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t20 = w1*s3;" }}{PARA 6 "" 1 "" 
+{TEXT -1 16 "    t21 = p3*t1;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t22 \+
+= p1*t3;" }}{PARA 6 "" 1 "" {TEXT -1 34 "    t23 = ad2+t19-t20-bd2-t21
++t22;" }}{PARA 6 "" 1 "" {TEXT -1 24 "    t25 = t14*d2-t23*d1;" }}
+{PARA 6 "" 1 "" {TEXT -1 17 "    t26 = t25*d2;" }}{PARA 6 "" 1 "" 
+{TEXT -1 22 "    t27 = a3+s3-b3-t3;" }}{PARA 6 "" 1 "" {TEXT -1 22 "  \+
+  t30 = p2*d3-p3*d2;" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t32 = a1+s1-b
+1-t1;" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t35 = p1*d2-p2*d1;" }}{PARA 
+6 "" 1 "" {TEXT -1 26 "    t37 = t27*t30-t32*t35;" }}{PARA 6 "" 1 "" 
+{TEXT -1 17 "    t38 = t37*d3;" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t41
+ = p3*d1-p1*d3;" }}{PARA 6 "" 1 "" {TEXT -1 22 "    t43 = a2+s2-b2-t2;
+" }}{PARA 6 "" 1 "" {TEXT -1 26 "    t45 = t32*t41-t43*t30;" }}{PARA 
+6 "" 1 "" {TEXT -1 17 "    t46 = t45*d2;" }}{PARA 6 "" 1 "" {TEXT -1 
+24 "    t49 = t27*d1-t32*d3;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    t50 =
+ t49*t35;" }}{PARA 6 "" 1 "" {TEXT -1 24 "    t53 = t32*d2-t43*d1;" }}
+{PARA 6 "" 1 "" {TEXT -1 15 "    t54 = -t41;" }}{PARA 6 "" 1 "" {TEXT 
+-1 18 "    t55 = t53*t54;" }}{PARA 6 "" 1 "" {TEXT -1 64 "    j2[0][0]
+ = -2.0*t17+2.0*t26-2.0*t38+2.0*t46-2.0*t50-2.0*t55;" }}{PARA 6 "" 1 "
+" {TEXT -1 23 "    t59 = t23*d3-t8*d2;" }}{PARA 6 "" 1 "" {TEXT -1 17 
+"    t60 = t59*d3;" }}{PARA 6 "" 1 "" {TEXT -1 17 "    t61 = t25*d1;" 
+}}{PARA 6 "" 1 "" {TEXT -1 26 "    t64 = t43*t35-t27*t41;" }}{PARA 6 "
+" 1 "" {TEXT -1 17 "    t65 = t64*d3;" }}{PARA 6 "" 1 "" {TEXT -1 17 "
+    t66 = t45*d1;" }}{PARA 6 "" 1 "" {TEXT -1 24 "    t69 = t43*d3-t27
+*d2;" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t70 = -t35;" }}{PARA 6 "" 1 "
+" {TEXT -1 18 "    t71 = t69*t70;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    \+
+t72 = t53*t30;" }}{PARA 6 "" 1 "" {TEXT -1 63 "    j2[0][1] = 2.0*t60-
+2.0*t61+2.0*t65-2.0*t66-2.0*t71-2.0*t72;" }}{PARA 6 "" 1 "" {TEXT -1 
+17 "    t74 = t59*d2;" }}{PARA 6 "" 1 "" {TEXT -1 17 "    t75 = t16*d1
+;" }}{PARA 6 "" 1 "" {TEXT -1 17 "    t76 = t64*d2;" }}{PARA 6 "" 1 "
+" {TEXT -1 17 "    t77 = t37*d1;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    t
+78 = t69*t41;" }}{PARA 6 "" 1 "" {TEXT -1 15 "    t79 = -t30;" }}
+{PARA 6 "" 1 "" {TEXT -1 18 "    t80 = t49*t79;" }}{PARA 6 "" 1 "" 
+{TEXT -1 64 "    j2[0][2] = -2.0*t74+2.0*t75-2.0*t76+2.0*t77-2.0*t78-2
+.0*t80;" }}{PARA 6 "" 1 "" {TEXT -1 19 "    t82 = -t60+t61;" }}{PARA 
+6 "" 1 "" {TEXT -1 18 "    t84 = t74-t75;" }}{PARA 6 "" 1 "" {TEXT -1 
+19 "    t86 = -t65+t66;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    t88 = t76-
+t77;" }}{PARA 6 "" 1 "" {TEXT -1 18 "    t90 = t71+t72;" }}{PARA 6 "" 
+1 "" {TEXT -1 18 "    t92 = t78+t80;" }}{PARA 6 "" 1 "" {TEXT -1 25 " \+
+   t96 = -t69*d3+t53*d1;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t97 = t4-
+t5;" }}{PARA 6 "" 1 "" {TEXT -1 25 "    t101 = t69*d2-t49*d1;" }}
+{PARA 6 "" 1 "" {TEXT -1 20 "    t102 = -t19+t20;" }}{PARA 6 "" 1 "" 
+{TEXT -1 79 "    j2[0][3] = -2.0*t82*s3+2.0*t84*s2-2.0*t86*s3+2.0*t88*
+s2-2.0*t90*s3+2.0*t92*" }}{PARA 6 "" 1 "" {TEXT -1 29 "s2-2.0*t96*t97-
+2.0*t101*t102;" }}{PARA 6 "" 1 "" {TEXT -1 19 "    t105 = t17-t26;" }}
+{PARA 6 "" 1 "" {TEXT -1 19 "    t108 = t38-t46;" }}{PARA 6 "" 1 "" 
+{TEXT -1 19 "    t111 = t50+t55;" }}{PARA 6 "" 1 "" {TEXT -1 25 "    t
+116 = t49*d3-t53*d2;" }}{PARA 6 "" 1 "" {TEXT -1 19 "    t119 = t10-t1
+1;" }}{PARA 6 "" 1 "" {TEXT -1 77 "    j2[0][4] = 2.0*t105*s3-2.0*t84*
+s1+2.0*t108*s3-2.0*t88*s1+2.0*t111*s3-2.0*" }}{PARA 6 "" 1 "" {TEXT 
+-1 34 "t92*s1+2.0*t116*t97-2.0*t101*t119;" }}{PARA 6 "" 1 "" {TEXT -1 
+78 "    j2[0][5] = -2.0*t105*s2+2.0*t82*s1-2.0*t108*s2+2.0*t86*s1-2.0*
+t111*s2+2.0*" }}{PARA 6 "" 1 "" {TEXT -1 34 "t90*s1+2.0*t116*t102+2.0*
+t96*t119;" }}{PARA 6 "" 1 "" {TEXT -1 25 "    j2[0][6] = -j2[0][0];" }
+}{PARA 6 "" 1 "" {TEXT -1 25 "    j2[0][7] = -j2[0][1];" }}{PARA 6 "" 
+1 "" {TEXT -1 25 "    j2[0][8] = -j2[0][2];" }}{PARA 6 "" 1 "" {TEXT 
+-1 17 "    t139 = t6-t7;" }}{PARA 6 "" 1 "" {TEXT -1 20 "    t141 = -t
+21+t22;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t143 = -t27;" }}{PARA 6 "
+" 1 "" {TEXT -1 28 "    t146 = t59*t143+t25*t32;" }}{PARA 6 "" 1 "" 
+{TEXT -1 16 "    t149 = -t32;" }}{PARA 6 "" 1 "" {TEXT -1 28 "    t151
+ = t59*t43+t16*t149;" }}{PARA 6 "" 1 "" {TEXT -1 28 "    t155 = t64*t1
+43+t45*t32;" }}{PARA 6 "" 1 "" {TEXT -1 28 "    t159 = t64*t43+t37*t14
+9;" }}{PARA 6 "" 1 "" {TEXT -1 27 "    t164 = -t69*t8+t53*t14;" }}
+{PARA 6 "" 1 "" {TEXT -1 27 "    t169 = t69*t23-t49*t14;" }}{PARA 6 "
+" 1 "" {TEXT -1 28 "    t173 = t69*t143+t53*t32;" }}{PARA 6 "" 1 "" 
+{TEXT -1 28 "    t177 = t69*t43+t49*t149;" }}{PARA 6 "" 1 "" {TEXT -1 
+78 "    t179 = -t82*t3+t84*t2-t86*t3+t88*t2-t90*t3+t92*t2-t96*t139-t10
+1*t141-t146*" }}{PARA 6 "" 1 "" {TEXT -1 61 "d3+t151*d2-t155*d3+t159*d
+2-t164*d3+t169*d2-t173*t35-t177*t54;" }}{PARA 6 "" 1 "" {TEXT -1 24 " \+
+   j2[0][9] = 2.0*t179;" }}{PARA 6 "" 1 "" {TEXT -1 19 "    t188 = t12
+-t13;" }}{PARA 6 "" 1 "" {TEXT -1 16 "    t191 = -t43;" }}{PARA 6 "" 
+1 "" {TEXT -1 28 "    t193 = t16*t27+t25*t191;" }}{PARA 6 "" 1 "" 
+{TEXT -1 28 "    t198 = t37*t27+t45*t191;" }}{PARA 6 "" 1 "" {TEXT -1 
+26 "    t204 = t49*t8-t53*t23;" }}{PARA 6 "" 1 "" {TEXT -1 28 "    t20
+9 = t49*t27+t53*t191;" }}{PARA 6 "" 1 "" {TEXT -1 76 "    t212 = t105*
+t3-t84*t1+t108*t3-t88*t1+t111*t3-t92*t1+t116*t139-t101*t188+" }}{PARA 
+6 "" 1 "" {TEXT -1 66 "t193*d3-t151*d1+t198*d3-t159*d1+t204*d3-t169*d1
+-t209*t70-t177*t30;" }}{PARA 6 "" 1 "" {TEXT -1 25 "    j2[0][10] = 2.
+0*t212;" }}{PARA 6 "" 1 "" {TEXT -1 76 "    t231 = -t105*t2+t82*t1-t10
+8*t2+t86*t1-t111*t2+t90*t1+t116*t141+t96*t188-" }}{PARA 6 "" 1 "" 
+{TEXT -1 66 "t193*d2+t146*d1-t198*d2+t155*d1-t204*d2+t164*d1-t209*t41-
+t173*t79;" }}{PARA 6 "" 1 "" {TEXT -1 25 "    j2[0][11] = 2.0*t231;" }
+}{PARA 6 "" 1 "" {TEXT -1 11 "    return;" }}{PARA 6 "" 1 "" {TEXT -1 
+3 "  \}" }}{PARA 6 "" 1 "" {TEXT -1 1 "\}" }}{PARA 6 "" 1 "" {TEXT -1 
+0 "" }}}{EXCHG {PARA 0 "> " 0 "" {MPLTEXT 1 0 0 "" }}}}{MARK "15 24 0
+" 13 }{VIEWOPTS 1 1 0 1 1 1803 }
