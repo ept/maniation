@@ -30,8 +30,8 @@ to the uncertainties facing this project, so that it could be completed in an or
 \section{Limitations}
 
 There are only few explicit approximations in my simulation algorithms; this means that if they
-were to be run using arbitrary-precision arithmetic and arbitrarily small time steps, the exact
-physical behaviour would be obtained. The exceptions are:
+were to be run using ideal arithmetic (no rounding errors) and arbitrarily small time steps,
+the exact physical behaviour would be obtained. The exceptions are:
 \begin{itemize}
 \item Given a triangle mesh and the density of a body, I currently approximate its mass and moment
     of inertia using a simple heuristic. For a better simulation, this should be
@@ -72,6 +72,3 @@ and will consider the possibility of publishing some of the new algorithms to a 
 
 I would like to thank Dr.~Brett Saunders~\cite{Saunders} and Dr.~Neil Dodgson (supervisor) for
 their ideas and discussions, particularly in the early phase of this project.
-
-\vspace{20pt}
-\centerline{\texttt{http://www.maniation.com/}}

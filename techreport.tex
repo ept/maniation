@@ -1,0 +1,99 @@
+\documentclass[11pt,a4paper,twoside,notitlepage]{report}
+\usepackage{a4}
+\usepackage{bm}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage{psfrag}
+\usepackage{ifthen}
+\setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
+\setlength{\evensidemargin}{\oddsidemargin}
+\setlength{\textwidth}{160mm}      % 25 mm right margin
+\setlength{\topmargin}{-0.4mm}     % 25 mm top margin
+\setlength{\headheight}{5mm}
+\setlength{\headsep}{5mm}
+\setlength{\footskip}{10mm}
+\setlength{\textheight}{227mm}     % 25 mm bottom margin
+\bibliographystyle{plain}
+\newcommand{\diff}{\ensuremath{\mathrm{d}}}     % Differential d (for differential operators)
+\newcommand{\norm}[1]{\ensuremath{|#1|}}        % Magnitude/Norm
+\newcommand{\ve}[1]{\ensuremath{\ifthenelse{    % Vector
+    \equal{#1}{\alpha}\or\equal{#1}{\beta}\or\equal{#1}{\gamma}\or\equal{#1}{\delta}\or
+    \equal{#1}{\epsilon}\or\equal{#1}{\varepsilon}\or\equal{#1}{\zeta}\or\equal{#1}{\eta}\or
+    \equal{#1}{\theta}\or\equal{#1}{\vartheta}\or\equal{#1}{\iota}\or\equal{#1}{\kappa}\or
+    \equal{#1}{\lambda}\or\equal{#1}{\mu}\or\equal{#1}{\nu}\or\equal{#1}{\xi}\or
+    \equal{#1}{\pi}\or\equal{#1}{\varpi}\or\equal{#1}{\rho}\or\equal{#1}{\varrho}\or
+    \equal{#1}{\sigma}\or\equal{#1}{\varsigma}\or\equal{#1}{\tau}\or\equal{#1}{\upsilon}\or
+    \equal{#1}{\phi}\or\equal{#1}{\varphi}\or\equal{#1}{\chi}\or\equal{#1}{\psi}\or
+    \equal{#1}{\omega}\or\equal{#1}{\Gamma}\or\equal{#1}{\Delta}\or\equal{#1}{\Theta}\or
+    \equal{#1}{\Lambda}\or\equal{#1}{\Xi}\or\equal{#1}{\Pi}\or\equal{#1}{\Sigma}\or
+    \equal{#1}{\Upsilon}\or\equal{#1}{\Phi}\or\equal{#1}{\Psi}\or\equal{#1}{\Omega}}
+    {\bm{#1}}{\mathbf{#1}}}}
+\newcommand{\m}[1]{\ensuremath{\mathsf{#1}}}    % Matrix
+\newcommand{\dual}[1]{{\ensuremath{#1^*}}}      % Dual tensor
+\newcommand{\q}[1]{\ensuremath{\mathsf{#1}}}    % Quaternion
+\newcommand{\qi}{\ensuremath{\mathsf{i}}}       % Quaternion i component
+\newcommand{\qj}{\ensuremath{\mathsf{j}}}       % Quaternion j component
+\newcommand{\qk}{\ensuremath{\mathsf{k}}}       % Quaternion k component
+\newcommand{\zerobox}[2]{%
+    \setbox0 = \hbox{\parbox[#1][\height][b]{20cm}{#2}}%
+    \dp0 = 0pt
+    \ht0 = 0pt
+    \noindent
+    \makebox[0pt][l]{\box0}%
+    \ignorespaces
+}
+%%%%%%
+%%%%%% Start of document
+%%%%%%
+\begin{document}
+\setcounter{page}{3}
+\begin{abstract}
+I describe the development of a program to simulate the dynamic behaviour
+of interacting rigid bodies. Such a simulation may be used to generate animations
+of articulated characters in 3D graphics applications. Bodies may have an
+arbitrary shape, defined by a triangle mesh, and may be connected with a variety
+of different joints. Joints are represented by constraint functions which are
+solved at run-time using Lagrange multipliers. The simulation performs collision
+detection and prevents penetration of rigid bodies by applying impulses to
+colliding bodies and reaction forces to bodies in resting contact.
+
+The simulation is shown to be physically accurate and is tested on several
+different scenes, including one of an articulated human character falling down a flight
+of stairs.
+
+An appendix describes how to derive arbitrary constraint functions for the Lagrange
+multiplier method. Collisions and joints are both represented as constraints, which
+allows them to be handled with a unified algorithm. The report also includes some
+results relating to the use of quaternions in dynamic simulations.
+\end{abstract}
+\addcontentsline{toc}{chapter}{Contents}
+\tableofcontents
+%%%%%%
+%%%%%% Content
+%%%%%%
+\chapter{Introduction}
+\input{intro}
+\chapter{Preparation}
+\input{simulation}
+\input{quaternions}
+\input{articulated}
+\input{software}
+\chapter{Implementation}
+\input{implement}
+\input{collision}
+\chapter{Evaluation}
+\input{evaluation}
+\input{examples}
+\chapter{Conclusions}
+\input{conclusions}
+\begin{appendix}
+\input{notation}
+\chapter{Proofs and derivations}
+\input{quatProofs}
+\input{rigidBody}
+\input{constraints}
+\input{constrEx}
+\newpage\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{diss}
+\end{appendix}
+\end{document}

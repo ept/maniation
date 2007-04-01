@@ -1,6 +1,6 @@
 .SUFFIXES = .tex .bib .aux .bbl .dvi .ps .pdf
 
-all:	wordcount diss-final.pdf
+all:	wordcount diss-final.pdf techreport.ps
 	@echo ''
 	@echo -n 'Word count: '
 	@perl $(HOME)/tools/latex2text.pl diss.tex | wc -w
@@ -29,6 +29,22 @@ diss.bbl:	diss.bib diss.aux
 
 diss.aux:	*.tex
 	latex diss
+
+techreport.pdf:	techreport.ps
+	gs -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -dBATCH -dNOPAUSE -dSAFER -sOutputFile=techreport.pdf techreport.ps
+
+techreport.ps:	techreport.dvi
+	dvips -Ppdf -G0 techreport.dvi
+
+techreport.dvi:	techreport.bbl
+	latex techreport
+	latex techreport
+
+techreport.bbl:	diss.bib techreport.aux
+	bibtex techreport
+
+techreport.aux:	*.tex
+	latex techreport
 
 clean:
 	rm -f *.{log,aux,bbl,blg,dvi,ps}

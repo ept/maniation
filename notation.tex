@@ -6,16 +6,16 @@ $\theta$ & italic Greek letter & angle\\
 \ve{a} & boldface Greek/Latin letter & column vector\\
 \ve{0} & boldface figure 0 & null vector (of appropriate dimension)\\
 \m{M} & sans serif upper-case letter & matrix\\
-\m{1} & sans serif figure 1 & identity matrix (of appropriate dimensions)\\
+\m{1} & sans serif figure 1 & identity matrix (of appropriate dim.)\\
 \q{q} & sans serif lower-case letter & quaternion\\
 $\dot{c}$ & dot & first derivative with respect to time\\
 $\ddot{c}$ & double dot & second derivative with respect to time\\
 $\m{J}^T$ & superscript $T$ & matrix transpose\\
-$\m{M}^{-1}$ & superscript $-1$ & matrix or quaternion inverse (equation~\ref{quatInverse})\\
-$\overline{\q{q}}$ & bar & quaternion conjugate (equation~\ref{quatConjugate})\\
-$\norm{\ve{a}}$ & norm & vector or quaternion magnitude (equation~\ref{quatMagnitude})\\
-$\tilde{\ve{a}}$ & tilde & corresponding quaternion (equation~\ref{vectorToQuat})\\
-$\dual{\ve{a}}$ & asterisk & dual tensor (equation~\ref{dualTensor})\\
+$\m{M}^{-1}$ & superscript $-1$ & matrix or quaternion inverse (eq.~\ref{quatInverse})\\
+$\overline{\q{q}}$ & bar & quaternion conjugate (eq.~\ref{quatConjugate})\\
+$\norm{\ve{a}}$ & norm & vector or quaternion magnitude (eq.~\ref{quatMagnitude})\\
+$\tilde{\ve{a}}$ & tilde & corresponding quaternion (eq.~\ref{vectorToQuat})\\
+$\dual{\ve{a}}$ & asterisk & dual tensor (eq.~\ref{dualTensor})\\
 $\ve{a}\times\ve{b}$ & cross & vector cross product\\
 $\ve{a}\cdot\ve{b}$ & dot & inner product\\
 $\Re(\q{q})$ & real & real part of a quaternion\\
@@ -54,127 +54,3 @@ Let us also recall some basic identities of vector and matrix algebra~\cite{RHB:
 (\m{A}\m{B})^T & = & \m{B}^T\m{A}^T \\
 \m{A}\m{A}^{-1} = \m{A}^{-1}\m{A} & = & \m{1}\quad\mathrm{(the~identity~matrix)}
 \end{eqnarray*}
-
-
-\chapter{Simulation examples (CD-ROM)\label{cdrom}}
-
-The CD-ROM accompanying this dissertation contains a video file (in MPEG-1 format) demonstrating
-many features of my simulation program. The same content may be obtained from the project web site
-at \texttt{http://www.maniation.com/}\footnote{\emph{maniation} is a simple anagram of
-\emph{animation}, and also contains the word \emph{mania}.}. The video shows a number of raytraced
-renderings of animations produced by simulation. There is also a sub-directory containing each
-scene as an individual file, to facilitate detailed examination.
-
-The following sections give a brief overview of how each simulation was created, and points out
-aspects that can be observed.
-
-\section{Pendulum systems}
-
-This section demonstrates the animation of a double pendulum (a rigid pendulum with a second one
-attached to its end), and its extension to three, eight and 25 segments. The double pendulum is
-a commonly studied system in physics; although it does not have an exact analytic solution, an
-approximate solution can be found for small angles. In this case, one finds that the resulting
-movement is the sum of two simple harmonic oscillations at different frequencies, resulting in
-a mysterious-looking swinging movement.
-
-The double, triple and eight-part pendulums are set up in a very similar way. Each segment is
-modelled as a rigid cylinder with constant density. The top end of the top segment is held in
-place by a `nail' constraint. Each pair of adjacent segments is connected by a ball-and-socket
-joint. Initially, all segments are at rest, the first segment is rotated by 45 degrees
-anticlockwise from the equilibrium position, and all other segments hang straight down.
-
-The simulation does not employ an XML input file; instead, the objects representing the bodies
-and the constraints are directly created by the Java test case. The simulation results were
-exported to Blender and rendered using the internal renderer and orthographic projection.
-I also performed a Fourier transform on the results of the double pendulum simulation, which
-indicated very clearly that there were two main frequency components.
-
-The 25-segment pendulum is an attempt to simulate rope, and it is considerably more ambitious.
-It is modelled as a cylindrical mesh bound to a chain of 25 bones. The ground is a separate mesh,
-and in the simulation its position is fixed by three `nail' constraints. This input data is
-represented as an XML file. Collision detection is performed on basis of the meshes, thus the
-rope can collide both with itself and with the ground.
-
-The joints between adjacent segments of the rope are of ball-and-socket type, and their rotation
-is limited to a maximum of 15 degrees about each axis. The si\-mu\-la\-ted rope is therefore very
-stiff. I am not entirely sure how realistic I should consider this simulation; its behaviour looks
-strange at first, but this is mainly due to the assumptions put into the model. I believe that
-the simulation correctly obeys the model, but the model would have to be refined in order
-to produce genuinely realistic-looking rope.
-
-\section{Newton's cradle}
-
-The next section shows Newton's cradle in a range of different animations. For full elasticity,
-various combinations of one, two and three balls in simultaneous motion are demonstrated, and all
-effects observed in a real toy cradle are reproduced. I also simulate what happens if collisions
-are not fully elastic: all balls gradually begin to swing, and the sequence of collisions becomes
-much more complicated.
-
-Newton's cradle is modelled as five spherical bodies, each with its centre of mass at the centre
-of the ball (i.e.\ the wire connecting it to the frame is assumed to be massless). The joint to
-the frame is modelled as a `nail' constraint, and the frame itself does not exist in the
-simulation. Collision detection is performed not on the basis of the meshes (since these are
-polyhedral approximations and not exact spheres), but using a special type of sphere/sphere
-constraint which computes its behaviour using the positions of the centres of the balls and their
-radii.
-
-For the simulation to work accurately, a very low penetration tolerance must be set. The different
-examples are simulated in exactly the same way, independent of the number of balls moving or the
-elasticity of collisions.
-
-\section{Falling boxes}
-
-The third section demonstrates eleven interacting rigid bodies: ten boxes falling onto a table.
-The simulation is performed at two different elasticities: one close to what one would expect in
-reality ($\varepsilon = 0.2$), and one very bouncy as contrast ($\varepsilon = 1.0$).
-
-Each of the ten boxes is modelled as a symmetric hollow body. All boxes and the table are
-specified as meshes in an XML input file. The table is held in place by three `nail' constraints.
-These simulations exhibit a range of different collision types: each example starts with a
-vertex/face collision when the first box hits the table, and is followed by a sequence of
-vertex/face, edge/edge and compound collisions. Whenever a collision cannot be clearly classified
-as either vertex/face or edge/edge, the algorithm searches for a plane which contains as closely
-as possible the line of intersection between the two colliding meshes. This plane is then used as
-the contact plane for computing the impulses and resting contact forces.
-
-The fully elastic version of this simulation looks unrealistic because it behaves as though the
-boxes were made of extremely bouncy rubber. The version with elasticity 0.2 is much closer to what
-one might expect in a real-life scene, but the contrast between the two is interesting. At the
-end of the low-elasticity simulation, several boxes can be seen in a frictionless glide over the
-surface of the table. They cannot penetrate the table due to a resting contact force.
-
-\section{Alfred falling down stairs}
-
-The final two sections show a humanoid model fall down a straight staircase and a spiral staircase
-respectively. These animations look very painful and are not for the faint of heart\footnote{I
-guarantee that no human beings or animals were harmed in the process of this project.}. I created
-these simulations not because I have mad sadistic fantasies, but because I required some
-situation which did not require control of muscular forces (which are hard to control in a
-simulation~\cite{Green:91}) but were nevertheless interesting.
-
-The simulation on straight stairs and on the spiral staircase are set up in a very similar way.
-Each scene consists of two bodies, a polygon model of the staircase and Alfred himself. In each
-case, the staircase is held in place by three `nail' constraints\footnote{It seems intuitively
-bizarre that one might make a whole staircase immobile by only three nails, but in the simulation
-the magnitude of the forces is, of course, almost irrelevant!}. Alfred is an articulated body
-as described in section~\ref{softwareTools}.
-
-All meshes and skeletons are defined in an XML input file. All joints' rotation is restricted in
-a way which approximates the anatomical reality. Nonetheless the body can enter poses which,
-although they are not impossible, look rather uncomfortable. This is because a pose does not
-gradually become more uncomfortable as the limit is approached, but action takes place only at
-the limit.
-
-For purposes of collision detection, the shape of the Alfred mesh is approximated by 252 little
-spheres. The staircase is not approximated. Thus this simulation does not make use of the usual
-vertex/face and edge/edge collisions; instead, sphere/face and sphere/edge collisions occur
-(on contact with the staircase), and sphere/sphere collisions (on contact between different parts
-of the articulated body, e.g.\ the hand against the chest). I found the use of spheres to be the
-most reliable technique for such a complicated mesh. Constraint functions for these types of
-collision can be derived fairly easily and handled using the usual algorithms for resting and
-colliding contact as described in section~\ref{collisionHandling}.
-
-The camera movement and lighting was set up in Blender. After importing the simulation results,
-the animation was rendered using Blender's internal renderer/raytracer. Some of the mesh
-deformations look strange; this is unrelated to the simulation, but must be blamed on my lack of
-3D art skills!

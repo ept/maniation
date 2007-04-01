@@ -110,7 +110,7 @@ performance of the \textsl{Java} implementation,
 \textsl{EJP}\footnote{Extensible Java Profiler, \texttt{http://ejp.sourceforge.org/}} was used.
 
 I created input data for the simulation using \textsl{Blender}\footnote{\texttt{http://www.blender.org/}},
-an open source 3D modelling/animation/rendering application. \textsl{Blender} supports internal
+an open source 3D modelling/\-ani\-ma\-tion/\-ren\-de\-ring application. \textsl{Blender} supports internal
 scripting in \textsl{Python}\footnote{\texttt{http://www.python.org/}} to extend its functionality.
 This allowed me to write some short \textsl{Python} scripts which imported the results of a
 simulation as an animation back into \textsl{Blender}, acting on the original models. This was useful
@@ -132,15 +132,6 @@ A working build environment was maintained both on the PWF and my computer so th
 continue seamlessly in case of disaster.
 
 \subsubsection{Example scenes}
-\begin{figure}
-\centerline{
-    \raisebox{2mm}{\scalebox{0.72}{\includegraphics{figures/alfred-mesh}}}\hspace{1.3cm}
-    \includegraphics{figures/alfred-rendered}
-    \includegraphics[width=45.16mm,height=71.6mm]{figures/alfred-skeleton}}
-\caption{Alfred, one of the meshes used as input data. From left to right: The triangle mesh in
-    wire-frame view; a raytraced perspective view; and the skeleton in its rest position.
-    \label{alfredFigure}}
-\end{figure}
 I modelled all input data for the simulations in \textsl{Blender}. The most interesting mesh
 is that of \emph{Alfred}, a humanoid articulated body (figure~\ref{alfredFigure}), which I created
 using human anatomical data~\cite{Anatomy:03}. It has 2295 vertices, 4524 faces and is bound to
@@ -155,3 +146,13 @@ good handling of cross-references, beautiful layout and many other benefits. I c
 figures using \textsl{Dia}\footnote{\texttt{http://www.gnome.org/projects/dia/}},
 \textsl{Gnuplot}\footnote{\texttt{http://www.gnuplot.info/}} and the
 \textsl{GIMP}\footnote{\texttt{http://www.gimp.org/}}.
+
+\begin{figure}
+\centerline{
+    \raisebox{2mm}{\scalebox{0.72}{\includegraphics{figures/alfred-mesh}}}\hspace{1.3cm}
+    \includegraphics{figures/alfred-rendered}
+    \includegraphics[width=45.16mm,height=71.6mm]{figures/alfred-skeleton}}
+\caption{Alfred, one of the meshes used as input data. From left to right: The triangle mesh in
+    wire-frame view; a raytraced perspective view; and the skeleton in its rest position.
+    \label{alfredFigure}}
+\end{figure}
