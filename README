@@ -1,0 +1,43 @@
+Simulation of colliding constrained rigid bodies
+================================================
+
+Martin Kleppmann <martin@kleppmann.de>
+
+
+Background
+----------
+
+Please see the following links.
+
+http://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-683.html
+http://www.maniation.com/
+http://www.yes-no-cancel.co.uk/2008/10/25/implementing-constrained-rigid-body-simulation-source-code-now-available/
+
+
+Usage
+-----
+
+Apart from all the underlying data structures, algorithms and constraints,
+this code repository includes a few examples of more complex systems built
+from the simple components: a gyroscope, a multi-part pendulum, Newton's cradle
+and a centrifuge-like thing.
+
+The way you would use these components is probably along the lines of:
+
+    Simulation sim = new Simulation();
+    MultiPendulum.setup(sim, 3);
+    sim.run(10.0);
+
+You will have to sort out input and output of data, display/rendering etc.
+yourself -- the purpose of this code is to demonstrate the algorithms, not
+to provide a fully functional dynamics simulator.
+
+
+Feedback
+--------
+
+Feedback is welcomed; please contact me at the email address above.
+However, I am not actively developing this code any further.
+If there is enough demand to set up a community where people can contribute
+code and patches, we can make this a proper open source project.
+
