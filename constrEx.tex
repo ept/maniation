@@ -1,0 +1,516 @@
+\section{A catalogue of constraint functions\label{constraintAppendix}}
+
+Let us consider some examples of constraints to clarify the procedure.
+
+\subsection{Fixed point in space (`Nail')\label{constrNail}}
+
+This simple constraint `nails' a particular point in a rigid body to a fixed point
+in world space. (It's a very flexible nail, because despite fixing the position, it allows all
+three modes of rotation.) Let \ve{p} be the position of the centre of mass of our rigid
+body, \ve{s} the vector from the centre of mass to the point in the body we want to attach,
+$\ve{\omega}$ the angular velocity of the rigid body, and \ve{t} the coordinates in world
+space that we want to nail the point to. Then we can set up a simple constraint function,
+\begin{equation}
+\ve{c} = \ve{p} + \ve{s} - \ve{t}
+\end{equation}
+which equals the null vector when $\ve{p}+\ve{s}$ and $\ve{t}$ coincide, as required.
+Since this is a three-dimensional vector equation, we are actually defining three constraints
+at once. \ve{t} does not change over time, so we obtain
+\begin{eqnarray}
+\dot{\ve{c}} &=& \dot{\ve{p}} + \ve{\omega}\times\ve{s} \nonumber\\
+&=& \dot{\ve{p}} - \dual{\ve{s}}\,\ve{\omega} \\
+\ddot{\ve{c}} &=& \ddot{\ve{p}} + \dot{\ve{\omega}}\times\ve{s} +
+    \ve{\omega}\times(\ve{\omega}\times\ve{s}) \nonumber\\
+&=& \ddot{\ve{p}} - \dual{\ve{s}}\,\dot{\ve{\omega}} -
+    \dual{(\ve{\omega}\times\ve{s})}\,\ve{\omega}
+\end{eqnarray}
+(cf.\ similar derivations in~\cite{Kalra:95}). We have already moved the `chosen variables' to
+the rightmost position of each product. We will now factor $\dot{\ve{c}}$ and write out the
+components of $\m{J}$ in terms of the vector components:
+
+\begin{equation}
+\label{constrEx1J}
+\dot{\ve{c}} = \left[\begin{array}{ccc} 1&0&0\\0&1&0\\0&0&1 \end{array}\right]
+    \dot{\ve{p}} + \left[\begin{array}{ccc}
+    0 & s_3 & -s_2 \\ -s_3 & 0 & s_1 \\ s_2 & -s_1 & 0
+    \end{array}\right] \ve{\omega}
+\end{equation}
+
+The two matrices in equation~\ref{constrEx1J} thus form two slices of $\m{J}$ at
+the locations appropriate for $\dot{\ve{p}}$ and $\ve{\omega}$. We now continue to the
+next step of the procedure:
+
+\begin{eqnarray}
+\dot{\m{J}}\dot{\ve{x}} = 
+\ddot{\ve{c}} - \m{J}\ddot{\ve{x}} &=&
+    \big(\ddot{\ve{p}} - \dual{\ve{s}}\,\dot{\ve{\omega}} -
+    \dual{(\ve{\omega}\times\ve{s})}\,\ve{\omega}\big) -
+    (\ddot{\ve{p}} - \dual{\ve{s}}\,\dot{\ve{\omega}}) \nonumber\\
+& = & -\dual{(\ve{\omega}\times\ve{s})}\,\ve{\omega} \nonumber\\
+& = & \left[\begin{array}{ccc} 0 &
+    \omega_1 s_2 - \omega_2 s_1 &
+    \omega_1 s_3 - \omega_3 s_1 \\
+    \omega_2 s_1 - \omega_1 s_2 & 0 &
+    \omega_2 s_3 - \omega_3 s_2 \\
+    \omega_3 s_1 - \omega_1 s_3 &
+    \omega_3 s_2 - \omega_2 s_3 & 0
+    \end{array}\right] \ve{\omega} \nonumber\\\label{constrEx1JDot}
+\end{eqnarray}
+
+We see that here there is only one slice for $\dot{\m{J}}$; the slice belonging to $\ddot{\ve{p}}$
+is zero. Since $\ve{\omega}$ also occurs inside the matrix, there are actually several
+alternative representations of this matrix which are equally valid.
+
+\subsection{Ball-and-socket joint\label{constrJoint}}
+
+Two rigid bodies are attached together at a particular point in each of the bodies.
+They may not separate, but all three rotational degrees of freedom are permitted. This is
+a good representation e.g.\ of a human shoulder joint.
+
+Let $\ve{a}$ and $\ve{b}$ be the positions of the centres of mass in the first and
+second rigid body respectively. Let $\ve{s}$ be the vector from $\ve{a}$ to the 
+attachment point, and $\ve{t}$ the vector from $\ve{b}$ to the attachment point.
+Also let $\ve{\omega}$ be the angular velocity of the first body, and $\ve{\phi}$ that
+of the second. Then our constraint function and its derivatives are:
+
+\begin{eqnarray}
+\ve{c} &=& \ve{a} + \ve{s} - \ve{b} - \ve{t} \\
+\dot{\ve{c}} &=& \dot{\ve{a}} + \ve{\omega}\times\ve{s} -
+    \dot{\ve{b}} - \ve{\phi}\times\ve{t} \\
+\ddot{\ve{c}} &=& \ddot{\ve{a}} + \dot{\ve{\omega}}\times\ve{s} +
+    \ve{\omega}\times(\ve{\omega}\times\ve{s}) -
+    \ddot{\ve{b}} - \dot{\ve{\phi}}\times\ve{t} -
+    \ve{\phi}\times(\ve{\phi}\times\ve{t})
+\end{eqnarray}
+
+The rest of the derivation is very similar to the previous example. We obtain four
+matrix slices for \m{J} and two slices for $\dot{\m{J}}$.
+
+
+\subsection{Rotation axis restriction (`Joystick')\label{constrJoystick}}
+
+We now have formulae to define a ball-and-socket joint. How can we express other types
+of joints? A good way of doing this is by augmenting the ball-and-socket constraint with
+additional constraints which restrict the set of valid rotations. In this section I
+derive expressions for a constraint which prohibits rotation about one particular axis~--
+or, in other words, confines the axis of any valid rotation to a plane. In engineering terms,
+this is called a universal joint~\cite{Shabana:01}. Let us define a unit vector \ve{n} which
+points in the direction of the axis we want to prohibit; equivalently, this is the normal of
+the confinement plane.
+
+It is not completely easy to visualize what this type of constraint means. One good way to look
+at it is to consider a standard two-axis joystick. If it is placed on a table, the two axes of
+rotation lie in a plane parallel to the surface of this table. But you cannot turn the stick about
+its own axis. Hence the normal of the constraint plane is orthogonal to the table surface.
+Don't be confused by the fact that the joystick handle happens to point in the direction of the
+normal~-- any sort of obscure shape may be substituted in its place without changing the nature
+of the constraint!
+
+A more common sort of joint is the \emph{hinge} or \emph{revolute joint}, which we find in most
+doors, in our knees and elbows. It allows rotation only about one particular axis. We can
+conveniently express it by employing two `joystick' constraints on the same body, each of which
+confines the axis to a plane. Provided the two planes are not parallel, the axis about which
+rotation may occur is just the line of intersection of these two planes. In summary, to make a
+revolute joint, we first add a ball-and-socket joint. Then we find two non-collinear vectors
+which are both orthogonal to the hinge axis, and use them as normal vectors for two `joystick'
+constraints. This reduces the original number of six degrees of freedom to one~-- the angle of
+the hinge.
+
+For this derivation I will use an alternative notation for quaternions, which is used by
+Shoemake~\cite{Shoemake:85}, amongst others. Instead of using the complex constants \qi{}, \qj{}
+and \qk{}, a quaternion is written as a pair consisting of a scalar (the real part) and a 3D
+vector (the three imaginary parts):
+\begin{equation}
+\q{q} = q_w + q_x\qi + q_y\qj + q_z\qk = [q_w, (q_x, q_y, q_z)^T] = [q_w, \ve{q}_v]
+\end{equation}
+Using this notation, we can write the quaternion product in terms of vector dot and cross products:
+\begin{equation}\label{quatProduct2}
+\q{p}\q{q} = [p_w,\; \ve{p}_v]\;[q_w,\; \ve{q}_v] =
+    [p_w q_w - \ve{p}_v \cdot \ve{q}_v,\;
+    p_w \ve{q}_v + q_w \ve{p}_v + \ve{p}_v \times \ve{q}_v]
+\end{equation}
+
+We shall now consider the relative rotation of two rigid bodies. Say the first body has an
+orientation quaternion \q{p} and angular velocity \ve{\phi}, and the second body orientation
+\q{q} and angular velocity \ve{\omega}. Assume that each quaternion expresses the rotation
+required to transform from the body's frame to the world frame. Then the quaternion product
+$\q{p}^{-1}\q{q}$ is the rotation required to transform from the second body's frame to the first
+one's~-- that is, the relative rotation of the two bodies.
+
+To confine the axis of rotation, we use the fact that the axis is contained in the imaginary
+parts of a quaternion (equation~\ref{quatRotation}, page~\pageref{quatRotation}). We want the dot
+product of this axis and the normal vector \ve{n} to be zero. Conveniently, the dot product
+happens to be implicitly present in the real part of the quaternion product
+(see equation~\ref{quatProduct2}). Hence we can define our constraint
+function as follows:
+\begin{equation}\label{rotConstrEqn}
+c = \Re(\tilde{\ve{n}}\, \q{p}^{-1}\q{q})
+\end{equation}
+
+As with complex numbers, the function $\Re$ returns only the real part of its argument.
+Since the real part of $\tilde{\ve{n}}$ is zero by definition, this is just the dot product of
+\ve{n} and the axis of $\q{p}^{-1}\q{q}$, with an extra minus sign in
+front~(cf.\ equation~\ref{quatProduct2}). The constraint function is a scalar because
+we are only losing one degree of freedom.
+
+The derivative of \q{q} with respect to time is
+$\dot{\q{q}} = \frac{1}{2}\tilde{\ve{\omega}}\q{q}$. Pushing the differential operator
+onto the inside of a quaternion inverse produces a minus sign and reverses the order, provided
+we are dealing with a unit quaternion:
+\begin{equation}
+\frac{\diff}{\diff t} \q{p} = \frac{1}{2}\tilde{\ve{\phi}}\,\q{p} \iff
+    \frac{\diff}{\diff t} (\q{p}^{-1}) = -\frac{1}{2}\q{p}\,\tilde{\ve{\phi}}
+\end{equation}
+
+We now have everything in place to calculate the constraint function derivatives:
+\begin{eqnarray}
+\dot{c} & = & \label{constrJoystickC}
+    \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\q{q}) -
+    \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\, \q{q}) \\
+\ddot{c} & = & \label{constrJoystickCDot}
+    \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\dot{\ve{\omega}}}\,\q{q})
+  - \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\dot{\ve{\phi}}}\, \q{q}) \\*
+&&+ \frac{1}{4} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\tilde{\ve{\omega}}\, \q{q})
+  - \frac{1}{2} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\,\tilde{\ve{\omega}}\, \q{q})
+  + \frac{1}{4} \Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\,\tilde{\ve{\phi}}\, \q{q})
+    \nonumber
+\end{eqnarray}
+
+We manipulate these equations into the form required to find \m{J}:
+\begin{eqnarray*}
+\Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\omega}}\,\q{q}) & = &
+    \Re\big( [0,\:\ve{n}]\: [p_w,\:-\ve{p}_v]\: [0,\:\ve{\omega}]\: [q_w,\:\ve{q}_v] \big) \\*
+&=& \Re\big( [\ve{n}\cdot\ve{p}_v,\: p_w\ve{n} - \ve{n}\times\ve{p}_v]\:
+             [-\ve{\omega}\cdot\ve{q}_v,\: q_w\ve{\omega} + \ve{\omega}\times\ve{q}_v] \big) \\*
+&=& -(\ve{n}\cdot\ve{p}_v) (\ve{\omega}\cdot\ve{q}_v) -
+    ( p_w\ve{n} - \ve{n}\times\ve{p}_v ) \cdot ( q_w\ve{\omega} + \ve{\omega}\times\ve{q}_v ) \\*
+&=& -\ve{n}^T \ve{p}_v \ve{q}_v^T \ve{\omega} - ( p_w\ve{n} + \ve{p}_v\times\ve{n} )^T
+    ( q_w\ve{\omega} - \ve{q}_v\times\ve{\omega} ) \\*
+&=& -\ve{n}^T \ve{p}_v \ve{q}_v^T \ve{\omega} - ( p_w\ve{n}^T - \ve{n}^T\dual{\ve{p}_v} )
+    ( q_w\ve{\omega} - \dual{\ve{q}_v}\,\ve{\omega} ) \\*
+&=& -\ve{n}^T \big( \ve{p}_v \ve{q}_v^T + ( p_w\m{1} - \dual{\ve{p}_v} )
+    ( q_w\m{1} - \dual{\ve{q}_v} ) \big)\, \ve{\omega}
+\end{eqnarray*}
+
+Here \m{1} denotes the $3\times3$ identity matrix. The same derivation is valid if we substitute
+\ve{\phi} for \ve{\omega}, hence we obtain the Jacobian
+\begin{eqnarray}
+\m{J}\dot{\ve{x}} & = & 
+    -\frac{1}{2} \ve{n}^T \big( \ve{p}_v \ve{q}_v^T + ( p_w\m{1} - \dual{\ve{p}_v} )
+    ( q_w\m{1} - \dual{\ve{q}_v} ) \big)\, \ve{\omega} \nonumber\\*
+&&  +\frac{1}{2} \ve{n}^T \big( \ve{p}_v \ve{q}_v^T + ( p_w\m{1} - \dual{\ve{p}_v} )
+    ( q_w\m{1} - \dual{\ve{q}_v} ) \big)\, \ve{\phi}
+\end{eqnarray}
+
+Now the first two terms of equation~\ref{constrJoystickCDot} are generated by $\m{J}\ddot{x}$, so
+for finding $\dot{\m{J}}$ we need only consider the last three terms. Let us evaluate the
+penultimate term:
+\begin{eqnarray*}
+\Re(\tilde{\ve{n}}\, \q{p}^{-1}\, \tilde{\ve{\phi}}\,\tilde{\ve{\omega}}\, \q{q}) & = &
+    \Re\big( [0,\:\ve{n}]\: [p_w,\:-\ve{p}_v]\: [0,\:\ve{\phi}]\: [0,\:\ve{\omega}]\:
+    [q_w,\:\ve{q}_v] \big) \\*
+&=& \Re\big( [0,\:\ve{n}]\: [\ve{p}_v \cdot \ve{\phi},\: p_w\ve{\phi} - \ve{p}_v\times\ve{\phi}]\:
+    [-\ve{\omega}\cdot\ve{q}_v,\: q_w\ve{\omega} + \ve{\omega}\times\ve{q}_v] \big) \\*
+&=& \Re\Big( \begin{array}[t]{lll} \big[ &
+    \ve{n}\cdot(\ve{p}_v\times\ve{\phi}) - p_w \ve{\phi}\cdot\ve{n}, &\\ &
+    (\ve{p}_v\cdot\ve{\phi}) \ve{n} + p_w\ve{n}\times\ve{\phi} -
+        \ve{n}\times(\ve{p}_v\times\ve{\phi}) \quad\big] &\\
+    \big[ & -\ve{\omega}\cdot\ve{q}_v,\: q_w\ve{\omega} +
+        \ve{\omega}\times\ve{q}_v \quad\big] & \Big) \end{array} \\
+&=& -\big( \ve{n}\cdot(\ve{p}_v\times\ve{\phi}) - p_w \ve{\phi}\cdot\ve{n} \big)
+     \big( \ve{\omega}\cdot\ve{q}_v \big) \\* &&
+    -\big( (\ve{p}_v\cdot\ve{\phi}) \ve{n} + p_w\ve{n}\times\ve{\phi} -
+        \ve{n}\times(\ve{p}_v\times\ve{\phi}) \big) \cdot
+     \big( q_w\ve{\omega} - \ve{q}_v\times\ve{\omega} \big) \\
+&=& -\big( \ve{n}\cdot(\ve{p}_v\times\ve{\phi}) \big) \big( \ve{q}_v\cdot\ve{\omega} \big)
+    + p_w (\ve{n}\cdot\ve{\phi}) (\ve{q}_v\cdot\ve{\omega}) \\* &&
+    +\big( \ve{n}\cdot(\ve{q}_v\times\ve{\omega}) \big) \big( \ve{p}_v\cdot\ve{\phi} \big)
+    - q_w (\ve{n}\cdot\ve{\omega}) (\ve{p}_v\cdot\ve{\phi}) \\* &&
+    -\big( \ve{n}\times(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi}) \big) \cdot
+     \big( q_w\ve{\omega} - \ve{q}_v\times\ve{\omega} \big) \\
+&=&  \ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\phi}\,\ve{q}_v^T \ve{\omega}
+    -\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}\,\ve{p}_v^T \ve{\phi} \\* &&
+    +(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi})^T \dual{\ve{n}}
+    (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}
+\end{eqnarray*}
+
+Fortunately, the other two terms of equation~\ref{constrJoystickCDot} we are interested in are
+similar, so we can obtain them by substitution in the last expression. This gives us the
+following expression for $\dot{\m{J}}$:
+
+\begin{eqnarray}
+\dot{\m{J}}\dot{\ve{x}} &=&
+    \frac{1}{4}\Big( \ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\omega}\,\ve{q}_v^T
+    -\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}\,\ve{p}_v^T \nonumber\\*&&\quad
+    +(p_w\ve{\omega} - \ve{p}_v\times\ve{\omega})^T \dual{\ve{n}} (q_w\m{1} - \dual{\ve{q}_v})
+    \nonumber\\*&&\quad
+    -2\ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\phi}\,\ve{q}_v^T
+    -2(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi})^T \dual{\ve{n}} (q_w\m{1} - \dual{\ve{q}_v})
+    \Big)\, \ve{\omega} + \nonumber\\*&&
+    \frac{1}{4}\Big( \ve{n}^T (p_w\m{1} - \dual{\ve{p}_v})\, \ve{\phi}\,\ve{q}_v^T
+    -\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\phi}\,\ve{p}_v^T \nonumber\\*&&\quad
+    +(p_w\ve{\phi} - \ve{p}_v\times\ve{\phi})^T \dual{\ve{n}} (q_w\m{1} - \dual{\ve{q}_v})
+    \nonumber\\*&&\quad
+    +2\ve{n}^T (q_w\m{1} - \dual{\ve{q}_v})\, \ve{\omega}\,\ve{p}_v^T \Big)\,\ve{\phi}
+\end{eqnarray}
+
+
+\subsection{Rotation angle limitation}
+
+As mentioned in section~\ref{generalizedCollisions}, the constraint function of the last section
+can be used in an inequality context to limit the angle of rotation rather than just the axes.
+Adding a constant value to the constraint function makes no difference to its derivatives and
+therefore leaves the Jacobians derived in the last section unchanged.
+
+So the implementation is easy, but the challenge is to understand what effect such an inequality
+actually has. Since quaternions are rather hard to visualize, let us translate the meaning of
+equation~\ref{rotConstrEqn} into Euler angles. Choose three orthogonal axes with basis vectors
+\ve{a}, \ve{b} and \ve{g} such that $\ve{a}\times\ve{b}=\ve{g}$ and $\ve{b}\times\ve{g}=\ve{a}$
+and $\ve{g}\times\ve{a}=\ve{b}$ and $\norm{\ve{a}} = \norm{\ve{b}} = \norm{\ve{g}} = 1$.
+Consider the rotation $\q{p}^{-1}\q{q}$ (the relative rotation between the two bodies), and
+decompose it into a sequence of three rotations: first a rotation of $\alpha$ about the \ve{a}
+axis, then a rotation of $\beta$ about the \ve{b} axis, and finally a rotation of $\gamma$ about
+the \ve{g} axis. Thus we have
+\begin{eqnarray}
+\q{p}^{-1}\q{q} &=& \q{g}\q{b}\q{a} \\
+\q{a} &=& \cos\big(\frac{\alpha}{2}\big) + \tilde{\ve{a}}\sin\big(\frac{\alpha}{2}\big) \\
+\q{b} &=& \cos\big(\frac{\beta }{2}\big) + \tilde{\ve{b}}\sin\big(\frac{\beta }{2}\big) \\
+\q{g} &=& \cos\big(\frac{\gamma}{2}\big) + \tilde{\ve{g}}\sin\big(\frac{\gamma}{2}\big)
+\end{eqnarray}
+
+Now if we evaluate the constraint function about each of the axes \ve{a}, \ve{b} and \ve{g}, we
+get (skipping some boring algebra):
+\begin{eqnarray}
+\Re(\tilde{\ve{a}}\,\q{g}\q{b}\q{a}) &=& -\sin\big(\frac{\alpha}{2}\big)
+     \cos\big(\frac{\beta }{2}\big)   \cos\big(\frac{\gamma}{2}\big)
+    -\cos\big(\frac{\alpha}{2}\big)   \sin\big(\frac{\beta }{2}\big)
+     \sin\big(\frac{\gamma}{2}\big)   \label{angleLimit1}\\
+\Re(\tilde{\ve{b}}\,\q{g}\q{b}\q{a}) &=& -\cos\big(\frac{\alpha}{2}\big)
+     \sin\big(\frac{\beta }{2}\big)   \cos\big(\frac{\gamma}{2}\big)
+    -\sin\big(\frac{\alpha}{2}\big)   \cos\big(\frac{\beta }{2}\big)
+     \sin\big(\frac{\gamma}{2}\big)   \label{angleLimit2}\\
+\Re(\tilde{\ve{g}}\,\q{g}\q{b}\q{a}) &=& -\cos\big(\frac{\alpha}{2}\big)
+     \cos\big(\frac{\beta }{2}\big)   \sin\big(\frac{\gamma}{2}\big)
+    -\sin\big(\frac{\alpha}{2}\big)   \sin\big(\frac{\beta }{2}\big)
+     \cos\big(\frac{\gamma}{2}\big)   \label{angleLimit3}
+\end{eqnarray}
+
+These expressions make clear how interdependent the three axes are~-- it is generally not
+possible to change a constraint on one axis without affecting the others. The best way to proceed
+from here is to enter inequalities using formulae~\ref{angleLimit1} to~\ref{angleLimit3} into
+a program for graphical visualization, and to experimentally determine the values such that the
+desired behaviour is achieved.
+
+
+\subsection{Confinement to a plane (vertex/face collision) \label{vertexFaceConstraint}}
+
+We want to define a constraint function whose value is the distance between a point
+and a plane, where the point is attached to one rigid body, and the plane to another. The plane
+is defined by a point in the plane and a normal vector. The distance should be positive if the
+point is on the side of the plane pointed to by the normal, and negative if it is on the opposite
+side. If we put this constraint directly into the Lagrange multiplier equation, it will enforce
+the condition that the distance be zero~-- the point is confined to move only within the plane.
+But if we use the same constraint function in an inequality, we have a handler for the
+vertex/face collision case.
+
+Say \ve{a} is the centre of mass position of the body to which the plane is attached, and \ve{s}
+is the vector from the centre of mass to an arbitrary point in the plane. The angular velocity
+of this body is \ve{\omega}. The plane has a unit normal vector $\hat{\ve{n}}$
+($\norm{\hat{\ve{n}}} = 1$). The point we are interested in is $\ve{b} + \ve{t}$, where \ve{b} is
+the centre of mass position of the body to which the point belongs. This body has angular
+velocity \ve{\phi}.
+
+Then the constraint function and its derivatives are given by
+\begin{eqnarray}
+c &=& (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot\hat{\ve{n}} \\
+\dot{c} &=& (\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s})
+    \cdot\hat{\ve{n}} + (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot(\ve{\omega}\times\hat{\ve{n}})
+    \nonumber\\
+&=& \hat{\ve{n}}^T\dot{\ve{b}} - \hat{\ve{n}}^T\dot{\ve{a}} - \hat{\ve{n}}^T\dual{\ve{t}}\ve{\phi}
+    + (\ve{a} - \ve{b} - \ve{t})^T \dual{\hat{\ve{n}}} \ve{\omega} \\
+\ddot{c} &=& \big( \ddot{\ve{b}} + \dot{\ve{\phi}}\times\ve{t} +
+    \ve{\phi}\times(\ve{\phi}\times\ve{t}) - \ddot{\ve{a}} \big) \cdot \hat{\ve{n}}+\nonumber\\*&&
+    2\big(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}}\big)
+    \cdot \big(\ve{\omega}\times\hat{\ve{n}}\big)
+    + \big(\ve{b} + \ve{t} - \ve{a}\big) \cdot \big( \dot{\ve{\omega}}\times\hat{\ve{n}} +
+    \ve{\omega}\times(\ve{\omega}\times\hat{\ve{n}}) \big) \nonumber\\
+&=&  \hat{\ve{n}}^T \ddot{\ve{b}}
+    -\hat{\ve{n}}^T \ddot{\ve{a}}
+    -\hat{\ve{n}}^T\dual{\ve{t}} \dot{\ve{\phi}}
+    +(\ve{a} - \ve{b} - \ve{t})^T \dual{\hat{\ve{n}}} \dot{\ve{\omega}} + \\*&&
+    \big( 2(\dot{\ve{a}} - \dot{\ve{b}} - \ve{\phi}\times\ve{t})^T \dual{\hat{\ve{n}}} 
+    +(\ve{a} - \ve{b} - \ve{t})^T \dual{(\ve{\omega}\times\hat{\ve{n}})}\big) \ve{\omega}
+    -\hat{\ve{n}}^T\dual{(\ve{\phi}\times\ve{t})} \ve{\phi} \nonumber
+\end{eqnarray}
+from which \m{J} and $\dot{\m{J}}$ can be read off as usual.
+
+
+\subsection{Edge/edge collision\label{edgeEdgeConstraint}}
+
+In this section we require a constraint function whose value is the shortest distance between
+two straight lines. The problem is closely related to the one in
+section~\ref{vertexFaceConstraint}. If used as an equality constraint, it could be used to
+simulate two metal rods which are joined together such that the join can move up or down either
+of the rods, but the rods always have to touch in one point~-- a kind of combination of a
+ball-and-socket joint with two one-dimensional sliding rails. However, the practical use of such
+a system is rather limited. Much more important is the use of this constraint as an inequality,
+where it can handle the collision situation in which two edges collide.
+
+We assume that each straight line is connected to a rigid body. The first body's centre of mass
+is located at \ve{a}, its angular velocity is \ve{\omega}, \ve{s} is a vector from the centre
+of mass to an arbitrary point on the line, and \ve{u} is a vector pointing along the line (unit
+magnitude is not required). Similarly, the second body's CoM is \ve{b}, its angular velocity is
+\ve{\phi}, \ve{t} points at the line and \ve{v} points in the line's direction. In this
+derivation we shall assume that the lines are not parallel
+($\norm{\ve{u}\times\ve{v}} \ne \ve{0}$); the parallel case is special and needs to be handled
+separately.
+
+If \ve{u} and \ve{v} are not parallel, we can find a unique plane which contains one line and is
+parallel to the other. This plane has a normal vector $\ve{n} = \ve{u}\times\ve{v}$ (or
+$\ve{n} = \ve{v}\times\ve{u}$). Interestingly this normal is the direction in which the force or
+impulse acts in the event of a collision. It is not obvious that this is the case, but by playing
+around with two books or similar it is possible to convince oneself. Then the closest distance
+between the two lines is given by
+\begin{equation}
+c = (\ve{b} + \ve{t} - \ve{a} - \ve{s})\cdot\frac{\ve{n}}{\norm{\ve{n}}}
+\end{equation}
+
+The derivation of the Jacobian matrices involves some of the most messy linear algebra in this
+project, so hold on tight. Let us first define a few auxiliary variables:
+\begin{eqnarray}
+\ve{n} & = & \ve{u}\times\ve{v} \\
+h &=& \frac{1}{\norm{\ve{n}}} = (\ve{n}\cdot\ve{n})^{-\frac{1}{2}} \\
+\ve{z} &=& \dot{\ve{n}} = \dot{\ve{u}}\times\ve{v} + \ve{u}\times\dot{\ve{v}} \nonumber\\*
+    &=& (\ve{\omega}\times\ve{u})\times\ve{v} + \ve{u}\times(\ve{\phi}\times\ve{v}) \nonumber\\*
+    &=& \dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi} \\
+\ve{y} &=& \dot{\ve{z}} = \ddot{\ve{u}}\times\ve{v} + 2\,\dot{\ve{u}}\times\dot{\ve{v}} +
+        \ve{u}\times\ddot{\ve{v}} \nonumber\\*
+    &=& (\dot{\ve{\omega}}\times\ve{u})\times\ve{v} +
+        (\ve{\omega}\times(\ve{\omega}\times\ve{u}))\times\ve{v} +
+        2\,(\ve{\omega}\times\ve{u})\times(\ve{\phi}\times\ve{v}) + \nonumber\\*&&
+        \ve{u}\times(\dot{\ve{\phi}}\times\ve{v}) +
+        \ve{u}\times(\ve{\phi}\times(\ve{\phi}\times\ve{v})) \\*
+    &=& \dual{\ve{v}}\dual{\ve{u}}\dot{\ve{\omega}} - \dual{\ve{u}}\dual{\ve{v}}\dot{\ve{\phi}} +
+        \dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}\ve{\omega} -
+        \dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}\ve{\phi} +
+        2\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}\ve{\omega} \nonumber\\
+\hat{\ve{n}} & = & h\ve{n} \\
+\dot{\hat{\ve{n}}} & = & h\ve{z} - \frac{1}{2}\ve{n}(\ve{n}\cdot\ve{n})^{-\frac{3}{2}}
+        (\ve{z}\cdot\ve{n} + \ve{n}\cdot\ve{z}) \nonumber\\*
+    &=& h\ve{z} - h^3\,(\ve{n}\cdot\ve{z})\,\ve{n} \\
+\ddot{\hat{\ve{n}}} & = & h\ve{y} - 2h^3 (\ve{n}\cdot\ve{z})\,\ve{z} -
+        h^3 (\ve{n}\cdot\ve{y})\,\ve{n}
+        -h^3 (\ve{z}\cdot\ve{z})\,\ve{n} + 3h^5 (\ve{n}\cdot\ve{z})^2\,\ve{n}
+\end{eqnarray}
+
+Now we can turn to calculating the derivatives of $c$:
+\begin{eqnarray}
+\dot{c} &=& \hat{\ve{n}}\cdot(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} -
+        \ve{\omega}\times\ve{s}) + (\ve{b}+\ve{t}-\ve{a}-\ve{s})\cdot\dot{\hat{\ve{n}}} \\*
+    &=& h\,(\ve{u}\times\ve{v})^T (\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} -
+        \ve{\omega}\times\ve{s}) + \nonumber\\*&&
+        (\ve{b}+\ve{t}-\ve{a}-\ve{s})^T \big( h\ve{z} - h^3\,(\ve{n}\cdot\ve{z})\,\ve{n} \big)
+        \nonumber\\
+    &=& h\ve{u}^T\dual{\ve{v}}\dot{\ve{b}} - h\ve{u}^T\dual{\ve{v}}\dot{\ve{a}} -
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{t}}\ve{\phi} +
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{s}}\ve{\omega} + \nonumber\\*&&
+        (\ve{b}+\ve{t}-\ve{a}-\ve{s})^T
+        \big(h\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - h\dual{\ve{u}}\dual{\ve{v}}\ve{\phi} -
+        h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})\big)
+        \nonumber\\
+    &=& h\ve{u}^T\dual{\ve{v}}\dot{\ve{b}} - h\ve{u}^T\dual{\ve{v}}\dot{\ve{a}} \nonumber\\*&&
+        +\Big( h\ve{u}^T\dual{\ve{v}}\dual{\ve{s}} + h\,(\ve{b}+\ve{t}-\ve{a}-\ve{s})^T
+        (\m{1} - h^2 \dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}) \dual{\ve{v}}\dual{\ve{u}}
+        \Big)\:\ve{\omega} \nonumber\\*&&
+        -\Big( h\ve{u}^T\dual{\ve{v}}\dual{\ve{t}} + h\,(\ve{b}+\ve{t}-\ve{a}-\ve{s})^T
+        (\m{1} - h^2 \dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}) \dual{\ve{u}}\dual{\ve{v}}
+        \Big)\:\ve{\phi} \\*
+    &=& \m{J}\dot{\ve{x}} \nonumber\\
+\ddot{c} &=& \hat{\ve{n}}\cdot\Big(\ddot{\ve{b}} + \dot{\ve{\phi}}\times\ve{t} +
+        \ve{\phi}\times(\ve{\phi}\times\ve{t}) - \ddot{\ve{a}} - \dot{\ve{\omega}}\times\ve{s} -
+        \ve{\omega}\times(\ve{\omega}\times\ve{s})\Big) + \nonumber\\*&&
+        2\,\Big(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s}\Big)
+        \cdot\dot{\hat{\ve{n}}} +
+        \Big(\ve{b} + \ve{t} - \ve{a} - \ve{s}\Big)\cdot\ddot{\hat{\ve{n}}} \\
+    &=& h\ve{u}^T\dual{\ve{v}}\ddot{\ve{b}} - h\ve{u}^T\dual{\ve{v}}\ddot{\ve{a}} -
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{t}}\dot{\ve{\phi}} +
+        h\ve{u}^T\dual{\ve{v}}\dual{\ve{s}}\dot{\ve{\omega}} + \nonumber\\*&&
+        h\ve{u}^T\dual{\ve{v}}\dual{(\ve{\omega}\times\ve{s})}\ve{\omega} -
+        h\ve{u}^T\dual{\ve{v}}\dual{(\ve{\phi}\times\ve{t})}\ve{\phi} \nonumber\\*&&
+        +2h\,(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s})^T
+        \Big(\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi}
+        \nonumber\\*&&\quad\quad -h^2\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})\Big)
+        \nonumber\\*&& +(\ve{b} + \ve{t} - \ve{a} - \ve{s})^T \Big(
+        \nonumber\\*&&\quad\quad h\,\big(
+        \dual{\ve{v}}\dual{\ve{u}}\dot{\ve{\omega}} - \dual{\ve{u}}\dual{\ve{v}}\dot{\ve{\phi}} +
+        \dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}\ve{\omega} \nonumber\\*&&\quad\quad\quad\quad
+        -\dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}\ve{\phi} +
+        2\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}\ve{\omega} \big)
+        \nonumber\\*&&\quad\quad
+        -2h^3 (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \nonumber\\*&&\quad\quad
+        -h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}} \big(
+        \dual{\ve{v}}\dual{\ve{u}}\dot{\ve{\omega}} - \dual{\ve{u}}\dual{\ve{v}}\dot{\ve{\phi}} +
+        \dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}\ve{\omega} \nonumber\\*&&\quad\quad\quad\quad
+        -\dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}\ve{\phi} +
+        2\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}\ve{\omega} \big)
+        \nonumber\\*&&\quad\quad
+        -h^3 \dual{\ve{u}}\ve{v}
+        (\ve{\omega}^T\dual{\ve{u}}\dual{\ve{v}} - \ve{\phi}^T\dual{\ve{v}}\dual{\ve{u}})
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \nonumber\\*&&\quad\quad
+        +3h^5 \dual{\ve{u}}\ve{v} \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi}) \Big) \nonumber
+\end{eqnarray}
+\newpage
+
+Finally we subtract the terms generated by $\m{J}\ddot{\ve{x}}$ from $\ddot{c}$ and separate
+into factors of \ve{\omega} and \ve{\phi} as usual:
+\begin{eqnarray}
+\dot{\m{J}}\dot{\ve{x}} &=& \bigg(
+        h\ve{u}^T\dual{\ve{v}}\dual{(\ve{\omega}\times\ve{s})} \\*&&\quad\quad +
+        2h\,(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s})^T
+        (\m{1} - h^2\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}) \dual{\ve{v}}\dual{\ve{u}}
+        \nonumber\\*&&\quad\quad
+        +(\ve{b} + \ve{t} - \ve{a} - \ve{s})^T \Big(
+        h\dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}
+        +2h\,\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}} \nonumber\\*&&\quad\quad\quad\quad
+        -h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}\dual{\ve{v}}\dual{(\ve{\omega}\times\ve{u})}
+        -2h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}\dual{(\ve{\phi}\times\ve{v})}\dual{\ve{u}}
+        \nonumber\\*&&\quad\quad\quad\quad
+        -2h^3\,(\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}}\dual{\ve{v}}\dual{\ve{u}}
+        \nonumber\\*&&\quad\quad\quad\quad
+        -h^3 \dual{\ve{u}}\ve{v} \big(
+        \ve{\omega}^T\dual{\ve{u}}\dual{\ve{v}} - \ve{\phi}^T\dual{\ve{v}}\dual{\ve{u}}
+        \nonumber\\*&&\quad\quad\quad\quad\quad\quad
+        -3h^2 \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}} \big) \dual{\ve{v}}\dual{\ve{u}} \Big) \bigg)\: \ve{\omega}
+        \nonumber\\*&&
+        -\bigg(
+        h\ve{u}^T\dual{\ve{v}}\dual{(\ve{\phi}\times\ve{t})} \nonumber\\*&&\quad\quad
+        +2h\,(\dot{\ve{b}} + \ve{\phi}\times\ve{t} - \dot{\ve{a}} - \ve{\omega}\times\ve{s})^T
+        (\m{1} - h^2\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}) \dual{\ve{u}}\dual{\ve{v}}
+        \nonumber\\*&&\quad\quad
+        +(\ve{b} + \ve{t} - \ve{a} - \ve{s})^T \Big(
+        h\dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}
+        -h^3\dual{\ve{u}}\ve{v}\ve{u}^T\dual{\ve{v}}\dual{\ve{u}}\dual{(\ve{\phi}\times\ve{v})}
+        \nonumber\\*&&\quad\quad\quad\quad
+        -2h^3\,(\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}} \dual{\ve{u}}\dual{\ve{v}}
+        \nonumber\\*&&\quad\quad\quad\quad
+        -h^3 \dual{\ve{u}}\ve{v} \big(
+        \ve{\omega}^T\dual{\ve{u}}\dual{\ve{v}} - \ve{\phi}^T\dual{\ve{v}}\dual{\ve{u}}
+        \nonumber\\*&&\quad\quad\quad\quad\quad\quad
+        -3h^2 \ve{u}^T\dual{\ve{v}}
+        (\dual{\ve{v}}\dual{\ve{u}}\ve{\omega} - \dual{\ve{u}}\dual{\ve{v}}\ve{\phi})
+        \ve{u}^T\dual{\ve{v}}
+        \big) \dual{\ve{u}}\dual{\ve{v}} \Big) \bigg)\: \ve{\phi} \nonumber
+\end{eqnarray}

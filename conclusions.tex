@@ -1,0 +1,74 @@
+\section{Successes}
+
+In this project I have successfully created a general-purpose application which simulates
+the dynamic behaviour of many different mechanical systems. In particular, it handles all
+features necessary to animate articulated characters like humans or animals: an
+arbitrary-shaped exterior, a skeleton with many different types of joints, and
+collisions with other bodies. I have quantitatively verified the accuracy of the simulation
+results for simple mechanical systems, and demonstrated that the program produces
+realistic-looking animations in more complicated scenes involving a
+model of a human character.
+
+All requirements of the project proposal have been met, except for the simulation of friction,
+which was ruled out at an early stage because it is too complicated. All other features were
+realized at a high quality standard. The implementation is carefully designed to use refined
+algorithms which 
+\begin{itemize}
+\item keep numerical errors very small, doubtlessly within the bounds acceptable even for
+    ambitious computer graphics purposes;
+\item give the simulation a high degree of stability and reliability;
+\item allow a reasonable run-time performance which can be traded off against the required
+    accuracy by adjusting parameters.
+\end{itemize}
+
+The technology of this project is close to current research, and carrying it out
+required some algorithms which I could not find in any of the publications I searched. I therefore
+had to newly invent several algorithms, which took several weeks longer than anticipated in
+the original schedule. However, I succeeded in adapting my management strategy
+to the uncertainties facing this project, so that it could be completed in an organized way.
+
+\section{Limitations}
+
+There are only few explicit approximations in my simulation algorithms; this means that if they
+were to be run using ideal arithmetic (no rounding errors) and arbitrarily small time steps,
+the exact physical behaviour would be obtained. The exceptions are:
+\begin{itemize}
+\item Given a triangle mesh and the density of a body, I currently approximate its mass and moment
+    of inertia using a simple heuristic. For a better simulation, this should be
+    replaced by an exact analysis of the geometric properties~\cite{Mirtich:96}.
+\item Simple collisions (vertex/face and edge/edge cases) can be handled in an exact way, but
+    more complicated collision geometries are currently approximated by planes or bounding
+    spheres. This produces plausible-looking but slightly incorrect animations. Ideally,
+    exact handling of any sort of collision would be desirable, but I am unsure whether such
+    an algorithm exists.
+\item As mentioned previously, static and sliding friction have been completely ignored.
+    Algorithms to simulate these exist, but they are complicated~\cite{Baraff:PhD}.
+\end{itemize}
+
+Even with these added features, my program would not be a ready-to-market product. It particularly
+lacks user-friendliness: there are several simulation parameters (tolerances and error thresholds)
+which need to be configured differently depending on the situation in order to obtain good
+results. Ideally the program should be able to determine these automatically. A higher execution
+speed would also be beneficial, since the current cost~-- in my test cases, up to an hour of CPU
+time per second of simulation time~-- limits productivity. The algorithm in~\cite{Baraff:96}
+could alleviate this.
+
+\section{Summary and outlook}
+
+In summary, I consider this project a clear success. I am glad to have chosen such an ambitious
+project because it was personally rewarding: in particular, the lack of existing algorithms
+forced me to contemplate the background theory in great detail, which has given me a good
+understanding of the subject area.
+
+There are not many decisions that I would have taken differently in retrospect. In the schedule I
+should have left more time for understanding the theory; I had thought there would be a simple,
+``obvious'' way of realizing articulated bodies, rather than having to deal with constraints. This
+meant I massively underestimated the problem. I would have also avoided the design mistake
+mentioned in section~\ref{algorithmImplementation}.
+
+The application is not yet user-friendly enough for general use, but with some additional effort
+it might gain this potential. I can envisage working on it beyond the frame of this project,
+and will consider the possibility of publishing some of the new algorithms to a wider audience.
+
+I would like to thank Dr.~Brett Saunders~\cite{Saunders} and Dr.~Neil Dodgson (supervisor) for
+their ideas and discussions, particularly in the early phase of this project.

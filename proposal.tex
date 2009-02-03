@@ -1,0 +1,226 @@
+%\documentclass{article}
+%\begin{document}
+
+{\hfill Martin Kleppmann}
+
+{\hfill Corpus Christi College}
+
+{\hfill mk428}
+
+\vspace{3cm}
+\centerline{\Large\bf Rigid body simulation for 3D character animation}
+\vspace{1cm}
+\centerline{19 October 2005}
+
+\vspace{3cm}
+\begin{tabular}{ll}
+{\bf Project Originator:} & Martin Kleppmann \vspace{1.5cm}\\
+{\bf Project Supervisor:} & Dr Neil Dodgson \vspace{0.5cm}\\
+{\bf Signature:} & \vspace{1.5cm}\\
+{\bf Director of Studies:} & Dr David Greaves \vspace{0.5cm}\\
+{\bf Signature:} & \vspace{1.5cm}\\
+{\bf Overseers:} & Dr Graham Titmus and Dr Markus Kuhn\\
+\end{tabular}
+\newpage
+
+\section*{Project description}
+
+The goal of this project is to develop a software tool for 3D character
+animation, akin to (but simpler than) the applications used in the
+production of cinematic special effects.
+
+\subsection*{Core requirements}
+
+The tool developed in this project should take as input a description
+of a deformable polygon mesh bound to a skeleton. The skeleton should
+contain anatomical constraints, in particular the range of angles each
+joint may reach. The tool should calculate correct deformations of the
+mesh for a given valid skeletal configuration and render the deformed
+mesh to a screen.
+
+In the next step, the tool should detect collisions within the
+deformed mesh, and use the laws of classical mechanics to simulate a
+rigid body, thus preventing different parts of the mesh from
+intersecting. The simulated physical effects in a core implementation
+should include collisions (impulse), friction forces, inertial mass
+and gravitational forces. Additional information required for this
+simulation (e.g.\ the mass of body attached to each bone of the
+skeleton) should be included in the input file. Internal (muscular)
+forces of the skeleton may also be specified as input, enabling the
+character to move `out of its own strength'. All physical effects
+should be simulated on a time-step basis.
+
+
+\subsection*{Optional extensions}
+
+Extensions to the program aim to take it further in the direction of
+tools used by 3D animation artists to create realistic-looking
+movements of humans or creatures. Possibilities include an inverse
+kinematics solver, or interaction with other objects.
+
+
+\subsection*{Acceptance criteria}
+
+The program must correctly handle the animation of at least one mesh
+resembling a human being. The mesh and skeleton need to include only
+the main limbs (fingers, face etc. are considered optional). The
+animation is correct if the character never enters an anatomically
+impossible pose and does not violate the laws of physics.
+
+Screenshots of several animations produced by the program will be
+included in the dissertation. For further evaluation, other students
+will be shown animations and asked to answer questions on whether they
+believe the animation to be correct by the above definition.
+
+Run-time performance is an optional acceptance criterion of this
+project: ideally the program should run fast enough to calculate
+animations on the example mesh in real time with fluent concurrent
+graphical output, an average present-day PC provided. Such a
+performance constraint may, however, require the use of very advanced
+algorithms, and is therefore not regarded as part of the core project.
+
+
+\subsection*{Non-Goals}
+
+The following issues are \emph{not} objectives of this project:
+
+\begin{itemize}
+\item To achieve realistic graphical results. It is hard to objectively
+  measure how realistic an animation looks, and a subjective judgement
+  depends on many artistic factors. The graphics should be judged by
+  `correctness' only.
+
+\item To create an interactive user interface. The tool requires no user
+  input beyond the mesh, skeleton, anatomy and animation files.
+
+\item To achieve scientifically accurate calculations by using
+  sophisticated numerical methods. Simple approximations are
+  sufficient provided they do not lead to obviously wrong results.
+\end{itemize}
+
+
+\section*{Resources}
+
+The main body of the program will be written in Java 1.5. This
+language is well suited for the purpose because of its widespread
+acceptance, good maintainability and the availability of extensive
+libraries. The graphical output will be rendered using the Java3D
+library.
+
+Development will primarily be undertaken on my own PC, with a
+revision-controlled copy on at least one other computer at any time,
+and at least weekly backups on Pelican (daily when approaching a
+deadline). I have tested all required software to ensure that it works
+on PWF machines; in the case of a problem with my own PC, project
+development could therefore seamlessly continue on the PWF.
+
+
+\section*{Starting point}
+
+I have some prior experience in basic 3D graphics programming using
+OpenGL. I am not yet familiar with the Java3D library, and learning to
+use it constitutes part of the preparation of the project.
+
+For file input/output I intend to use an XML data binding tool which
+I developed during the Summer 2005. Code automatically generated by
+this tool will be included for marshalling/unmarshalling of data
+structures, but the data binding tool is not itself part of this
+project.
+
+I do not intend to make use of any external or previously written code
+apart from this tool and the standard Java runtime libraries.
+The physics simulation will be based primarily on my knowledge from
+Part~IA Natural Sciences and additional reading if necessary. For the
+collision detection part of the project, I will search for literature
+on appropriate algorithms during the preparation phase.
+
+I would like to create example 3D meshes myself using the Blender
+modelling software. I already have a moderate amount of experience
+in using this application.
+
+
+\section*{Timetable}
+
+The project timetable aims to complete long before the final deadline
+in order to leave additional time for exam revision. It is divided
+into 2-week blocks.
+
+\subsubsection*{10 Oct -- 23 Oct:}
+Create 3D model of a human, including skeleton. Write project proposal,
+get approval of supervisor and overseers. Revise Part~IA physics.
+
+Milestones: A simple polygon mesh resembling a human; project proposal
+submitted.
+
+\subsubsection*{24 Oct -- 6 Nov:}
+Plan the underlying data structures. Describe these in an XML schema.
+Create parser and writer for mesh file format using data binding.
+Render the undeformed mesh using Java3D. Work out the maths behind
+mesh deformation and physics.
+
+Milestones: Working program which can read in the human mesh from a
+file and display it on screen. Sketch of the calculations underlying
+the physical simulation.
+
+\subsubsection*{7 Nov -- 20 Nov:}
+Survey of literature on collision detection algorithms. Select an
+appropriate algorithm and plan the required data structures.
+Implement mesh deformation as planned previously. Prepare sample
+animations.
+
+Milestone: The working program is extended to display an animated
+deformation of the model on screen.
+
+\subsubsection*{21 Nov -- 4 Dec:}
+Implement an appropriate collision detection algorithm as described
+in literature. Perform some preliminary performance measurements to
+estimate the efficiency of the algorithm. If necessary, try to
+optimize the data structure to require less processing.
+
+Milestone: The working program is extended to produce some form of
+output whenever a collision is detected.
+
+\subsubsection*{5 Dec -- 18 Dec:}
+Implement the physical model of forces, collisions and friction. Test
+the program at different deformations, ensure that the collisions
+prevent the mesh from intersecting.
+
+Milestone: The output of the working program should now look a bit
+like a person in zero gravity (except for the missing inertial mass).
+
+\subsubsection*{19 Dec -- 1 Jan:}
+Holiday.
+
+\subsubsection*{2 Jan -- 15 Jan:}
+Implement the remaining physical model, in particular inertia and
+gravity. Give the model a sense of balance, making it stand upright.
+
+Milestone: The core requirements of the project should now be
+fulfilled (except for some potential inaccuracies and inefficiencies).
+
+\subsubsection*{16 Jan -- 29 Jan:}
+Time to investigate and implement an extension.
+
+\subsubsection*{30 Jan -- 12 Feb:}
+Clean up the implementation, fix remaining bugs. Start thorough
+evaluation: Create demo animations, demonstrate to test users and
+collect feedback.
+
+Milestones: Screenshots of the working program. Progress report.
+
+\subsubsection*{13 Feb -- 26 Feb:}
+Write outline of the whole dissertation. Refine the introduction and
+preparation chapters. Create diagrams and illustrations as necessary.
+
+Milestone: First two chapters of the dissertation completed.
+
+\subsubsection*{28 Feb -- 12 Mar:}
+Write detail of the implementation, evaluation and conclusions
+chapters. Ask other people to read draft dissertation.
+
+Milestone: Dissertation completely written.
+
+\subsubsection*{13 Mar -- 19 Mar (1 week):}
+Finalize dissertation, refinement of language. Prepare for printing.
+
+%\end{document}

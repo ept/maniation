@@ -1,0 +1,149 @@
+\section{Quaternions\label{quaternions}}
+\subsection{The need for Quaternions}
+Besides its position, each rigid body in 3D space may have an orientation, in which there are
+three degrees of freedom (three independent axes to rotate about).
+While the position of a body can be neatly represented using Cartesian coordinates, there is
+no obvious best way of describing an orientation. The most common schemes describe
+it in terms of a rotation operation which transforms a vector in the body's local
+coordinates into world coordinates (or \textsl{vice versa}). But again, there are various different
+approaches to representing this rotation, all of which have advantages and disadvantages.
+
+\emph{Euler angles} are probably the most intuitive representation of a 3D rotation, describing
+it as a series of three rotations about different axes. These axes are fixed by convention, so it
+suffices to specify the three angles of rotation. However, this scheme has a number of
+drawbacks~\cite{Saunders:PhD,Shoemake:85}: amongst other things, it is possible that rotation
+about one of the axes freezes during an animation (``Gimbal lock'').
+
+\emph{Rotation matrices} are commonly used because they are well understood and
+allow efficient combination with other linear transformations (scaling
+and shearing~-- also translation if homogeneous coordinates are employed). However, ODEs over
+rotation matrices are difficult to implement correctly, since this representation uses nine
+numbers (a $3\times3$ matrix) to represent three degrees of freedom, thus introducing six
+additional side conditions which must be maintained. Not doing so causes skew through numerical
+drift~\cite{Saunders:PhD}.
+
+\emph{Quaternions}~\cite{Shoemake:85,Eberly:01,MathWorld:Quaternion} are a popular alternative
+to the two previous sche\-mes, and they are used extensively in this project.
+
+\subsection{Definition and properties}
+Mathematically, quaternions can be regarded as numbers with one real part and three
+distinct imaginary parts:
+\begin{equation}
+\q{q} = q_w + q_x\qi + q_y\qj + q_z\qk
+\end{equation}
+where $q_w$, $q_x$, $q_y$ and $q_z$ are real numbers and \qi{}, \qj{} and \qk{} satisfy
+\begin{equation}
+\qi^2 = \qj^2 = \qk^2 = \qi\qj\qk = -1.
+\end{equation}
+From this follows that
+$\qi\qj = -\qj\qi = \qk$ and
+$\qj\qk = -\qk\qj = \qi$ and
+$\qk\qi = -\qi\qk = \qj$.
+Note that multiplication is not commutative.
+
+We will also need the conjugate and the inverse of a quaternion. In analogy to
+complex numbers, these are given respectively by
+\begin{eqnarray}
+\overline{\q{q}} & = & q_w - q_x\qi - q_y\qj - q_z\qk \label{quatConjugate}\\
+\q{q}^{-1} & = & \frac{\overline{\q{q}}}{\norm{\q{q}}^2} \label{quatInverse}\\
+\mathrm{where}\quad\quad \norm{q_w + q_x\qi + q_y\qj + q_z\qk} &=&
+    \sqrt{q_w^2 + q_x^2 + q_y^2 + q_z^2} \label{quatMagnitude}
+\end{eqnarray}
+
+Sometimes we will need to relate a 3D vector to a quaternion with zero real part.
+For a given vector $\ve{u} = (u_1, u_2, u_3)^T$ we define the corresponding
+quaternion to be
+\begin{equation}
+\label{vectorToQuat}
+\tilde{\ve{u}} = u_1\qi + u_2\qj + u_3\qk.
+\end{equation}
+
+The complex constants \qi{}, \qj{} and \qk{} are required for the algebra only, therefore we can
+represent a quaternion as four numbers $(q_w,q_x,q_y,q_z)$. It turns out that a quaternion
+with unit magnitude ($\norm{\q{q}} = 1$) neatly represents an arbitrary rotation in
+3D space, similarly to the way that an ordinary complex number represents a rotation in the 2D
+Argand diagram. The condition $\norm{\q{q}} = 1$ reduces the number of degrees of freedom to
+three, as required.
+
+Every unit quaternion represents a rotation of angle $\theta$ about an arbitrary axis.
+If the axis passes through the origin and has a direction given by the vector
+\ve{a} with $\norm{\ve{a}} = 1$, the quaternion describing this rotation is
+\begin{equation}
+\label{quatRotation}
+\q{q} = \cos\left(\frac{\theta}{2}\right) + \tilde{\ve{a}} \sin\left(\frac{\theta}{2}\right).
+\end{equation}
+It can easily be verified that this quaternion always has unit magnitude. It shall be assumed
+throughout this project that the rotation thus described is clockwise (as seen when looking in
+the direction of the vector $\ve{a}$) in a right-hand coordinate system, i.e.\ that it is
+given by the ``right-hand rule''.
+
+Two rotations can be concatenated by multiplying their quaternions together. The order in which
+these rotations are applied is significant, and quaternion multiplication is not commutative,
+so the semantics match. The operations are, however, associative. The quaternion product is
+obtained simply by multiplying out the components, observing the rules for multiplying \qi{},
+\qj{} and \qk{}:
+\begin{eqnarray}
+\lefteqn{(p_w + p_x\qi + p_y\qj + p_z\qk)(q_w + q_x\qi + q_y\qj + q_z\qk) = } \nonumber\\*
+&& (p_w q_w - p_x q_x - p_y q_y - p_z q_z) + 
+   (p_w q_x + p_x q_w + p_y q_z - p_z q_y) \,\qi + \nonumber\\*
+&& (p_w q_y + p_y q_w + p_z q_x - p_x q_z) \,\qj + 
+   (p_w q_z + p_z q_w + p_x q_y - p_y q_x) \,\qk \label{quatProduct}
+\end{eqnarray}
+
+To rotate a vector $\ve{v} = (v_1, v_2, v_3)^T$ by a quaternion \q{q}, we first
+convert it into its corresponding quaternion $\tilde{\ve{v}}$ as defined in
+equation~\ref{vectorToQuat} and then calculate the quaternion product
+\begin{equation}
+\label{quatTransform}
+\tilde{\ve{v}}' = \q{q}\tilde{\ve{v}}\q{q}^{-1}
+\end{equation}
+
+If we expand this formula, we find that the real part of the result is always zero, and
+that the rotated vector $\ve{v}' = (v_1', v_2', v_3')^T$ corresponds
+to $\tilde{\ve{v}}'$ (i.e.\ $\ve{v}'$ is contained in the three complex parts of
+the quaternion product).
+
+Some authors, notably Shoemake~\cite{Shoemake:85}, choose to define the product in
+equation~\ref{quatTransform} in
+the reverse order. The choice is a matter of convention, since it merely changes the effect
+of this operation from being a clockwise to a counter-clockwise rotation. I chose the clockwise
+convention because it is consistent with the usual definition of the angular velocity vector
+in physics.
+
+Observe that under this convention, if \q{q} is itself a product of quaternions
+$\q{q} = \q{q}_n \q{q}_{n-1} \cdots \q{q}_1$, the result is that of first applying the
+$\q{q}_1$ rotation, then $\q{q}_2$ etc. In other words, the rotations in a quaternion product
+are applied from right to left. To verify that this is the case, the identity
+$\overline{\q{p}\, \q{q}} = \q{\overline{q}}\; \q{\overline{p}}$
+is useful~\cite{MathWorld:Quaternion}.
+
+\subsection{Quaternion integration}
+
+We have seen that given the torques on a body, a numerical ODE solver can treat each component
+of the vector separately to obtain the new angular momentum. Now that we are representing
+orientation as a quaternion, how do we compute the change in orientation given the body's angular
+velocity?
+
+The instantaneous rate of change of a quaternion \q{q} over time is
+usually~\cite{BaraffWitkin:97,Eberly:04,Saunders:PhD} given as
+\begin{equation}
+\label{quatRateOfChange}
+\dot{\q{q}}(t) = \frac{1}{2}\tilde{\ve{\omega}}(t)\q{q}(t)
+\end{equation}
+where $\tilde{\ve{\omega}}$ is the quaternion corresponding to the angular velocity
+vector $\ve{\omega}$. The quaternion $\dot{\q{q}}$ can be fed into an ODE solver which can handle
+its four components separately. However, when this is done it is observed that the new orientation
+$\q{q}'$ no longer has unit magnitude. This is an inherent property of the definition in
+equation~\ref{quatRateOfChange}, and not, as sometimes claimed~\cite{Eberly:04}, merely a matter
+of numerical round-off (proof in appendix~\ref{quatIntegrationMagnitude}). Usually this problem
+is `solved' by renormalizing the quaternion:
+\begin{equation}
+\q{q}(t + h) = \frac{\q{q}'}{\norm{\q{q}'}} \quad\quad\mathrm{where}\quad
+    \q{q}' = \q{q}(t) + h\dot{\q{q}}(t)
+\end{equation}
+(using Euler's method for clarity; $\q{q}'$ would be appropriately redefined when using e.g.\ RK4).
+This `solution' seemed quite \textsl{ad hoc} to me, and I demonstrated that it returns
+erroneous results if the angular velocity is large (see appendix~\ref{quatNormalization}).
+I derive an exact algorithm for quaternion integration in appendix~\ref{quatProofs}. Such
+an algorithm may be important in aerospace applications, as the NASA patent~\cite{NASA:00}
+suggests.

@@ -1,0 +1,121 @@
+This project is concerned with the dynamics, i.e.\ the behaviour over time, of a general class
+of mechanical systems in three-dimensional space. In this report I describe the development and
+evaluation of a program to simulate such physical systems. The primary domain of this work is
+computer graphics, where physically-based modelling is a useful tool for creating realistic
+animations, although a wider range of applications in robotics and engineering can be envisaged.
+
+\section{Motivation}
+
+3D animated graphics have become an everyday part of our lives through films, advertising and
+computer games. Recent years have seen not only the production of feature-length animated films,
+but also the widespread use of animation in combination with traditionally shot footage. The
+techniques are now so refined that computer generated and recorded pictures are sometimes
+indistinguishable even to experts, thus opening up many new artistic possibilities.
+
+Currently computer animation still involves a large amount of manual effort, despite commonly
+being termed ``computer generated''. It is said that in large-budget film productions every single
+frame is edited by hand, and many animations are completely handcrafted. There are artistic
+reasons for this (sometimes an animation is deliberately required to be physically impossible
+to achieve a special effect), and also economic reasons (animators are cheaper to hire than
+computer scientists). However, as the complexity of animated scenes increases, manual animation
+becomes unfeasible. Large crowds, fluids, cloth and some types of deformable bodies are therefore
+commonly animated using simulation techniques.
+
+Unfortunately such scenes with an unbounded number of degrees of freedom are difficult to simulate
+well. Fluid dynamics is very complicated and a subject of ongoing research; the physics of
+deformable bodies (so-called ``soft matter'') is not even completely understood. Graphical
+simulations in these areas tend to resort to means which look good but are physically meaningless.
+This project aims to address the more well-defined subject of character animation, i.e.\ the
+movement of humans, many species of animal, and some types of alien creatures. Their common
+feature is that their bodies are deformable on the basis of a skeleton. Such bodies are called
+\emph{articulated bodies} in computer graphics, and it is usually assumed that this is the only
+type of deformation~-- they do not have ``soft flesh''. \emph{Skeleton} is not used as an
+anatomically accurate term, because more or fewer bones might be used, depending on the animation
+requirements.
+
+Rigid body dynamics, which will form the basis for physically based character animation, is well
+understood and has a solid theoretical underpinning against which the simulation results can be
+checked. Hence physically-based modelling lends itself more to an objective evaluation than
+many other areas of computer graphics, making it well suited as a Part~II project.
+
+While a simulation of a single rigid body can be fairly simple, dealing with multiple
+non-penetrating and interacting bodies is surprisingly difficult. In fact, creating such
+simulations was a subject of PhD theses only 10--15 years
+ago~\cite{Baraff:PhD,Mirtich:PhD,Saunders:PhD} and the topic has not yet settled enough to be
+described in textbooks\footnote{Some books \cite{Shabana:01,Eberly:04} give an introduction to
+the subject, but not in enough depth that the reader could actually implement a simulation.}. This
+means that a project in this area will inevitably involve a research component in addition to
+the software engineering. This constitutes an exciting challenge.
+
+\section{Scope and requirements}
+
+Simulations of dynamic systems are employed in a wide range of environments:
+\begin{enumerate}
+\item games and related real-time applications, where fast computation is pa\-ra\-mount and
+    anything which ``looks good'' is acceptable;
+\item professional animation systems for high quality graphics, in which calculations are done
+    offline;
+\item engineering and quantitative research, where accuracy and knowledge of errors are the main
+    concerns.
+\end{enumerate}
+
+The project proposal identifies itself with the second area, a trade-off between accuracy and
+speed. Once the scope was set, a more detailed analysis of the requirements had to be undertaken.
+Based on the project proposal, the program must
+\begin{itemize}
+\item read several polygon meshes, with skeletons and physical properties, from a file;
+\item provide a general framework for handling interactions between objects;
+\item ensure, as a particular type of interaction, that rigid bodies do not penetrate each other;
+\item combine forces, torques and impulses from interactions and hence calculate the change to
+    the system over time;
+\item output the simulation state over time in rendered form on screen, and into a file such that
+    it can be processed by other applications.
+\end{itemize}
+
+With respect to physical laws, the simulation should include
+\begin{itemize}
+\item the momentary state of a rigid body (position and orientation) and its velocities (linear
+    and angular),
+\item changes to a body's state through forces, torques, linear and angular impulses,
+\item inertial mass, gravity and collisions between bodies,
+\item appropriate handling for articulated bodies, including limits on the range of valid angles
+    for each joint.
+\end{itemize}
+
+This list of requirements differs slightly from those stated in the proposal:
+\begin{itemize}
+\item The simulation of friction forces was removed from the requirements, because the literature
+    suggested that it was a very difficult problem~\cite{Baraff:PhD} and I decided it was beyond
+    the scope of a Part~II project.
+\item Muscular forces are easy to implement but involve a large amount of manual effort to
+    control~\cite{Green:91}, so I shifted the emphasis towards ``passive'' systems with no
+    external forces apart from gravity.
+\item The requirements were extended from one body to multiple bodies~-- not many interesting
+    simulations involve just a single body.
+\item Output of the results to a file was added to ease evaluation.
+\end{itemize}
+
+\section{Overview\label{introOverview}}
+
+The dynamics of rigid bodies are physically described by ordinary differential equations (ODEs),
+and a simulation essentially comes down to numerically finding their solution, given a set of
+initial conditions and a set of constraints. Hence this project can be broken into six components:
+
+\begin{enumerate}
+\item A numerical solver for ordinary differential equations. This is a well researched area, and
+    a range of good standard algorithms exist. This component is described in
+    section~\ref{solvingODEs}.
+\item An implementation of the equations of motion for rigid bodies. This is standard physics but
+    has some implementation quirks. See sections~\ref{rigidBodyDynamics} and~\ref{quaternions}.
+\item Algorithms to ensure the correct handling of articulated bodies.
+    See section~\ref{articulatedBodies}.
+\item Detection of collision between bodies. A vast amount of research has been done in this area,
+    and most algorithms are concerned with speed. However, since run-time efficiency is not my
+    primary concern, this part was kept quite simple. See section~\ref{collisionDetection}.
+\item Handling of collisions, that is computation of the correct impulses between colliding
+    bodies. This must also work in the context of articulated bodies!
+    See section~\ref{collidingContact}.
+\item Handling of resting contact, that is the computation of forces between bodies which are in
+    contact but not colliding. This is probably the most challenging part of the project.
+    See section~\ref{restingContact}.
+\end{enumerate}

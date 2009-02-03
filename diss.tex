@@ -1,0 +1,182 @@
+\documentclass[11pt,a4paper,twoside,notitlepage]{report}
+\usepackage{a4}
+\usepackage{bm}
+\usepackage[british]{babel}
+\usepackage{graphicx}
+\usepackage{psfrag}
+\usepackage{ifthen}
+\headheight 14pt
+\bibliographystyle{plain}
+\newcommand{\diff}{\ensuremath{\mathrm{d}}}     % Differential d (for differential operators)
+\newcommand{\norm}[1]{\ensuremath{|#1|}}        % Magnitude/Norm
+\newcommand{\ve}[1]{\ensuremath{\ifthenelse{    % Vector
+    \equal{#1}{\alpha}\or\equal{#1}{\beta}\or\equal{#1}{\gamma}\or\equal{#1}{\delta}\or
+    \equal{#1}{\epsilon}\or\equal{#1}{\varepsilon}\or\equal{#1}{\zeta}\or\equal{#1}{\eta}\or
+    \equal{#1}{\theta}\or\equal{#1}{\vartheta}\or\equal{#1}{\iota}\or\equal{#1}{\kappa}\or
+    \equal{#1}{\lambda}\or\equal{#1}{\mu}\or\equal{#1}{\nu}\or\equal{#1}{\xi}\or
+    \equal{#1}{\pi}\or\equal{#1}{\varpi}\or\equal{#1}{\rho}\or\equal{#1}{\varrho}\or
+    \equal{#1}{\sigma}\or\equal{#1}{\varsigma}\or\equal{#1}{\tau}\or\equal{#1}{\upsilon}\or
+    \equal{#1}{\phi}\or\equal{#1}{\varphi}\or\equal{#1}{\chi}\or\equal{#1}{\psi}\or
+    \equal{#1}{\omega}\or\equal{#1}{\Gamma}\or\equal{#1}{\Delta}\or\equal{#1}{\Theta}\or
+    \equal{#1}{\Lambda}\or\equal{#1}{\Xi}\or\equal{#1}{\Pi}\or\equal{#1}{\Sigma}\or
+    \equal{#1}{\Upsilon}\or\equal{#1}{\Phi}\or\equal{#1}{\Psi}\or\equal{#1}{\Omega}}
+    {\bm{#1}}{\mathbf{#1}}}}
+\newcommand{\m}[1]{\ensuremath{\mathsf{#1}}}    % Matrix
+\newcommand{\dual}[1]{{\ensuremath{#1^*}}}      % Dual tensor
+\newcommand{\q}[1]{\ensuremath{\mathsf{#1}}}    % Quaternion
+\newcommand{\qi}{\ensuremath{\mathsf{i}}}       % Quaternion i component
+\newcommand{\qj}{\ensuremath{\mathsf{j}}}       % Quaternion j component
+\newcommand{\qk}{\ensuremath{\mathsf{k}}}       % Quaternion k componenta
+%%%%%%
+%%%%%% Flickbook and headers stuff
+%%%%%%
+\newcommand{\zerobox}[2]{%
+    \setbox0 = \hbox{\parbox[#1][\height][b]{20cm}{#2}}%
+    \dp0 = 0pt
+    \ht0 = 0pt
+    \noindent
+    \makebox[0pt][l]{\box0}%
+    \ignorespaces
+}
+\newcounter{flickright}
+\newcounter{flickleft}
+\usepackage{fancyhdr}
+\pagestyle{fancyplain}
+\newcommand{\flickbook}{%
+    \fancyhf{}
+    \fancyfoot[RO]{\stepcounter{flickright}
+        \zerobox{t}{\vspace{-1.2cm}\hspace{0.6cm}\includegraphics[width=3cm,height=3cm]{flick/flick1-\arabic{flickright}}}}
+    \fancyfoot[LE]{\stepcounter{flickleft}
+        \zerobox{t}{\vspace{-1.2cm}\makebox[0pt][r]{\includegraphics[width=3cm,height=3cm]{flick/flick2-\arabic{flickleft}}\hspace{0.6cm}}}}
+}
+\flickbook
+\fancyhead[RO,LE]{\thepage}
+\fancyhead[LO,RE]{\slshape\leftmark}
+\fancypagestyle{plain}{%
+    \flickbook
+    \fancyfoot[CO,CE]{\thepage}
+}
+\renewcommand{\headrulewidth}{0pt}
+%%%%%%
+%%%%%% Title page & proforma
+%%%%%%
+\begin{document}
+\thispagestyle{empty}
+\hspace{100mm}\zerobox{b}{\raisebox{20mm}{\large\bf Martin Kleppmann}}
+\vspace*{50mm}
+\begin{center}
+{\Huge\bf Rigid body simulation for 3D character animation} \\\vspace*{20mm}
+\Large
+Computer Science Tripos \\\vspace*{5mm}
+Corpus Christi College \\\vspace*{5mm}
+\today
+\end{center}
+\newpage\thispagestyle{empty}
+\cleardoublepage\setcounter{page}{1}
+
+\chapter*{Proforma}
+\begin{tabular}{@{}ll}
+Name:               & Martin Kleppmann \\
+College:            & Corpus Christi College \\
+Project Title:      & Rigid body simulation for 3D character animation \\
+Examination:        & Computer Science Tripos, June 2006 \\
+Word Count:         & 11982%WORDCOUNT%
+\footnotemark[1]\\
+Project Originator: & Martin Kleppmann \\
+Supervisor:         & Dr Neil Dodgson \\
+\end{tabular}
+\footnotetext[1]{Including footnotes; excluding figures, equations and appendices.}
+\stepcounter{footnote}
+\vspace{10mm}
+
+\section*{Original Aims of the Project}
+The aim of this project was to develop a simulation which creates physically accurate animations
+of a 3D character, like a human or an animal. The character was to be represented as a polygon
+mesh, bound to a skeleton such that it could move at the joints but was otherwise rigid. The
+animations produced by the simulation should be fit for use in computer graphics applications~--
+i.e.\ they should be realistic in the sense that the character must not move in an anatomically
+or physically impossible way.
+
+\section*{Work Completed}
+A general-purpose simulation for a wide range of mechanical systems has been developed and tested
+on various examples. It correctly handles the dynamics of articulated characters, as required,
+and it also supports many other systems of interacting rigid bodies. All physical effects
+of rigid bodies have been implemented except for friction. The simulation results show a good
+agreement with exact solutions for simple systems, and more complicated systems have been
+judged qualitatively. Several algorithms for different aspects of the simulation were newly
+invented in this project.
+
+\section*{Special Difficulties}
+None.
+
+\newpage
+\vspace*{60mm}
+\section*{Declaration}
+
+I, Martin Kleppmann of Corpus Christi College, being a candidate for Part~II of the Computer
+Science Tripos, hereby declare that this dissertation and the work described in it are my own
+work, unaided except as may be specified below, and that the dissertation does not contain
+material that has already been used to any substantial extent for a comparable purpose.
+
+\vspace{20mm}
+\leftline{Signed}
+\vspace{12mm}
+\leftline{Date}
+\cleardoublepage
+
+\addcontentsline{toc}{chapter}{Contents}
+\tableofcontents
+%%%%%%
+%%%%%% Content
+%%%%%%
+\chapter{Introduction}
+\input{intro}
+\chapter{Preparation}
+\input{simulation}
+\input{quaternions}
+\input{articulated}
+\input{software}
+\chapter{Implementation}
+\input{implement}
+\input{collision}
+\chapter{Evaluation}
+\input{evaluation}
+\chapter{Conclusions}
+\input{conclusions}
+\newpage\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{diss}
+\begin{appendix}
+% Set 10pt font
+\renewcommand{\tiny}{\fontsize{5}{6}\selectfont}
+\renewcommand{\scriptsize}{\fontsize{7}{8}\selectfont}
+\renewcommand{\footnotesize}{\fontsize{8}{9.5}\selectfont}
+\renewcommand{\small}{\fontsize{9}{11}\selectfont}
+\renewcommand{\normalsize}{\fontsize{10}{12}\selectfont}
+\renewcommand{\large}{\fontsize{12}{14}\selectfont}
+\renewcommand{\Large}{\fontsize{14.4}{18}\selectfont}
+\renewcommand{\LARGE}{\fontsize{17.28}{22}\selectfont}
+\renewcommand{\huge}{\fontsize{20.74}{25}\selectfont}
+\renewcommand{\Huge}{\fontsize{24.88}{30}\selectfont}
+\normalsize
+\input{notation}
+\chapter{Proofs and derivations}
+All work presented in this appendix is my original work. I am not aware of similar derivations
+having been published already, except where bibliographical references are given.
+\input{quatProofs}
+\input{rigidBody}
+\input{constraints}
+\input{constrEx}
+% \chapter*{Organography\markboth{Organography}{}}
+% The word \emph{organography} is derived from the Greek
+% $\mbox{\makebox[0pt]{\raisebox{1.5pt}{\hspace{6pt}'$'$}}} o\rho\gamma\breve{\alpha}\nu o\nu$,
+% which means \emph{instrument}, \emph{tool} or \emph{engine}\footnote{Thank you to Fabian Meinel
+% and Jamie Sutherland for this translation.}. Hence this appendix contains an overview of all
+% software tools used in the implementation of this project.
+\cleardoublepage
+\stepcounter{chapter}
+\addcontentsline{toc}{chapter}{Original project proposal}
+\chaptermark{Original project proposal}
+\thispagestyle{plain}
+\input{proposal}
+\end{appendix}
+\end{document}
