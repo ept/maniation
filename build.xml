@@ -1,26 +1,19 @@
 <project name="maniation" default="compile">
 
-    <!-- settings for PWF -->
-    <!--property name="root" location="/home/mk428/martin"/>
-    <property name="jre" location="/home/mk428/jre1.5.0_05"/-->
-
-    <!-- settings for penpen -->
-    <property name="root" location="/home/martin"/>
-    <property name="jre" location="/usr/java/jdk1.5.0_06/jre"/>
-
     <!-- derived settings -->
-    <property name="bin" location="${root}/.bin"/>
-    <property name="lib" location="${root}/.lib"/>
-    <property name="databinding" location="${root}/tools/databinding"/>
+    <property name="bin" location="${basedir}/bin"/>
+    <property name="lib" location="${basedir}/lib"/>
 
     <target name="init">
         <mkdir dir="${bin}"/>
         <path id="classpath">
             <pathelement location="${bin}"/>
-            <pathelement location="${lib}/xerces-2_7_1/xercesImpl.jar"/>
+            <pathelement location="${lib}/xercesImpl-2.7.1.jar"/>
+            <!--
             <pathelement location="${jre}/lib/ext/j3dcore.jar"/>
             <pathelement location="${jre}/lib/ext/j3dutils.jar"/>
             <pathelement location="${jre}/lib/ext/vecmath.jar"/>
+            -->
         </path>
     </target>
     
@@ -32,26 +25,20 @@
         </java>
     </target-->
 
-    <target name="databinding">
-        <javac srcdir="${databinding}/source" destdir="${bin}" listfiles="yes" source="1.5" target="1.5">
-            <classpath refid="classpath"/>
-        </javac>
-    </target>
-    
-    <target name="compile" depends="init,databinding">
+    <target name="compile" depends="init">
         <javac srcdir="." destdir="${bin}" listfiles="yes" source="1.5" target="1.5">
             <classpath refid="classpath"/>
         </javac>
     </target>
 
     <target name="run" depends="init,compile">
-        <java classname="de.kleppmann.maniation.TestDynamics" fork="true" jvm="${jre}/bin/java">
+        <java classname="de.kleppmann.maniation.TestDynamics" fork="true">
             <classpath refid="classpath"/>
         </java>
     </target>
 
     <target name="profile" depends="init,compile">
-        <java classname="de.kleppmann.maniation.TestDynamics" fork="true" jvm="${jre}/bin/java">
+        <java classname="de.kleppmann.maniation.TestDynamics" fork="true">
             <jvmarg value="-Xruntracer:enabled=true"/>
             <env key="LD_LIBRARY_PATH" path="${lib}/ejp/lib:${LD_LIBRARY_PATH}"/>
             <classpath>
@@ -59,18 +46,5 @@
                 <pathelement location="${lib}/ejp/lib/tracerapi.jar"/>
             </classpath>
         </java>
-    </target>
-
-    <taskdef name="statcvs" classname="net.sf.statcvs.ant.StatCvsTask"
-        classpath="${lib}/statcvs-0.2.2/statcvs.jar"/>
-
-    <target name="stats">
-        <mkdir dir="stats"/>
-        <exec executable="cvs" output="cvs.log" error="/dev/null">
-            <arg line="log"/>
-        </exec>
-        <statcvs projectDirectory="." cvsLogFile="cvs.log"
-            outputDirectory="stats" title="Part II Project" />
-        <delete file="cvs.log"/>
     </target>
 </project>
